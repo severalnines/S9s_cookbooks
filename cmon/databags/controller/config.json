@@ -1,0 +1,6 @@
+{
+  "id": "config",
+  "host_ipaddress": "192.168.122.84",
+  "cmon_package_x86_64": "cmon-1.1.25-64bit-glibc23-mc70",
+  "cmon_package_i686": "cmon-1.1.25-32bit-glibc23-mc70"
+}

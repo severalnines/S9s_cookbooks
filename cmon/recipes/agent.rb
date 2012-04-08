@@ -17,11 +17,13 @@
 # limitations under the License.
 #
 
-# downlod cmon package
-cmon_package="cmon-1.1.25-64bit-glibc23-mc70.tar.gz"
-Chef::Log.info "Downloading #{cmon_package}"
+cmon_config = data_bag_item("controller", "config")
+node['cmon']['remote']['mysql_hostname'] = cmon_config["host_ipaddress"]
+
+cmon_package=cmon_config['cmon_package_' + node['kernel']['machine']]
+Chef::Log.info "Downloading #{cmon_package}.tar.gz"
 remote_file "#{Chef::Config[:file_cache_path]}/cmon.tar.gz" do
-  source "http://www.severalnines.com/downloads/cmon/" + cmon_package
+  source "http://www.severalnines.com/downloads/cmon/" + cmon_package + ".tar.gz"
   action :create_if_missing
 end
 
@@ -30,7 +32,38 @@ directory node['cmon']['install_dir_cmon'] do
   owner "root"
   mode "0755"
   action :create
+  recursive true
 end
+
+bash "untar-cmon_package" do
+  user "root"
+  code <<-EOH
+    rm -rf #{node['cmon']['install_dir_cmon']}/cmon
+    zcat #{Chef::Config[:file_cache_path]}/cmon.tar.gz | tar xf - -C #{node['cmon']['install_dir_cmon']}
+    ln -s #{node['cmon']['install_dir_cmon']}/#{cmon_package} #{node['cmon']['install_dir_cmon']}/cmon
+  EOH
+end
+
+execute "agent-install-privileges" do
+  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_agent_grants.sql"
+  action :nothing
+end
+
+Chef::Log.info "Create agent grants"
+template "cmon.agent.grants.sql" do
+  path "#{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_agent_grants.sql"
+  source "cmon.agent.grants.sql.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+#  variables(
+#    :user => node['cmon']['remote']['mysql_user'],
+#    :password => node['cmon']['remote']['mysql_password'],
+#    :database => 'cmon'
+#  )
+  notifies :run, "execute[agent-install-privileges]", :immediately
+end
+Chef::Log.info "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_agent_grants.sql"
 
 directory node['cmon']['misc']['lock_dir'] do
   owner "root"
@@ -39,24 +72,13 @@ directory node['cmon']['misc']['lock_dir'] do
   recursive true
 end
 
-bash "unpack_cmon_package" do
-  user "root"
-  code <<-EOH
-  	rm -rf #{node['cmon']['install_dir_cmon']}/cmon
-		cmon_name=`echo "#{cmon_package}" | awk -F ".tar"  '{print $1}'`
-		echo $cmon_name > /tmp/alex
-		zcat #{Chef::Config[:file_cache_path]}/cmon.tar.gz | tar xf - -C #{node['cmon']['install_dir_cmon']}
-		ln -s #{node['cmon']['install_dir_cmon']}/$cmon_name #{node['cmon']['install_dir_cmon']}/cmon
-  EOH
-end
-
 service "cmon" do
-	supports :restart => true, :start => true, :stop => true, :reload => true
+  supports :restart => true, :start => true, :stop => true, :reload => true
   action :nothing
 end 
 
 template "cmon.agent.cnf" do
-	path "#{node['cmon']['install_configpath']}/cmon.cnf"
+  path "#{node['cmon']['install_configpath']}/cmon.cnf"
   source "cmon.agent.cnf.erb"
   owner "root"
   group "root"
@@ -74,12 +96,6 @@ cookbook_file "/etc/init.d/cmon" do
 end
 
 service "cmon" do
-	supports :restart => true, :start => true, :stop => true, :reload => true
+  supports :restart => true, :start => true, :stop => true, :reload => true
   action [:enable, :start]
 end 
-
-#execute "start-cmon" do
-#  command %Q{/etc/init.d/cmon start}
-#  creates {node['cmon']['misc']['pid_file']}
-#end
-

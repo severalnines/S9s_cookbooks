@@ -1,0 +1,7 @@
+SET SQL_LOG_BIN=0; 
+GRANT INSERT,UPDATE,DELETE,SELECT ON cmon.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon']['remote']['mysql_password'] %>';
+GRANT INSERT,UPDATE,DELETE,SELECT ON cmon.* TO 'cmon'@'<%= node['cmon']['remote']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon']['remote']['mysql_password'] %>';
+GRANT SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon']['remote']['mysql_password'] %>';
+GRANT SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'<%= node['cmon']['remote']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon']['remote']['mysql_password'] %>';
+GRANT SELECT ON mysql.* TO 'cmon'@'<%= node['cmon']['remote']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon']['remote']['mysql_password'] %>';
+GRANT SELECT ON ndbinfo.* TO 'cmon'@'<%= node['cmon']['remote']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon']['remote']['mysql_password'] %>';
