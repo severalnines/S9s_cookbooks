@@ -16,5 +16,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+#
+# cmon Agent
+#
+#include_recipe "cmon::agent_packages"
 #include_recipe "cmon::agent"
+
+#
+# cmon Controller
+#
+#include_recipe "cmon::controller_packages"
 include_recipe "cmon::controller"
+
+#
+# cmon Web app
+#
+#include_recipe "cmon::web_packages"
+include_recipe "cmon::web"

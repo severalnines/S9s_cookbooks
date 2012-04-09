@@ -7,5 +7,3 @@ MAILTO=root
 
 */5 * * * *     root    test -x  $CMON_BINDIR/cmon_rrd_all && $CMON_BINDIR/cmon_rrd_all $CMON_BINDIR > /dev/null
 
-
-

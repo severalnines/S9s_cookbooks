@@ -36,10 +36,10 @@ default['cmon']['rrd']['image_dir'] = "/var/www/cmon/graphs"
 default['cmon']['rrd']['rrdtool']   = "/usr/local/bin/rrdtool"
 default['cmon']['rrd']['data_dir']  = "/var/lib/cmon"
 
-default['cmon']['misc']['os_user']    = "root"
-default['cmon']['misc']['wwwwroot']   = "/var/www/"
-default['cmon']['misc']['web_user']   = "www-data"
-default['cmon']['misc']['core_dir']   = "/root/whats_coredir"
+default['cmon']['misc']['os_user']  = "root"
+default['cmon']['misc']['wwwroot']  = "/var/www"
+default['cmon']['misc']['web_user'] = "www-data"
+default['cmon']['misc']['core_dir'] = "/core_cmon_install_dir"
 
 default['cmon']['misc']['pid_file'] = "/var/run/cmon.pid"
 # /run/lock/ for ubuntu but for other dists?
@@ -70,8 +70,8 @@ when "centos", "redhat", "fedora", "suse", "scientific", "amazon"
     default['cmon']['service']['tool'] = "/sbin/chkconfig"    
   end
 
-  default['cmon']['misc']['WWWROOT'] = "/var/www/html"
-  default['cmon']['misc']['WEB_USER'] = "apache"
+  default['cmon']['misc']['wwwroot'] = "/var/www/html"
+  default['cmon']['misc']['web_user'] = "apache"
 
   default['mysql']['package_name'] = "mysql-server"
   default['mysql']['service_name'] = "mysqld"

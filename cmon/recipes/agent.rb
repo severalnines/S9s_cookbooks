@@ -42,6 +42,7 @@ bash "untar-cmon-package" do
     zcat #{Chef::Config[:file_cache_path]}/cmon.tar.gz | tar xf - -C #{node['cmon']['install_dir_cmon']}
     ln -s #{node['cmon']['install_dir_cmon']}/#{cmon_package} #{node['cmon']['install_dir_cmon']}/cmon
   EOH
+  not_if { File.directory? "#{node['cmon']['install_dir_cmon']}/cmon" }
 end
 
 execute "agent-install-privileges" do

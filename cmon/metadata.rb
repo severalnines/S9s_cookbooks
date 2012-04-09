@@ -11,3 +11,7 @@ recipe "cmon::web", "Installs cmon web application"
 recipe "cmon::agent_packages", "Installs cmon agent required packages (psmisc libaio)"
 recipe "cmon::controller_packages", "Installs cmon controller requried packages (rrdtool mysql mysql-server)"
 recipe "cmon::web_packages", "Installs cmon web application required packages (apache2 php5-mysql php5-gd libapache2-mod-php5)"
+
+%w{ debian ubuntu centos fedora redhat }.each do |os|
+  supports os
+end

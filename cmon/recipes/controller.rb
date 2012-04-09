@@ -19,6 +19,7 @@
 
 cmon_config = data_bag_item('controller', 'config')
 node['cmon']['remote']['mysql_hostname'] = node['ipaddress']
+node['cmon']['mode']['controller']  = cmon_config['mode']
 
 cmon_package=cmon_config['cmon_package_' + node['kernel']['machine']]
 Chef::Log.info "Downloading #{cmon_package}.tar.gz"
@@ -42,6 +43,7 @@ bash "untar-cmon-package" do
     zcat #{Chef::Config[:file_cache_path]}/cmon.tar.gz | tar xf - -C #{node['cmon']['install_dir_cmon']}
     ln -s #{node['cmon']['install_dir_cmon']}/#{cmon_package} #{node['cmon']['install_dir_cmon']}/cmon
   EOH
+	not_if { File.directory? "#{node['cmon']['install_dir_cmon']}/cmon" }
 end
 
 execute "controller-create-db-schema" do
@@ -91,6 +93,13 @@ execute "controller-grant-agents" do
   command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_agent_grants.sql"
   action :run
 end
+
+
+execute "install-core-scripts" do
+  command "cp #{node['cmon']['install_dir_cmon']}/cmon/bin/cmon_* /usr/bin/"
+  action :run
+end
+
 
 directory node['cmon']['misc']['lock_dir'] do
   owner "root"
