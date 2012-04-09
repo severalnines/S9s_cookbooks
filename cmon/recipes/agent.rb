@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-cmon_config = data_bag_item("controller", "config")
-node['cmon']['remote']['mysql_hostname'] = cmon_config["host_ipaddress"]
+cmon_config = data_bag_item('controller', 'config')
+node['cmon']['remote']['mysql_hostname'] = cmon_config['host_ipaddress']
 
 cmon_package=cmon_config['cmon_package_' + node['kernel']['machine']]
 Chef::Log.info "Downloading #{cmon_package}.tar.gz"
@@ -61,9 +61,8 @@ template "cmon.agent.grants.sql" do
 #    :password => node['cmon']['remote']['mysql_password'],
 #    :database => 'cmon'
 #  )
-  notifies :run, "execute[agent-install-privileges]", :immediately
+  notifies :run, resources(:execute => "agent-install-privileges", :immediately
 end
-Chef::Log.info "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_agent_grants.sql"
 
 directory node['cmon']['misc']['lock_dir'] do
   owner "root"

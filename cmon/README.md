@@ -49,17 +49,17 @@ Usage
 
 On agent nodes,
 
+    include_recipe "cmon::agent_packages" (optional)
     include_recipe "cmon::agent"
-    include_recipe "cmon::agent_packages"
 
 This will install the cmon agent and its requried packages on the node.
 After the installation you still need to manually edit the /etc/cmon.cnf file and
 enter the correct IP adress to the cmon controller's DB instance.
 
-On controller nodes,
+On controller only nodes,
 
+    include_recipe "cmon::controller_packages" (optional)
     include_recipe "cmon::controller"
-    include_recipe "cmon::controller_packages"
 
 This will install the cmon controller and its requried packages on the node. A cmon user
 and its grants will be automatically created using the generated
@@ -67,17 +67,20 @@ and its grants will be automatically created using the generated
 
 On the cmon web application node,
 
+    include_recipe "cmon::web_packages" (optional)
     include_recipe "cmon::web"
-    include_recipe "cmon::web_packages"
+    include_recipe "cmon::controller_packages" (optional)
+    include_recipe "cmon::controller" (optional)
 
 This will install the cmon web application and its requried packages on the node. 
 
 License and Author
 ==================
 
-Author:: Alex Yu (<alex@severalnines.com>)
+Alex Yu (<alex@severalnines.com>)
+Derived from examples Opscode, Inc cookbook repos.
 
-Copyright:: 2012 Opscode, Inc
+Copyright (c) 2012 Severalnines AB.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
