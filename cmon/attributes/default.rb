@@ -36,9 +36,9 @@ default['cmon']['rrd']['image_dir'] = "/var/www/cmon/graphs"
 default['cmon']['rrd']['rrdtool']   = "/usr/local/bin/rrdtool"
 default['cmon']['rrd']['data_dir']  = "/var/lib/cmon"
 
-default['cmon']['misc']['os_user']   = "root"
-default['cmon']['misc']['WWWROOT']  = "/var/www/"
-default['cmon']['misc']['WEB_USER'] = "www-data"
+default['cmon']['misc']['os_user']    = "root"
+default['cmon']['misc']['wwwwroot']   = "/var/www/"
+default['cmon']['misc']['web_user']   = "www-data"
 default['cmon']['misc']['core_dir']   = "/root/whats_coredir"
 
 default['cmon']['misc']['pid_file'] = "/var/run/cmon.pid"
@@ -62,13 +62,16 @@ when "centos", "redhat", "fedora", "suse", "scientific", "amazon"
   default['cmon']['controller']['packages'] = %w(rrdtool mysql mysql-server)
   default['cmon']['web']['packages'] = %w(httpd php php-mysql php-gd)
 
-	if FileTest.exist?("/usr/sbin/chkconfig")
-		default['cmon']['service']['too'] = "/usr/sbin/chkconfig"
-	elsif FileTest.exist? ("/usr/bin/chkconfig")
-		default['cmon']['service']['tool'] = "/usr/bin/chkconfig"
-	elsif FileTest.exist? ("/sbin/chkconfig")
-		default['cmon']['service']['tool'] = "/sbin/chkconfig"		
-	end
+  if FileTest.exist?("/usr/sbin/chkconfig")
+    default['cmon']['service']['too'] = "/usr/sbin/chkconfig"
+  elsif FileTest.exist? ("/usr/bin/chkconfig")
+    default['cmon']['service']['tool'] = "/usr/bin/chkconfig"
+  elsif FileTest.exist? ("/sbin/chkconfig")
+    default['cmon']['service']['tool'] = "/sbin/chkconfig"    
+  end
+
+  default['cmon']['misc']['WWWROOT'] = "/var/www/html"
+  default['cmon']['misc']['WEB_USER'] = "apache"
 
   default['mysql']['package_name'] = "mysql-server"
   default['mysql']['service_name'] = "mysqld"
@@ -77,7 +80,7 @@ else
   default['cmon']['agent']['packages'] = %w(psmisc libaio1)
   default['cmon']['controller']['packages'] = %w(rrdtool mysql-server)
   default['cmon']['web']['packages'] = %w(apache2 php5-mysql php5-gd)
-	default['cmon']['service']['tool'] = "/usr/sbin/update-rc.d"
+  default['cmon']['service']['tool'] = "/usr/sbin/update-rc.d"
 
   default['mysql']['package_name'] = "mysql-server"
   default['mysql']['service_name'] = "mysql"

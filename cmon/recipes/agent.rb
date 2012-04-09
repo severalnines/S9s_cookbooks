@@ -27,7 +27,7 @@ remote_file "#{Chef::Config[:file_cache_path]}/cmon.tar.gz" do
   action :create_if_missing
 end
 
-# install cmon in /usr/local/cmon as default
+# installs cmon in /usr/local as default
 directory node['cmon']['install_dir_cmon'] do
   owner "root"
   mode "0755"
@@ -35,7 +35,7 @@ directory node['cmon']['install_dir_cmon'] do
   recursive true
 end
 
-bash "untar-cmon_package" do
+bash "untar-cmon-package" do
   user "root"
   code <<-EOH
     rm -rf #{node['cmon']['install_dir_cmon']}/cmon

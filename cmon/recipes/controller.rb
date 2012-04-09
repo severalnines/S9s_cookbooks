@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: cmon
-# Recipe:: agent
+# Recipe:: controller
 #
 # Copyright 2012, Severalnines AB.
 #
@@ -35,7 +35,7 @@ directory node['cmon']['install_dir_cmon'] do
   recursive true
 end
 
-bash "untar-cmon_package" do
+bash "untar-cmon-package" do
   user "root"
   code <<-EOH
     rm -rf #{node['cmon']['install_dir_cmon']}/cmon

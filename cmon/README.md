@@ -14,7 +14,7 @@ Platform
 
 Tested on:
 
-* Ubuntu 11.10
+* Ubuntu 11.10 w/ chef-solo only...
 
 Cookbooks
 ---------
@@ -26,8 +26,6 @@ N/A
 
 Attributes
 ==========
-
-TODO
 
 * `cmon['remote']['mysql_user']`     - cmon controller MySQL user (cmon)
 * `cmon['remote']['mysql_hostname']` - cmon controller MySQL hostname (nnn)
@@ -43,6 +41,35 @@ TODO
 * `cmon['local']['mysql_hostname']` - MySQL local hostname (nnn)
 * `cmon['local']['mysql_password']` - MySQL local user's password (cmom)
 * `cmon['local']['mysql_port']`     - MySQL local port (3306)
+
+and others please see attributes/default.rb
+
+Data Bags
+=========
+
+agent/hosts.json
+----------------
+{
+  "id": "config", 
+   "hosts": [
+     "192.168.122.12",
+     "192.168.122.14",
+     "192.168.122.16"
+    ]
+}
+
+Used by the controller recipe to add agent hosts to its grant table.
+
+controller/config.json
+----------------------
+{
+  "id": "config",
+  "host_ipaddress": "192.168.122.84",
+  "cmon_package_x86_64": "cmon-1.1.25-64bit-glibc23-mc70",
+  "cmon_package_i686": "cmon-1.1.25-32bit-glibc23-mc70"
+}
+
+Used by both controller and agent recipes. host_ipaddress is the cmon controller host which is required for agents.
 
 Usage
 =====
@@ -78,7 +105,7 @@ License and Author
 ==================
 
 Alex Yu (<alex@severalnines.com>)
-Derived from examples Opscode, Inc cookbook repos.
+Derived from Opscode, Inc cookbook recipes examples.
 
 Copyright (c) 2012 Severalnines AB.
 
