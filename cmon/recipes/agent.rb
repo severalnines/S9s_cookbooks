@@ -62,7 +62,7 @@ template "cmon.agent.grants.sql" do
 #    :password => node['cmon']['remote']['mysql_password'],
 #    :database => 'cmon'
 #  )
-  notifies :run, resources(:execute => "agent-install-privileges", :immediately
+  notifies :run, resources(:execute => "agent-install-privileges"), :immediately
 end
 
 directory node['cmon']['misc']['lock_dir'] do
