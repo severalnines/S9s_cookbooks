@@ -22,6 +22,20 @@
 packages = node['cmon']['controller']['packages']
 packages.each do |name|
   package name do
+    Chef::Log.info "Installing #{name}..."
     action :install
   end
+end
+
+# MySQL installed with no root password!
+# Let's secure it. Get root password from ['cmon']['local']['mysql_password']
+# todo: maybe erb or tmp file
+bash "secure-mysql" do
+  user "root"
+  code <<-EOH
+  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "UPDATE mysql.user SET Password=PASSWORD('#{node['cmon']['local']['mysql_password']}') WHERE User='root'"
+  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "DROP DATABASE test;DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "FLUSH PRIVILEGES"
+  EOH
 end
