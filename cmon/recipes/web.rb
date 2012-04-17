@@ -47,12 +47,12 @@ end
 bash "install-web-app" do
   user "root"
   code <<-EOH
-		cp #{node['cmon']['install_dir_cmon']}/cmon/etc/cron.d/cmon /etc/cron.d/cmon
-		mkdir -p #{node['cmon']['misc']['wwwwroot']}/cmon
-		mkdir -p /var/lib/cmon
-		mkdir -p #{node['cmon']['misc']['wwwwroot']}/cmon/graphs
-		mkdir -p #{node['cmon']['misc']['wwwwroot']}/cmon/upload/schema
-		cp -rf #{node['cmon']['install_dir_cmon']}/cmon/www/*  #{node['cmon']['misc']['wwwwroot']}/
-		chown -R #{node['cmon']['misc']['web_user']}:#{node['cmon']['misc']['web_user']} #{node['cmon']['misc']['wwwwroot']}/cmon
+    cp #{node['cmon']['install_dir_cmon']}/cmon/etc/cron.d/cmon /etc/cron.d/cmon
+    mkdir -p #{node['cmon']['misc']['wwwwroot']}/cmon
+    mkdir -p /var/lib/cmon
+    mkdir -p #{node['cmon']['misc']['wwwwroot']}/cmon/graphs
+    mkdir -p #{node['cmon']['misc']['wwwwroot']}/cmon/upload/schema
+    cp -rf #{node['cmon']['install_dir_cmon']}/cmon/www/*  #{node['cmon']['misc']['wwwwroot']}/
+    chown -R #{node['cmon']['misc']['web_user']}:#{node['cmon']['misc']['web_user']} #{node['cmon']['misc']['wwwwroot']}/cmon
   EOH
 end

@@ -20,17 +20,41 @@
 #
 # cmon Agent
 #
+# cmon::agent_packages
+#   installs 
+#     psmisc libaio (rhel/centos)
+#     psmisc libaio1 (debian/ubuntu)
+#
+# cmon::agent
+#   installs the agent
+
 #include_recipe "cmon::agent_packages"
 #include_recipe "cmon::agent"
 
 #
 # cmon Controller
 #
+# cmon::controller_packages
+#   installs 
+#     rrdtool mysql mysql-server (rhel/centos)
+#     rrdtool mysql-server (debian)
+#
+# cmon::controller
+#   installs the controller 
+
 #include_recipe "cmon::controller_packages"
 include_recipe "cmon::controller"
 
 #
 # cmon Web app
 #
+# cmon::web_packages
+#   installs
+#     httpd php php-mysql php-gd (rhel/centos)
+#     apache2 php5-mysql php5-gd (debian/ubuntu)
+#
+# cmon::web_packages
+#   installs ClusterControl web application (php)
+
 #include_recipe "cmon::web_packages"
 include_recipe "cmon::web"
