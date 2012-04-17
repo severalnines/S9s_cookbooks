@@ -37,7 +37,7 @@ default['cmon']['rrd']['rrdtool']   = "/usr/local/bin/rrdtool"
 default['cmon']['rrd']['data_dir']  = "/var/lib/cmon"
 
 default['cmon']['misc']['os_user']  = "root"
-default['cmon']['misc']['wwwroot']  = "/var/www"
+default['cmon']['misc']['wwwwroot'] = "/var/www"
 default['cmon']['misc']['web_user'] = "www-data"
 default['cmon']['misc']['core_dir'] = "/core_cmon_install_dir"
 
