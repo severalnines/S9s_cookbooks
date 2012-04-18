@@ -12,7 +12,7 @@ type=<%= node['cmon']['cluster_type'] %>
 mode=<%= node['cmon']['mode']['controller'] %>
 
 mysql_port=<%= node['cmon']['remote']['mysql_port'] %>
-mysql_hostname==<%= node['ipaddress'] %>
+mysql_hostname=<%= node['cmon']['local']['mysql_hostname'] %>
 mysql_password=<%= node['cmon']['remote']['mysql_password'] %>
 
 local_mysql_port=<%= node['cmon']['local']['mysql_port'] %>
