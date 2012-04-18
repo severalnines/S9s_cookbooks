@@ -84,6 +84,7 @@ bash "create-agent-grants" do
   code <<-EOH
     for h in #{host_list}
     do
+      echo "GRANT SUPER ON *.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon']['cmon_password']}';" >> #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_agent_grants.sql
       echo "GRANT INSERT,UPDATE,DELETE,SELECT ON cmon.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon']['cmon_password']}';" >> #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_agent_grants.sql
     done
   EOH
