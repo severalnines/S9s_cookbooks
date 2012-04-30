@@ -64,9 +64,9 @@ when "centos", "redhat", "fedora", "suse", "scientific", "amazon"
 
   if FileTest.exist?("/usr/sbin/chkconfig")
     default['cmon']['service']['too'] = "/usr/sbin/chkconfig"
-  elsif FileTest.exist? ("/usr/bin/chkconfig")
+  elsif FileTest.exist?("/usr/bin/chkconfig")
     default['cmon']['service']['tool'] = "/usr/bin/chkconfig"
-  elsif FileTest.exist? ("/sbin/chkconfig")
+  elsif FileTest.exist?("/sbin/chkconfig")
     default['cmon']['service']['tool'] = "/sbin/chkconfig"    
   end
 
