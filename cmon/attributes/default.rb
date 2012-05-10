@@ -22,13 +22,31 @@ default['cmon']['cluster_type']    = "replication"
 default['cmon']['install_dir_cmon']   = "/usr/local"
 default['cmon']['install_configpath'] = "/etc"
 
-default['cmon']['mysql']['install_dir']   = "/usr/local"
-default['cmon']['mysql']['base_dir']      = "/usr/local/mysql"
-default['cmon']['mysql']['lib_dir']       = "/usr/local/mysql/lib"
-default['cmon']['mysql']['bin_dir']       = "/usr/local/mysql/bin"
-default['cmon']['mysql']['ndb_bin_dir']   = "/usr/local/mysql/bin"
-default['cmon']['mysql']['libexec']       = "/usr/local/mysql/bin"
-default['cmon']['mysql']['script_dir']    = "/usr/local/mysql/scripts"
+
+case node["platform"]
+when "centos", "redhat", "fedora", "suse", "scientific", "amazon"
+
+  default['cmon']['mysql']['install_dir']   = "/"
+  default['cmon']['mysql']['base_dir']      = "/usr"
+  default['cmon']['mysql']['bin_dir']       = "/usr/bin"
+  default['cmon']['mysql']['libexec']       = "/usr/bin"
+  default['cmon']['mysql']['lib_dir']       = "/usr/lib"
+
+  default['cmon']['mysql']['ndb_bin_dir']   = "/usr/bin"
+
+else
+  default['cmon']['mysql']['install_dir']   = "/"
+  default['cmon']['mysql']['base_dir']      = "/usr"
+  default['cmon']['mysql']['bin_dir']       = "/usr/bin"
+  default['cmon']['mysql']['libexec']       = "/usr/bin"
+  default['cmon']['mysql']['lib_dir']       = "/usr/lib"
+
+  default['cmon']['mysql']['ndb_bin_dir']   = "/usr/bin"
+end
+
+  # not used...
+  default['cmon']['mysql']['script_dir']    = "/usr/local/mysql/scripts"
+
 default['cmon']['mysql']['repl_user']     = ""
 default['cmon']['mysql']['repl_password'] = "repl"
 
@@ -55,9 +73,9 @@ default['cmon']['misc']['BACKUPDIR'] = ""
 default['cmon']['misc']['IDENTITY']  = ""
 default['cmon']['misc']['IDENTITY2'] = ""
 
-#default['mysql']['bind_address'] = attribute?('cloud') ? cloud['local_ipv4'] : ipaddress
 case node["platform"]
 when "centos", "redhat", "fedora", "suse", "scientific", "amazon"
+
   default['cmon']['agent']['packages'] = %w(psmisc libaio)
   default['cmon']['controller']['packages'] = %w(rrdtool mysql mysql-server)
   default['cmon']['web']['packages'] = %w(httpd php php-mysql php-gd)
