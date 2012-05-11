@@ -21,6 +21,7 @@ cmon_config = data_bag_item('s9s_controller', 'config')
 #node['controller']['mysql_hostname'] = node['ipaddress']
 node['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
 node['mode']['controller'] = cmon_config['mode']
+node['cluster_type'] = cmon_config['type']
 
 cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
 cmon_tarball = cmon_package + ".tar.gz"

@@ -2,6 +2,7 @@
   "id": "config",
   "controller_host_ipaddress": "192.168.122.11",
   "mode": "controller",
+  "type": "replication",
   "cmon_package_x86_64": "cmon-1.1.27-64bit-glibc23-mc70",
   "cmon_package_i686": "cmon-1.1.27-32bit-glibc23-mc70",
   "cmon_package_i386": "cmon-1.1.27-32bit-glibc23-mc70",
