@@ -47,30 +47,38 @@ and others please see attributes/default.rb
 Data Bags
 =========
 
-agent/hosts.json
-----------------
-{
-  "id": "config", 
-   "hosts": [
-     "192.168.122.12",
-     "192.168.122.14",
-     "192.168.122.16"
-    ]
-}
-
-Used by the controller recipe to add agent hosts to its grant table.
+Used by the controller recipe to for example add agent hosts to its grant table.
+The agent recipe uses the controller_host_ipaddress for cmon controller host.
 
 controller/config.json
 ----------------------
 {
   "id": "config",
-  "host_ipaddress": "192.168.122.84",
+  "controller_host_ipaddress": "192.168.122.11",
   "mode": "controller",
-  "cmon_package_x86_64": "cmon-1.1.25-64bit-glibc23-mc70",
-  "cmon_package_i686": "cmon-1.1.25-32bit-glibc23-mc70"
+  "cmon_package_x86_64": "cmon-1.1.27-64bit-glibc23-mc70",
+  "cmon_package_i686": "cmon-1.1.27-32bit-glibc23-mc70",
+  "cmon_package_i386": "cmon-1.1.27-32bit-glibc23-mc70",
+  "agent_hosts": [
+     "192.168.122.12",
+     "192.168.122.14",
+     "192.168.122.16"
+    ],
+  "mysqlserver_hosts": [
+     "ip1",
+     "ip2"
+  ],    
+  "datanode_hosts": [
+     "ip1",
+     "ip2"
+  ],    
+  "mgm_hosts": [
+     "ip1",
+     "ip2"
+  ]
 }
 
-Used by both controller and agent recipes. host_ipaddress is the cmon controller host which is required for agents.
+For agentless installations use mysqlserver_hosts, datanode_hosts and mgm_hosts.
 
 Usage
 =====

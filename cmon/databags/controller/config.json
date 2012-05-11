@@ -10,10 +10,14 @@
      "192.168.122.14",
      "192.168.122.16"
     ],
+  "mysqlserver_hosts": [
+     "ip1",
+     "ip2"
+  ],
   "datanode_hosts": [
      "ip1",
      "ip2"
-  ],    
+  ],
   "mgm_hosts": [
      "ip1",
      "ip2"
