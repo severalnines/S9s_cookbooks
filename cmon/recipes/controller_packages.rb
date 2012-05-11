@@ -19,7 +19,7 @@
 
 
 # Install dependency packages
-packages = node['cmon']['controller']['packages']
+packages = node['controller']['packages']
 packages.each do |name|
   package name do
     Chef::Log.info "Installing #{name}..."
@@ -33,9 +33,10 @@ end
 bash "secure-mysql" do
   user "root"
   code <<-EOH
-  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "UPDATE mysql.user SET Password=PASSWORD('#{node['cmon']['local']['mysql_password']}') WHERE User='root'"
-  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
-  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "DROP DATABASE test;DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
-  #{node['cmon']['mysql']['bin_dir']}/mysql -uroot -e "FLUSH PRIVILEGES"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "FLUSH PRIVILEGES"
   EOH
+  only_if "#{node['mysql']['mysql_bin']} -u root -h127.0.0.1 -e 'show databases;'"
 end

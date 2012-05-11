@@ -19,7 +19,7 @@
 
 
 # Install dependency packages
-packages = node['cmon']['web']['packages']
+packages = node['web']['packages']
 packages.each do |name|
   package name do
     action :install

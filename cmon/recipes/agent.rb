@@ -18,7 +18,7 @@
 #
 
 cmon_config = data_bag_item('s9s_controller', 'config')
-node['cmon']['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
+node['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
 
 cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
 cmon_tarball = cmon_package + ".tar.gz"
@@ -29,7 +29,7 @@ remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
 end
 
 # installs cmon in /usr/local as default
-directory node['cmon']['install_dir_cmon'] do
+directory node['install_dir_cmon'] do
   owner "root"
   mode "0755"
   action :create
@@ -39,34 +39,34 @@ end
 bash "untar-cmon-package" do
   user "root"
   code <<-EOH
-    rm -rf #{node['cmon']['install_dir_cmon']}/cmon
-    zcat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['cmon']['install_dir_cmon']}
-    ln -s #{node['cmon']['install_dir_cmon']}/#{cmon_package} #{node['cmon']['install_dir_cmon']}/cmon
+    rm -rf #{node['install_dir_cmon']}/cmon
+    zcat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['install_dir_cmon']}
+    ln -s #{node['install_dir_cmon']}/#{cmon_package} #{node['install_dir_cmon']}/cmon
   EOH
-  not_if { File.directory? "#{node['cmon']['install_dir_cmon']}/#{cmon_package}" }
+  not_if { File.directory? "#{node['install_dir_cmon']}/#{cmon_package}" }
 end
 
 execute "agent-install-privileges" do
-  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['mysql']['root_password']} < #{node['cmon']['sql']['agent_grants']}"
+  command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['agent_grants']}"
   action :nothing
 end
 
 Chef::Log.info "Create agent grants"
 template "cmon.agent.grants.sql" do
-  path "#{node['cmon']['sql']['agent_grants']}"
+  path "#{node['sql']['agent_grants']}"
   source "cmon.agent.grants.sql.erb"
   owner "root"
   group "root"
   mode "0644"
 #  variables(
-#    :user => node['cmon']['remote']['mysql_user'],
-#    :password => node['cmon']['remote']['mysql_password'],
+#    :user => node['remote']['mysql_user'],
+#    :password => node['remote']['mysql_password'],
 #    :database => 'cmon'
 #  )
   notifies :run, resources(:execute => "agent-install-privileges"), :immediately
 end
 
-directory node['cmon']['misc']['lock_dir'] do
+directory node['misc']['lock_dir'] do
   owner "root"
   mode "0755"
   action :create
@@ -79,7 +79,7 @@ service "cmon" do
 end 
 
 template "cmon.agent.cnf" do
-  path "#{node['cmon']['install_config_path']}/cmon.cnf"
+  path "#{node['install_config_path']}/cmon.cnf"
   source "cmon.agent.cnf.erb"
   owner "root"
   group "root"

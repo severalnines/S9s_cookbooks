@@ -1,124 +1,128 @@
-default['cmon']['install_dir_cmon']   = "/usr/local"
-default['cmon']['install_config_path'] = "/etc"
+default['install_dir_cmon']   = "/usr/local"
+default['install_config_path'] = "/etc"
 
-default['cmon']['cluster_id']      = 1
-default['cmon']['cluster_name']    = "default_cluster_1"
-default['cmon']['cluster_type']    = "replication"
+default['cluster_id']      = 1
+default['cluster_name']    = "default_cluster_1"
+default['cluster_type']    = "replication"
 
-default['cmon']['controller']['mysql_base_dir']    = "/usr"
-default['cmon']['controller']['mysql_user']        = "cmon"
-default['cmon']['controller']['mysql_hostname']    = "from-databag"
-default['cmon']['controller']['mysql_password']    = "cmon"
-default['cmon']['controller']['mysql_port']        = 3306
-default['cmon']['controller']['ndb_connectstring'] = "from-databag"
+default['controller']['mysql_user']        = "cmon"
+default['controller']['mysql_hostname']    = "from-databag"
+default['controller']['mysql_password']    = "cmon"
+default['controller']['mysql_port']        = 3306
+default['controller']['ndb_connectstring'] = "from-databag"
 
-default['cmon']['cmon_password']      = "cmon"
-default['cmon']['mode']['agent']      = "agent"
-default['cmon']['mode']['controller'] = "controller"
-default['cmon']['mode']['dual']       = "dual"
+default['cmon_password']      = "cmon"
 
-default['cmon']['agent']['mysql_user']     = "cmon"
-default['cmon']['agent']['mysql_hostname'] = "127.0.0.1"
-default['cmon']['agent']['mysql_password'] = "cmon"
-default['cmon']['agent']['mysql_port']     = 3306
-default['cmon']['agent']['hostname']       = node['ipaddress']
+default['mode']['agent']      = "agent"
+default['mode']['controller'] = "controller"
+default['mode']['dual']       = "dual"
+
+default['agent']['mysql_user']     = "cmon"
+default['agent']['mysql_hostname'] = "127.0.0.1"
+default['agent']['mysql_password'] = "cmon"
+default['agent']['mysql_port']     = 3306
+default['agent']['hostname']       = node['ipaddress']
 
 case node['platform']
 when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
-  default['cmon']['mysql']['install_dir']   = "/"
-  default['cmon']['mysql']['base_dir']      = "/usr"
-  default['cmon']['mysql']['bin_dir']       = "/usr/bin"
-  default['cmon']['mysql']['libexec']       = "/usr/bin"
-  default['cmon']['mysql']['lib_dir']       = "/usr/lib"
+  default['mysql']['install_dir']   = "/"
+  default['mysql']['base_dir']      = "/usr"
+  default['mysql']['bin_dir']       = "/usr/bin"
+  default['mysql']['libexec']       = "/usr/bin"
+  default['mysql']['lib_dir']       = "/usr/lib"
 
-  default['cmon']['mysql']['ndb_bin_dir']   = "/usr/bin"
+  default['mysql']['ndb_bin_dir']   = "/usr/bin"
 
-  default['cmon']['agent']['packages'] = %w(psmisc libaio)
-  default['cmon']['controller']['packages'] = %w(rrdtool mysql mysql-server)
+  default['agent']['packages'] = %w(psmisc libaio)
+  default['controller']['packages'] = %w(rrdtool mysql mysql-server)
 
-  default['cmon']['controller']['mysql_packages'] = %w(mysql mysql-server)
-  default['cmon']['controller']['rrdtool_packages'] = %w(rrdtool)
+  default['controller']['mysql_packages'] = %w(mysql mysql-server)
+  default['controller']['rrdtool_packages'] = %w(rrdtool)
 
-  default['cmon']['web']['packages'] = %w(httpd php php-mysql php-gd)
+  default['web']['packages'] = %w(httpd php php-mysql php-gd)
 
   if FileTest.exist?("/usr/sbin/chkconfig")
-    default['cmon']['service']['too'] = "/usr/sbin/chkconfig"
+    default['cmon_service']['too'] = "/usr/sbin/chkconfig"
   elsif FileTest.exist?("/usr/bin/chkconfig")
-    default['cmon']['service']['tool'] = "/usr/bin/chkconfig"
+    default['cmon_service']['tool'] = "/usr/bin/chkconfig"
   elsif FileTest.exist?("/sbin/chkconfig")
-    default['cmon']['service']['tool'] = "/sbin/chkconfig"    
+    default['cmon_service']['tool'] = "/sbin/chkconfig"    
   end
 
-  default['cmon']['misc']['wwwroot'] = "/var/www/html"
-  default['cmon']['misc']['web_user'] = "apache"
-
-  default['mysql']['package_name'] = "mysql-server"
   default['mysql']['service_name'] = "mysqld"
+
+  default['misc']['wwwroot'] = "/var/www/html"
+  default['misc']['web_user'] = "apache"
 
 else
 
-  default['cmon']['mysql']['install_dir']   = "/"
-  default['cmon']['mysql']['base_dir']      = "/usr"
-  default['cmon']['mysql']['bin_dir']       = "/usr/bin"
-  default['cmon']['mysql']['libexec']       = "/usr/bin"
-  default['cmon']['mysql']['lib_dir']       = "/usr/lib"
+  default['mysql']['install_dir']   = "/"
+  default['mysql']['base_dir']      = "/usr"
+  default['mysql']['bin_dir']       = "/usr/bin"
+  default['mysql']['libexec']       = "/usr/bin"
+  default['mysql']['lib_dir']       = "/usr/lib"
 
-  default['cmon']['mysql']['ndb_bin_dir']   = "/usr/bin"
+  default['mysql']['ndb_bin_dir']   = "/usr/bin"
 
-  default['cmon']['agent']['packages'] = %w(psmisc libaio1)
-  default['cmon']['controller']['packages'] = %w(rrdtool mysql-server)
+  default['agent']['packages'] = %w(psmisc libaio1)
+  default['controller']['packages'] = %w(rrdtool mysql-server)
 
-  default['cmon']['controller']['mysql_packages'] = %w(mysql-server)
-  default['cmon']['controller']['rrdtool_packages'] = %w(rrdtool)
+  default['controller']['mysql_packages'] = %w(mysql-server)
+  default['controller']['rrdtool_packages'] = %w(rrdtool)
 
-  default['cmon']['web']['packages'] = %w(apache2 php5-mysql php5-gd)
-  default['cmon']['service']['tool'] = "/usr/sbin/update-rc.d"
+  default['web']['packages'] = %w(apache2 libapache2-mod-php5 php5-mysql php5-gd)
+  default['service']['tool'] = "/usr/sbin/update-rc.d"
 
-  default['mysql']['package_name'] = "mysql-server"
   default['mysql']['service_name'] = "mysql"
 
-  default['cmon']['misc']['wwwroot'] = "/var/www"
-  default['cmon']['misc']['web_user'] = "www-data"
+  default['misc']['wwwroot'] = "/var/www"
+  default['misc']['web_user'] = "www-data"
 
 end
 
-default['cmon']['mysql']['root_password'] = "password"
-default['cmon']['mysql']['mysql_bin'] = default['cmon']['mysql']['bin_dir'] + "/mysql"
+if attribute?('ec2')
+  default['mysql']['ec2_path']    = "/mnt/mysql"
+  default['mysql']['ebs_vol_dev'] = "/dev/sdi"
+  default['mysql']['ebs_vol_size'] = 50
+end
 
-default['cmon']['mysql']['data_dir']  = "/var/lib/mysql"
-default['cmon']['mysql']['pid_file']  = "mysqld.pid"
-default['cmon']['mysql']['socket']    = "var/lib/mysql/mysql.sock"
-default['cmon']['mysql']['port']  = 3306
+default['mysql']['root_password'] = "password"
+default['mysql']['mysql_bin'] = default['mysql']['bin_dir'] + "/mysql"
 
-default['cmon']['mysql']['repl_user']     = ""
-default['cmon']['mysql']['repl_password'] = "repl"
+default['mysql']['data_dir']  = "/var/lib/mysql"
+default['mysql']['pid_file']  = "mysqld.pid"
+default['mysql']['socket']    = "/var/run/mysqld/mysqld.sock"
+default['mysql']['port']  = 3306
 
-default['cmon']['sql']['cmon_schema'] = default['cmon']['install_dir_cmon'] + "/cmon/sql/cmon_db.sql"
-default['cmon']['sql']['cmon_data']   = default['cmon']['install_dir_cmon'] + "/cmon/sql/cmon_data.sql"
-default['cmon']['sql']['controller_grants'] = default['cmon']['install_dir_cmon'] + "/cmon/sql/cmon_controller_grants.sql"
-default['cmon']['sql']['controller_agent_grants'] = default['cmon']['install_dir_cmon'] + "/cmon/sql/cmon_controller_agent_grants.sql"
-default['cmon']['sql']['agent_grants'] = default['cmon']['install_dir_cmon'] + "/cmon/sql/cmon_agent_grants.sql"
+default['mysql']['repl_user']     = ""
+default['mysql']['repl_password'] = "repl"
 
-default['cmon']['rrd']['image_dir'] = "/var/www/cmon/graphs"
-default['cmon']['rrd']['rrdtool']   = "/usr/local/bin/rrdtool"
-default['cmon']['rrd']['data_dir']  = "/var/lib/cmon"
+default['sql']['cmon_schema'] = default['install_dir_cmon'] + "/cmon/sql/cmon_db.sql"
+default['sql']['cmon_data']   = default['install_dir_cmon'] + "/cmon/sql/cmon_data.sql"
+default['sql']['controller_grants'] = default['install_dir_cmon'] + "/cmon/sql/cmon_controller_grants.sql"
+default['sql']['controller_agent_grants'] = default['install_dir_cmon'] + "/cmon/sql/cmon_controller_agent_grants.sql"
+default['sql']['agent_grants'] = default['install_dir_cmon'] + "/cmon/sql/cmon_agent_grants.sql"
 
-default['cmon']['misc']['os_user']  = "root"
-default['cmon']['misc']['core_dir'] = "/core_cmon_install_dir"
+default['rrd']['image_dir'] = "/var/www/cmon/graphs"
+default['rrd']['rrdtool']   = "/usr/local/bin/rrdtool"
+default['rrd']['data_dir']  = "/var/lib/cmon"
 
-default['cmon']['misc']['pid_file'] = "/var/run/cmon.pid"
+default['misc']['os_user']  = "root"
+default['misc']['core_dir'] = "/core_cmon_install_dir"
+
+default['misc']['pid_file'] = "/var/run/cmon.pid"
 # /run/lock/ for ubuntu but for other dists?
-default['cmon']['misc']['lock_dir'] = "/run/lock"
-default['cmon']['misc']['log_file'] = "/var/log/cmon.log"
-default['cmon']['misc']['nodaemon'] = 1
-default['cmon']['misc']['db_stats_collection_interval'] = 30
-default['cmon']['misc']['host_stats_collection_interval'] = 30
+default['misc']['lock_dir'] = "/run/lock"
+default['misc']['log_file'] = "/var/log/cmon.log"
+default['misc']['nodaemon'] = 1
+default['misc']['db_stats_collection_interval'] = 30
+default['misc']['host_stats_collection_interval'] = 30
 
-default['cmon']['mysql']['script_dir']    = "/usr/bin"
+default['mysql']['script_dir']    = "/usr/bin"
 
 #default['cmon']['misc']['cmon_core_dir'] = ""
-default['cmon']['misc']['ndb_binary']=
-default['cmon']['misc']['BACKUPDIR'] = ""
-default['cmon']['misc']['IDENTITY']  = ""
-default['cmon']['misc']['IDENTITY2'] = ""
+default['misc']['ndb_binary'] = ""
+default['misc']['BACKUPDIR'] = ""
+default['misc']['IDENTITY']  = ""
+default['misc']['IDENTITY2'] = ""

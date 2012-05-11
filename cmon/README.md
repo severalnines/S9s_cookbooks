@@ -14,7 +14,7 @@ Platform
 
 Tested on:
 
-* Ubuntu 11.10 w/ chef-solo v0.10.8 only.
+* Ubuntu 11.10 w/ chef-solo and chef-server v0.10.8 only.
 
 Cookbooks
 ---------
@@ -27,31 +27,34 @@ N/A
 Attributes
 ==========
 
-* `cmon['remote']['mysql_user']`     - cmon controller MySQL user (cmon)
-* `cmon['remote']['mysql_hostname']` - cmon controller MySQL hostname (nnn)
-* `cmon['remote']['mysql_password']` - cmon controller MySQL user's password (cmon)
-* `cmon['remote']['mysql_port']`     - cmon controller MySQL port (3306)
+No change to these attributes should be required as default.
 
-* `cmon['cmon_password']`        = cmon controller user's password (cmon)
-* `cmon['mode']['agent']`        = run as agent
-* `cmon['mode']['controller']`   = run as controller
-* `cmon['mode']['dual']`         = run in dual mode, i.e., both as controller and agent
+* ['controller']['mysql_user']     - cmon controller MySQL user (cmon)
+* ['controller']['mysql_hostname'] - cmon controller MySQL hostname (nnn)
+* ['controller']['mysql_password'] - cmon controller MySQL user's password (cmon)
+* ['controller']['mysql_port']     - cmon controller MySQL port (3306)
 
-* `cmon['local']['mysql_user']`     - MySQ local user (root)
-* `cmon['local']['mysql_hostname']` - MySQL local hostname (nnn)
-* `cmon['local']['mysql_password']` - MySQL local user's password (cmon)
-* `cmon['local']['mysql_port']`     - MySQL local port (3306)
+* ['cmon_password']        = cmon controller user's password (cmon)
+* ['mode']['agent']        = run as agent
+* ['mode']['controller']   = run as controller
+* ['mode']['dual']         = run in dual mode, i.e., both as controller and agent
+
+* ['agent']['mysql_user']     - MySQ local user (root)
+* ['local']['mysql_hostname'] - MySQL local hostname (nnn)
+* ['local']['mysql_password'] - MySQL local user's password (cmon)
+* ['local']['mysql_port']     - MySQL local port (3306)
 
 and others please see attributes/default.rb
 
 Data Bags
 =========
 
-Used by the controller recipe to for example add agent hosts to its grant table.
-The agent recipe uses the controller_host_ipaddress for cmon controller host.
+Data items are used by the controller recipe to for example add agent hosts 
+to its grant table and the agent recipe uses the controller_host_ipaddress to
+set the a controller host.
 
-controller/config.json
-----------------------
+s9s_controller / config.json
+----------------------------
 {
   "id": "config",
   "controller_host_ipaddress": "192.168.122.11",
@@ -78,39 +81,41 @@ controller/config.json
   ]
 }
 
-For agentless installations use mysqlserver_hosts, datanode_hosts and mgm_hosts.
+FUTURE: For agentless installations use mysqlserver_hosts, datanode_hosts and mgm_hosts.
 
 Usage
 =====
 
-On agent nodes,
+Roles:
+ Controller Role: cc_controller
+    run_list [
+      "recipe[cmon::controller_mysql]", 
+      "recipe[cmon::controller_rrdtool]", 
+      "recipe[cmon::controller]"
+    ]
 
-    include_recipe "cmon::agent_packages" (optional)
-    include_recipe "cmon::agent"
+Installs the Cluster Control Controller process. Instead of our MySQL recipe you can choose to use any other available recipe instead.
 
-This will install the cmon agent and its requried packages on the node.
+Agent Role: cc_agent
+    run_list [
+      "recipe[cmon::agent_packages]", 
+      "recipe[cmon::agent]"
+    ]
 
-On controller only nodes,
+Web App Role: cc_webapp
+    run_list [
+      "recipe[cmon::webserver]", 
+      "recipe[cmon::webapp]"
+    ]
 
-    include_recipe "cmon::controller_packages" (optional)
-    include_recipe "cmon::controller"
+The web application and the webserver are usually installed on the controller node.
 
-This will install the cmon controller and its requried packages on the node. A cmon user
-and its grants will be automatically created using the generated
-/usr/local/cmon/sql/cmon_controller_grants.sql file.
-
-On the cmon web application node,
-
-    include_recipe "cmon::web_packages" (optional)
-    include_recipe "cmon::web"
-    include_recipe "cmon::controller_packages" (optional)
-    include_recipe "cmon::controller" (optional)
-
-This will install the cmon web application and its requried packages on the node. 
 
 Change History
 ===============
 
+* v0.3 - Code cleanup, better use of roles, data bags and more tests using Chef-Server. Uses cmon v1.1.27.
+* v0.2 - Bug fixes and making sure it worked on Chef-Solo.
 * v0.1 - Initial recipes based upon cmon v1.1.25. 
 
 License and Author

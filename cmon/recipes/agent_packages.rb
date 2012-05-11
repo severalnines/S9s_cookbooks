@@ -19,7 +19,7 @@
 
 
 # Install dependency packages
-packages = node['cmon']['agent']['packages']
+packages = node['agent']['packages']
 packages.each do |name|
   package name do
     action :install

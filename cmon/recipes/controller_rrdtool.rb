@@ -19,7 +19,7 @@
 
 
 # Install dependency packages
-packages = node['cmon']['controller']['rrdtool_packages']
+packages = node['controller']['rrdtool_packages']
 packages.each do |name|
   package name do
     Chef::Log.info "Installing #{name}..."
