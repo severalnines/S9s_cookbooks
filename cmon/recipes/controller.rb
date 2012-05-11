@@ -23,11 +23,13 @@ node['cmon']['controller']['mysql_hostname'] = cmon_config['controller_host_ipad
 node['cmon']['mode']['controller'] = cmon_config['mode']
 
 cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
-Chef::Log.info "Downloading #{cmon_package}.tar.gz"
-remote_file "#{Chef::Config[:file_cache_path]}/cmon.tar.gz" do
-  source "http://www.severalnines.com/downloads/cmon/" + cmon_package + ".tar.gz"
+cmon_tarball = cmon_package + ".tar.gz"
+Chef::Log.info "Downloading #{cmon_tarball}"
+remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
+  source "http://www.severalnines.com/downloads/cmon/" + cmon_tarball
   action :create_if_missing
 end
+
 
 # install cmon in /usr/local/cmon as default
 directory node['cmon']['install_dir_cmon'] do
@@ -41,10 +43,10 @@ bash "untar-cmon-package" do
   user "root"
   code <<-EOH
     rm -rf #{node['cmon']['install_dir_cmon']}/cmon
-    zcat #{Chef::Config[:file_cache_path]}/cmon.tar.gz | tar xf - -C #{node['cmon']['install_dir_cmon']}
+    zcat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['cmon']['install_dir_cmon']}
     ln -s #{node['cmon']['install_dir_cmon']}/#{cmon_package} #{node['cmon']['install_dir_cmon']}/cmon
   EOH
-	not_if { File.directory? "#{node['cmon']['install_dir_cmon']}/cmon" }
+  not_if { File.directory? "#{node['cmon']['install_dir_cmon']}/#{cmon_package}" }
 end
 
 execute "controller-create-db-schema" do
