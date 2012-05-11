@@ -78,7 +78,7 @@ else
   default['mysql']['package_name'] = "mysql-server"
   default['mysql']['service_name'] = "mysql"
 
-  default['cmon']['misc']['wwwwroot'] = "/var/www"
+  default['cmon']['misc']['wwwroot'] = "/var/www"
   default['cmon']['misc']['web_user'] = "www-data"
 
 end
