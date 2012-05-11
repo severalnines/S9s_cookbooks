@@ -55,58 +55,58 @@ set the a controller host.
 
 s9s_controller / config.json
 ----------------------------
-{
-  "id": "config",
-  "controller_host_ipaddress": "192.168.122.11",
-  "mode": "controller",
-  "cmon_package_x86_64": "cmon-1.1.27-64bit-glibc23-mc70",
-  "cmon_package_i686": "cmon-1.1.27-32bit-glibc23-mc70",
-  "cmon_package_i386": "cmon-1.1.27-32bit-glibc23-mc70",
-  "agent_hosts": [
-     "192.168.122.12",
-     "192.168.122.14",
-     "192.168.122.16"
-    ],
-  "mysqlserver_hosts": [
-     "ip1",
-     "ip2"
-  ],    
-  "datanode_hosts": [
-     "ip1",
-     "ip2"
-  ],    
-  "mgm_hosts": [
-     "ip1",
-     "ip2"
-  ]
-}
+    {
+      "id": "config",
+      "controller_host_ipaddress": "192.168.122.11",
+      "mode": "controller",
+      "cmon_package_x86_64": "cmon-1.1.27-64bit-glibc23-mc70",
+      "cmon_package_i686": "cmon-1.1.27-32bit-glibc23-mc70",
+      "cmon_package_i386": "cmon-1.1.27-32bit-glibc23-mc70",
+      "agent_hosts": [
+         "192.168.122.12",
+         "192.168.122.14",
+         "192.168.122.16"
+        ],
+      "mysqlserver_hosts": [
+         "ip1",
+         "ip2"
+      ],    
+      "datanode_hosts": [
+         "ip1",
+         "ip2"
+      ],    
+      "mgm_hosts": [
+         "ip1",
+         "ip2"
+      ]
+    }
 
 FUTURE: For agentless installations use mysqlserver_hosts, datanode_hosts and mgm_hosts.
 
 Usage
 =====
 
-Roles:
- Controller Role: cc_controller
-    run_list [
-      "recipe[cmon::controller_mysql]", 
-      "recipe[cmon::controller_rrdtool]", 
-      "recipe[cmon::controller]"
-    ]
+    Roles:
+     Controller Role: cc_controller
+        run_list [
+          "recipe[cmon::controller_mysql]", 
+          "recipe[cmon::controller_rrdtool]", 
+          "recipe[cmon::controller]"
+        ]
 
 Installs the Cluster Control Controller process. Instead of our MySQL recipe you can choose to use any other available recipe instead.
 
-Agent Role: cc_agent
-    run_list [
-      "recipe[cmon::agent_packages]", 
-      "recipe[cmon::agent]"
-    ]
+    Agent Role: cc_agent
+        run_list [
+          "recipe[cmon::agent_packages]", 
+          "recipe[cmon::agent]"
+        ]
 
-Web App Role: cc_webapp
-    run_list [
-      "recipe[cmon::webserver]", 
-      "recipe[cmon::webapp]"
-    ]
+    Web App Role: cc_webapp
+        run_list [
+          "recipe[cmon::webserver]", 
+          "recipe[cmon::webapp]"
+        ]
 
 The web application and the webserver are usually installed on the controller node.
 
