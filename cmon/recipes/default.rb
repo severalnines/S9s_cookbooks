@@ -28,8 +28,8 @@
 # cmon::agent
 #   installs the agent
 
-#include_recipe "cmon::agent_packages"
-#include_recipe "cmon::agent"
+include_recipe "cmon::agent_packages"
+include_recipe "cmon::agent"
 
 #
 # cmon Controller
@@ -39,22 +39,34 @@
 #     rrdtool mysql mysql-server (rhel/centos)
 #     rrdtool mysql-server (debian)
 #
+# cmon::controller_mysql
+#   installs 
+#     mysql mysql-server (rhel/centos)
+#     mysql-server (debian)
+#
+# cmon::controller_rrdtool
+#   installs 
+#     rrdtool
+#
 # cmon::controller
 #   installs the controller 
 
+#include_recipe "cmon::controller_mysql"
+#include_recipe "cmon::controller_rrdtool"
+
 #include_recipe "cmon::controller_packages"
-include_recipe "cmon::controller"
+#include_recipe "cmon::controller"
 
 #
 # cmon Web app
 #
-# cmon::web_packages
+# cmon::webserver
 #   installs
 #     httpd php php-mysql php-gd (rhel/centos)
 #     apache2 php5-mysql php5-gd (debian/ubuntu)
 #
-# cmon::web_packages
+# cmon::webapp
 #   installs ClusterControl web application (php)
 
-#include_recipe "cmon::web_packages"
-include_recipe "cmon::web"
+#include_recipe "cmon::webserver"
+#include_recipe "cmon::webapp"

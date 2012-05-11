@@ -18,7 +18,7 @@
 #
 
 cmon_config = data_bag_item('controller', 'config')
-node['cmon']['remote']['mysql_hostname'] = cmon_config['host_ipaddress']
+node['cmon']['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
 
 cmon_package=cmon_config['cmon_package_' + node['kernel']['machine']]
 Chef::Log.info "Downloading #{cmon_package}.tar.gz"
@@ -46,13 +46,13 @@ bash "untar-cmon-package" do
 end
 
 execute "agent-install-privileges" do
-  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_agent_grants.sql"
+  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['mysql']['root_password']} < #{node['cmon']['sql']['agent_grants']}"
   action :nothing
 end
 
 Chef::Log.info "Create agent grants"
 template "cmon.agent.grants.sql" do
-  path "#{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_agent_grants.sql"
+  path "#{node['cmon']['sql']['agent_grants']}"
   source "cmon.agent.grants.sql.erb"
   owner "root"
   group "root"
@@ -78,7 +78,7 @@ service "cmon" do
 end 
 
 template "cmon.agent.cnf" do
-  path "#{node['cmon']['install_configpath']}/cmon.cnf"
+  path "#{node['cmon']['install_config_path']}/cmon.cnf"
   source "cmon.agent.cnf.erb"
   owner "root"
   group "root"

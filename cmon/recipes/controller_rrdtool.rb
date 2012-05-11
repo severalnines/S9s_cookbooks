@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: cmon
-# Recipe:: web-packages
+# Recipe:: controller-packages
 #
 # Copyright 2012, Severalnines AB.
 #
@@ -19,9 +19,10 @@
 
 
 # Install dependency packages
-packages = node['cmon']['web']['packages']
+packages = node['cmon']['controller']['rrdtool_packages']
 packages.each do |name|
   package name do
+    Chef::Log.info "Installing #{name}..."
     action :install
   end
 end

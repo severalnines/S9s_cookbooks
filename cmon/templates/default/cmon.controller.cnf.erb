@@ -5,36 +5,80 @@
 #
 # Controller cmon.cnf
 #
+
+# id and name of cluster that this cmon controller. 
+# Must be unique for each monitored cluster, like server-id in mysql
 cluster_id=<%= node['cmon']['cluster_id'] %>
 name=<%= node['cmon']['cluster_name'] %>
-type=<%= node['cmon']['cluster_type'] %>
 
+# mode = [controller|agent|dual]
 mode=<%= node['cmon']['mode']['controller'] %>
 
-mysql_port=<%= node['cmon']['remote']['mysql_port'] %>
-mysql_hostname=<%= node['cmon']['local']['mysql_hostname'] %>
-mysql_password=<%= node['cmon']['remote']['mysql_password'] %>
+# type = [mysqlcluster|replication|galera]
+type=<%= node['cmon']['cluster_type'] %>
 
-local_mysql_port=<%= node['cmon']['local']['mysql_port'] %>
-local_mysql_password=<%= node['cmon']['local']['mysql_password'] %>
-local_mysql_hostname=<%= node['cmon']['local']['mysql_hostname'] %>
+# os = [redhat|debian]
+<% case node['platform'] -%>
+<% when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon' -%>
+os=redhat
+<% else -%>
+os=debian
+<% end -%>
+
+# skip_name_resolve = [0|1] - set 1 if you use ip addresses only everywhere
+skip_name_resolve=1
+
+## CMON DB config  - mysql_password is for the 'cmon' user
+#mysql_basedir=<%= node['cmon']['controller']['mysql_base_dir'] %>
+mysql_port=<%= node['cmon']['controller']['mysql_port'] %>
+mysql_hostname=<%= node['cmon']['controller']['mysql_hostname'] %>
+mysql_password=<%= node['cmon']['controller']['mysql_password'] %>
+# ndb_connectstring  - comma-separated list of management servers: a:1186,b:1196
+ndb_connectstring=<%= node['cmon']['controller']['ndb_connectstring'] %>
+
+#cmon_multi_tenant=no
+#cmon_preinstalled_image=no
+#cmon_db=cmon
+
+## Agent to local DB connection - local_mysql_password is for the 'cmon' user
+local_mysql_password=<%= node['cmon']['agent']['mysql_password'] %>
+local_mysql_hostname=<%= node['cmon']['agent']['mysql_hostname'] %>
+local_mysql_port=<%= node['cmon']['agent']['mysql_port'] %>
+
+#hostname is the hostname of the current host
 hostname=<%= node['ipaddress'] %>
-#The user who owns the core scripts below
-osuser=<%= node['cmon']['misc']['os_user'] %>
+
+## The user that can SSH without password to the other nodes
+os_user=<%= node['cmon']['misc']['os_user'] %>
 
 #location of Configurator script root, e.g /root/mysqlcluster-71/
-cmon_core_dir=/root/mysqlcluster-71/
+cmon_core_dir=
 
+# location of cmon.pid file. The pidfile is written in /tmp/ by default
 pidfile=<%= node['cmon']['misc']['pid_file'] %>
+
+# logfile is default to syslog.
 logfile=<%= node['cmon']['misc']['log_file'] %>
-#BUG right now - start/stop nodes/getting logs/start backups etc does not work in daemon mode 
-# at this point
+
+# daemonize = 0, not daemoize = 1
 nodaemon=<%= node['cmon']['misc']['nodaemon'] %>
 
+# collection intervals (in seconds)
 db_stats_collection_interval=<%= node['cmon']['misc']['db_stats_collection_interval'] %>
 host_stats_collection_interval=<%= node['cmon']['misc']['host_stats_collection_interval'] %>
+
+wwwroot=<%= node['cmon']['misc']['wwwroot'] %>
+
+# mysql servers in the cluster. "," or " " sep. list
+mysql_server_addresses=
+# mgm and data nodes are only used to MySQL Cluster "," or " " sep. list
+datanode_addresses=
+mgmnode_addresses=
+
 ###### RRD SECTION - graphs ######
 mysql_bindir=<%= node['cmon']['mysql']['bin_dir'] %>
 imagedir=<%= node['cmon']['rrd']['image_dir'] %>
 rrdtool=<%= node['cmon']['rrd']['rrdtool'] %>
 rrd_datadir=<%= node['cmon']['rrd']['data_dir'] %>
+###### END OF RRD SECTION - graphs ######
+

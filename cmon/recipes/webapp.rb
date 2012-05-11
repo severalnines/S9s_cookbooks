@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: cmon
-# Recipe:: web
+# Recipe:: webapp
 #
 # Copyright 2012, Severalnines AB.
 #
@@ -20,7 +20,7 @@
 cmon_config = data_bag_item('controller', 'config')
 
 cmon_package=cmon_config['cmon_package_' + node['kernel']['machine']]
-Chef::Log.info "Downloading #{cmon_package}.tar.gz"
+Chef::Log.info "Downloading #{cmon_package}.tar.gz to #{Chef::Config[:file_cache_path]}/cmon.tar.gz"
 remote_file "#{Chef::Config[:file_cache_path]}/cmon.tar.gz" do
   source "http://www.severalnines.com/downloads/cmon/" + cmon_package + ".tar.gz"
   action :create_if_missing

@@ -18,10 +18,11 @@
 #
 
 cmon_config = data_bag_item('controller', 'config')
-node['cmon']['remote']['mysql_hostname'] = node['ipaddress']
-node['cmon']['mode']['controller']  = cmon_config['mode']
+#node['cmon']['controller']['mysql_hostname'] = node['ipaddress']
+node['cmon']['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
+node['cmon']['mode']['controller'] = cmon_config['mode']
 
-cmon_package=cmon_config['cmon_package_' + node['kernel']['machine']]
+cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
 Chef::Log.info "Downloading #{cmon_package}.tar.gz"
 remote_file "#{Chef::Config[:file_cache_path]}/cmon.tar.gz" do
   source "http://www.severalnines.com/downloads/cmon/" + cmon_package + ".tar.gz"
@@ -47,23 +48,23 @@ bash "untar-cmon-package" do
 end
 
 execute "controller-create-db-schema" do
-  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_db.sql"
+  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['mysql']['root_password']} < #{node['cmon']['sql']['cmon_schema']}"
   action :run
 end
 
 execute "controller-import-tables" do
-  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_data.sql"
+  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['mysql']['root_password']} < #{node['cmon']['sql']['cmon_data']}"
   action :run
 end
 
 execute "controller-install-privileges" do
-  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_grants.sql"
+  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['mysql']['root_password']} < #{node['cmon']['sql']['controller_grants']}"
   action :nothing
 end
 
 Chef::Log.info "Create controller grants"
 template "cmon.controller.grants.sql" do
-  path "#{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_grants.sql"
+  path "#{node['cmon']['sql']['controller_grants']}"
   source "cmon.controller.grants.sql.erb"
   owner "root"
   group "root"
@@ -72,8 +73,8 @@ template "cmon.controller.grants.sql" do
 end
 
 
-agents = data_bag_item('agent', 'config')
-hosts = agents['hosts']
+agents = data_bag_item('controller', 'config')
+hosts = agents['agent_hosts']
 host_list = ""
 hosts.each do |h|
  host_list << h + " "
@@ -84,14 +85,14 @@ bash "create-agent-grants" do
   code <<-EOH
     for h in #{host_list}
     do
-      echo "GRANT SUPER ON *.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon']['cmon_password']}';" >> #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_agent_grants.sql
-      echo "GRANT INSERT,UPDATE,DELETE,SELECT ON cmon.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon']['cmon_password']}';" >> #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_agent_grants.sql
+      echo "GRANT SUPER ON *.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon']['cmon_password']}';" >> #{node['cmon']['sql']['controller_agent_grants']}
+      echo "GRANT INSERT,UPDATE,DELETE,SELECT ON cmon.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon']['cmon_password']}';" >> #{node['cmon']['sql']['controller_agent_grants']}
     done
   EOH
 end
 
 execute "controller-grant-agents" do
-  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['local']['mysql_password']} < #{node['cmon']['install_dir_cmon']}/cmon/sql/cmon_controller_agent_grants.sql"
+  command "#{node['cmon']['mysql']['bin_dir']}/mysql -uroot -p#{node['cmon']['mysql']['root_password']} < #{node['cmon']['sql']['controller_agent_grants']}"
   action :run
 end
 
@@ -115,7 +116,7 @@ service "cmon" do
 end 
 
 template "cmon.controller.cnf" do
-  path "#{node['cmon']['install_configpath']}/cmon.cnf"
+  path "#{node['cmon']['install_config_path']}/cmon.cnf"
   source "cmon.controller.cnf.erb"
   owner "root"
   group "root"
