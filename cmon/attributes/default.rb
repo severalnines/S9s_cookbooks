@@ -81,12 +81,6 @@ else
 
 end
 
-if attribute?('ec2')
-  default['mysql']['ec2_path']    = "/mnt/mysql"
-  default['mysql']['ebs_vol_dev'] = "/dev/sdi"
-  default['mysql']['ebs_vol_size'] = 50
-end
-
 default['mysql']['root_password'] = "password"
 default['mysql']['mysql_bin'] = default['mysql']['bin_dir'] + "/mysql"
 
