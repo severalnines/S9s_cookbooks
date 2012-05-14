@@ -42,14 +42,6 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
   default['web']['packages'] = %w(httpd php php-mysql php-gd)
 
-  if FileTest.exist?("/usr/sbin/chkconfig")
-    default['cmon_service']['too'] = "/usr/sbin/chkconfig"
-  elsif FileTest.exist?("/usr/bin/chkconfig")
-    default['cmon_service']['tool'] = "/usr/bin/chkconfig"
-  elsif FileTest.exist?("/sbin/chkconfig")
-    default['cmon_service']['tool'] = "/sbin/chkconfig"    
-  end
-
   default['mysql']['service_name'] = "mysqld"
 
   default['misc']['wwwroot'] = "/var/www/html"
@@ -72,7 +64,6 @@ else
   default['controller']['rrdtool_packages'] = %w(rrdtool)
 
   default['web']['packages'] = %w(apache2 libapache2-mod-php5 php5-mysql php5-gd)
-  default['service']['tool'] = "/usr/sbin/update-rc.d"
 
   default['mysql']['service_name'] = "mysql"
 
