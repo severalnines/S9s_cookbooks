@@ -1,5 +1,5 @@
 cookbook_path "#{File.expand_path(File.dirname(__FILE__))}/"
-data_bag_path "#{File.expand_path(File.dirname(__FILE__))}/cmon/databags"
+data_bag_path "#{File.expand_path(File.dirname(__FILE__))}/cmon/data_bags"
 Chef::Log.debug Chef::Config[:cookbook_path]
 Chef::Log.debug Chef::Config[:data_bag_path]
 
