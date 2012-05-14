@@ -9,12 +9,7 @@
 [MYSQLD]
 user=mysql
 basedir = <%= node['mysql']['base_dir'] %>
-<% if node.attribute?('ec2') -%>
-datadir = <%= node['mysql']['ec2_path'] %>
-<% else -%>
 datadir = <%= node['mysql']['data_dir'] %>
-<% end -%>
-
 pid-file = <%= node['mysql']['pid_file'] %>
 socket = <%= node['mysql']['socket'] %>
 port = <%= node['mysql']['port'] %>
