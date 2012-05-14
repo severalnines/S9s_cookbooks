@@ -138,5 +138,5 @@ end
 
 service "cmon" do
   supports :restart => true, :start => true, :stop => true, :reload => true
-  action :start
+  action [:enable, :start]
 end 
