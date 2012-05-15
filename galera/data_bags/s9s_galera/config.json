@@ -1,0 +1,18 @@
+{
+  "id": "config",
+  "mysql_wsrep_package_x86_64": "mysql-5.5.23_wsrep_23.5-linux-x86_64",
+  "mysql_wsrep_package_i686": "mysql-5.5.23_wsrep_23.5-linux-i686",
+  "galera_package_i386": {
+  	"deb": "galera-23.2.0-i386.deb",
+  	"rpm": "galera-23.2.0-1.rhel5.i386.rpm"},  
+  "galera_package_x86_64": {
+  	"deb": "galera-23.2.0-amd64.deb",
+  	"rpm": "galera-23.2.0-1.rhel5.x86_64.rpm"
+  },
+  "primary": "192.168.122.11",
+  "galera_hosts": [
+     "192.168.122.12",
+     "192.168.122.14",
+     "192.168.122.16"
+    ]
+}
