@@ -22,11 +22,12 @@ end
 default['mysql']['root_password'] = "password"
 default['mysql']['mysqlbin'] = default['mysql']['bindir'] + "/mysql"
 
-default['mysql']['datadir']  = "/var/lib/mysql"
-default['mysql']['pidfile']  = default['mysql']['datadir'] + "/mysqld.pid"
-default['mysql']['socket']    = "/var/run/mysqld/mysqld.sock"
-default['mysql']['port']  = 3306
-default['mysql']['tmpdir'] = "/tmp"
+default['mysql']['datadir'] = "/var/lib/mysql"
+default['mysql']['rundir']  = "/var/run/mysqld"
+default['mysql']['pidfile'] = default['mysql']['datadir'] + "/mysqld.pid"
+default['mysql']['socket']  = "/var/run/mysqld/mysqld.sock"
+default['mysql']['port']    = 3306
+default['mysql']['tmpdir']  = "/tmp"
 
 default['mysql']['innodb']['buffer_pool_size'] = "128M"
 default['mysql']['innodb']['flush_log_at_trx_commit'] = 2

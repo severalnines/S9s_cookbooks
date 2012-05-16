@@ -114,6 +114,14 @@ directory node['mysql']['datadir'] do
   recursive true
 end
 
+directory node['mysql']['rundir'] do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+  recursive true
+end
+
 # install db to the data directory
 execute "setup-mysql-datadir" do
   command "#{node['mysql']['basedir']}/scripts/mysql_install_db --force --user=mysql --basedir=#{node['mysql']['basedir']} --datadir=#{node['mysql']['datadir']}"
