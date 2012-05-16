@@ -32,6 +32,16 @@
 #sudo service apparmor restart
 
 
+group "mysql" do
+end
+
+user "mysql" do
+  gid "mysql"
+  comment "MySQL server"
+  system true
+  shell "/bin/false"
+end
+
 galera_config = data_bag_item('s9s_galera', 'config')
 
 mysql_package = galera_config['mysql_wsrep_package_' + node['kernel']['machine']]
@@ -73,10 +83,10 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
       rpm -e --nodeps --allmatches mysql mysql-devel mysql-server mysql-bench
       rm -rf /var/lib/mysql/*
       rm -rf /etc/my.cnf /etc/mysql
-      rpm -Uhv libssl0.9.8
+      rpm -Uhv #{node['xtra']['packages']}
       rpm -Uhv #{Chef::Config[:file_cache_path]}/#{galera_package}
     EOH
-    not_if "test -f #{node['wsrep']['provider']}"
+    not_if { FileTest.exists?("#{node['wsrep']['provider']}") }
   end
 else
   bash "purge-mysql-n-install-galera" do
@@ -89,10 +99,10 @@ else
       apt-get -y autoclean
       rm -rf /var/lib/mysql/*
       rm -rf /etc/my.cnf /etc/mysql
-      apt-get -y install libssl0.9.8 
+      apt-get -y install #{node['xtra']['packages']}
       dpkg -i #{Chef::Config[:file_cache_path]}/#{galera_package}
     EOH
-    not_if "test -f #{node['wsrep']['provider']}"
+    not_if { FileTest.exists?("#{node['wsrep']['provider']}") }
   end
 end
 

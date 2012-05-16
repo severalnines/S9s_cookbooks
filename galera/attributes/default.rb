@@ -6,13 +6,17 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
   default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql_galera"
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysqld"
+  
+  default['xtra']['packages'] = "libssl0.9.8 psmisc libaio"
 
 else
 
   default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql_galera"
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysqld"
-  
+
+  default['xtra']['packages'] = "libssl0.9.8 psmisc libaio1"
+
 end
 
 default['mysql']['root_password'] = "password"
