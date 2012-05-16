@@ -3,7 +3,7 @@ default['galera']['install_dir'] = "/usr/local"
 case node['platform']
 when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
-  default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql_galera"
+  default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql"
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysqld"
   
@@ -11,7 +11,7 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
 else
 
-  default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql_galera"
+  default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql"
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysqld"
 
