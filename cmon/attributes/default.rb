@@ -96,7 +96,7 @@ default['sql']['controller_agent_grants'] = default['install_dir_cmon'] + "/cmon
 default['sql']['agent_grants'] = default['install_dir_cmon'] + "/cmon/sql/cmon_agent_grants.sql"
 
 default['rrd']['image_dir'] = "/var/www/cmon/graphs"
-default['rrd']['rrdtool']   = "/usr/local/bin/rrdtool"
+default['rrd']['rrdtool']   = "/usr/bin/rrdtool"
 default['rrd']['data_dir']  = "/var/lib/cmon"
 
 default['misc']['os_user']  = "root"
