@@ -19,13 +19,14 @@ else
 
 end
 
+default['xtra']['sleep'] = 60
 default['mysql']['root_password'] = "password"
 default['mysql']['mysqlbin'] = default['mysql']['bindir'] + "/mysql"
 
 default['mysql']['datadir'] = "/var/lib/mysql"
 default['mysql']['rundir']  = "/var/run/mysqld"
 default['mysql']['pidfile'] = default['mysql']['datadir'] + "/mysqld.pid"
-default['mysql']['socket']  = "/var/run/mysqld/mysqld.sock"
+default['mysql']['socket']  = default['mysql']['rundir'] + "/mysqld.sock"
 default['mysql']['port']    = 3306
 default['mysql']['tmpdir']  = "/tmp"
 

@@ -72,7 +72,7 @@ bash "untar-mysql-package" do
     zcat #{Chef::Config[:file_cache_path]}/#{mysql_tarball} | tar xf - -C #{node['galera']['install_dir']}
     ln -s #{node['galera']['install_dir']}/#{mysql_package} #{node['galera']['install_dir']}/mysql_galera
   EOH
-  not_if { File.directory?("#{node['galera']['install_dir']}/#{galera_package}") }
+  not_if { File.directory?("#{node['galera']['install_dir']}/#{mysql_package}") }
 end
 
 case node['platform']
@@ -107,16 +107,16 @@ else
 end
 
 directory node['mysql']['datadir'] do
-  owner "root"
-  group "root"
+  owner "mysql"
+  group "mysql"
   mode "0755"
   action :create
   recursive true
 end
 
 directory node['mysql']['rundir'] do
-  owner "root"
-  group "root"
+  owner "mysql"
+  group "mysql"
   mode "0755"
   action :create
   recursive true
@@ -162,8 +162,8 @@ end
 ruby_block 'wait-until-innodb' do
   block do
     if FileTest.exists?("#{node['mysql']['datadir']}/galera.cache") == false
-      Chef::Log.info "Sleep a while (20s) until the mysql server is up..."
-      sleep 20
+      Chef::Log.info "Temp fix. Sleep a while (#{node['xtra']['sleep']}s) until the mysql server is really up before securing, granting and setting cluster URL..."
+      sleep node['xtra']['sleep']
     end
   end
 end
@@ -171,21 +171,20 @@ end
 bash "set-wsrep-grants" do
   user "root"
   code <<-EOH
-    #{node['mysql']['mysqlbin']} -uroot -e "SET wsrep_on=OFF; DELETE FROM mysql.user WHERE user='';"
-    #{node['mysql']['mysqlbin']} -uroot -e "SET wsrep_on=OFF; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
   EOH
-  only_if "#{node['mysql']['mysqlbin']} -uroot -e 'show databases'"
+  only_if "#{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e 'show databases'"
 end
 
 bash "secure-mysql" do
   user "root"
   code <<-EOH
-    #{node['mysql']['mysqlbin']} -uroot -e "SET wsrep_on=OFF; UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
-    #{node['mysql']['mysqlbin']} -uroot -e "SET wsrep_on=OFF; DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
-    #{node['mysql']['mysqlbin']} -uroot -e "SET wsrep_on=OFF; DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
-    #{node['mysql']['mysqlbin']} -uroot -e "SET wsrep_on=OFF; FLUSH PRIVILEGES"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; FLUSH PRIVILEGES"
   EOH
-  only_if "#{node['mysql']['mysqlbin']} -uroot -e 'show databases'"
+  only_if "#{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e 'show databases'"
 end
 
 # not use atm
