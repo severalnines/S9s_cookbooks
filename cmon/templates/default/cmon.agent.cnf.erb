@@ -40,7 +40,7 @@ ndb_connectstring=<%= node['controller']['ndb_connectstring'] %>
 ## Agent to local DB connection - local_mysql_password is for the 'cmon' user
 local_mysql_password=<%= node['agent']['mysql_password'] %>
 #local_mysql_hostname=<%= node['agent']['mysql_hostname'] %>
-mysql_hostname=127.0.0.1
+local_mysql_hostname=127.0.0.1
 local_mysql_port=<%= node['agent']['mysql_port'] %>
 
 #hostname is the hostname of the current host

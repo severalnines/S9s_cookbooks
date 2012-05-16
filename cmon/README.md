@@ -51,7 +51,7 @@ Data Bags
 
 Data items are used by the controller recipe to for example add agent hosts 
 to its grant table and the agent recipe uses the controller_host_ipaddress to
-set the a controller host.
+set a controller host.
 
 s9s_controller / config.json
 ----------------------------

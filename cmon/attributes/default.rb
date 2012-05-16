@@ -47,6 +47,9 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
   default['misc']['wwwroot'] = "/var/www/html"
   default['misc']['web_user'] = "apache"
 
+  default['apache']['service_name'] = "httpd"
+  default['apache']['default-site'] = '/etc/httpd/conf/httpd.conf'
+
 else
 
   default['mysql']['install_dir']   = "/"
@@ -69,6 +72,9 @@ else
 
   default['misc']['wwwroot'] = "/var/www"
   default['misc']['web_user'] = "www-data"
+
+  default['apache']['service_name'] = "apache2"
+  default['apache']['default-site'] = '/etc/apache2/sites-enabled/000-default'
 
 end
 

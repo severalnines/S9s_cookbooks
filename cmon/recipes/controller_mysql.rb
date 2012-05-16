@@ -62,30 +62,37 @@ template "my.cnf" do
   mode "0644"
 end
 
-if FileTest.exist?("/etc/my.cnf") || FileTest.exist?("/etc/mysql/my.cnf")
+execute "cp-my.cmon.cnf" do
+  command "cp -f /etc/my.cmon.cnf /etc/mysql/my.cnf"
+  action :run
+  only_if { FileTest.exists?("/etc/mysql/my.cnf") }
+end
 
-  cfg_cmd = 'mv /etc/my.cmon.cnf /etc/mysql/my.cnf'
+execute "cp2-my.cmon.cnf" do
+  command "cp -f /etc/my.cmon.cnf /etc/my.cnf"
+  action :run
+  only_if { FileTest.exists?("/etc/my.cnf") }
+end
 
-  if FileTest.exist?("/etc/my.cnf")
-    cfg_cmd = 'mv /etc/my.cmon.cnf /etc/my.cnf'
-  end
+execute "rm-my.cmon.cnf" do
+  command "rm /etc/my.cmon.cnf"
+  action :run
+  only_if { FileTest.exists?("/etc/my.cmon.cnf") }
+end
 
-  execute "remove_my.cnf" do
-    command "rm -f /etc/my.cnf /etc/mysql/my.cnf"
-    action :run
-  end
+execute "purge_innodb_logfiles" do
+  command "rm #{node['mysql']['data_dir']}/ib_logfile*"
+  action :run
+  only_if { FileTest.exists?("#{node['mysql']['data_dir']}/ib_logfile0") }
+end
 
-  execute "mv_my.cmon.cnf" do
-    command "#{cfg_cmd}"
-    action :run
-    only_if { FileTest.exists?("/etc/my.cmon.cnf") }
-  end
+execute "set-allow-override" do
+  command "sed -i 's/AllowOverride None/AllowOverride All/g' #{node['apache']['default-site']}"
+  action :run
+end
 
-  execute "purge_innodb_logfiles" do
-    command "rm #{node['mysql']['data_dir']}/ib_logfile*"
-    action :run
-    only_if { FileTest.exists?("#{node['mysql']['data_dir']}/ib_logfile0") }
-  end
+service ['apache']['service_name'] do
+  action :restart
 end
 
 service "mysql" do
