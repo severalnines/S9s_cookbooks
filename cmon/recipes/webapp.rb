@@ -53,7 +53,7 @@ bash "install-web-app" do
     mkdir -p /var/lib/cmon
     mkdir -p #{node['misc']['wwwroot']}/cmon/graphs
     mkdir -p #{node['misc']['wwwroot']}/cmon/upload/schema
-    cp -rf #{node['install_dir_cmon']}/cmon/www/*  #{node['misc']['wwwwroot']}/
-    chown -R #{node['misc']['web_user']}:#{node['misc']['web_user']} #{node['misc']['wwwwroot']}/cmon
+    cp -rf #{node['install_dir_cmon']}/cmon/www/*  #{node['misc']['wwwroot']}/
+    chown -R #{node['misc']['web_user']}:#{node['misc']['web_user']} #{node['misc']['wwwroot']}/cmon
   EOH
 end
