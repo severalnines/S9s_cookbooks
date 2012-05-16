@@ -68,9 +68,9 @@ end
 bash "untar-mysql-package" do
   user "root"
   code <<-EOH
-    rm -rf #{node['galera']['install_dir']}/mysql_galera
+    rm -rf #{node['galera']['install_dir']}/mysql
     zcat #{Chef::Config[:file_cache_path]}/#{mysql_tarball} | tar xf - -C #{node['galera']['install_dir']}
-    ln -s #{node['galera']['install_dir']}/#{mysql_package} #{node['galera']['install_dir']}/mysql_galera
+    ln -s #{node['galera']['install_dir']}/#{mysql_package} #{node['galera']['install_dir']}/mysql
   EOH
   not_if { File.directory?("#{node['galera']['install_dir']}/#{mysql_package}") }
 end
@@ -187,7 +187,7 @@ bash "secure-mysql" do
   only_if "#{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e 'show databases'"
 end
 
-# not use atm
+# not used atm
 primary = galera_config['primary']
 
 hosts = galera_config['galera_hosts']
