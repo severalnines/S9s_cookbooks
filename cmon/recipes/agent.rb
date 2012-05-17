@@ -29,6 +29,16 @@ remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
   action :create_if_missing
 end
 
+cc_pub_key = cmon_config['cc_pub_key']
+execute "append-authorized-keys" do
+  if cc_pub_key != nil && cc_pub_key.length > 0
+    command "echo #{cc_pub_key} >> /root/.ssh/authorized_keys; touch /root/.ssh/.cc_pub_key; chmod 600 /root/.ssh/authorized_keys"
+    action :run
+    not_if { FileTest.exists?("/root/.ssh/.cc_pub_key") }
+  end
+end
+
+
 # installs cmon in /usr/local as default
 directory node['install_dir_cmon'] do
   owner "root"
