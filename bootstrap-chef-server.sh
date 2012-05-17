@@ -4,7 +4,7 @@ echo "This script installs Chef on your server (debian/ubuntu)"
 echo "Press return key to continue or CTRL-C to abort"
 read x
 
-if if [ -f /etc/apt/trusted.gpg.d/opscode-keyring.gpg ] then
+if [ -f /etc/apt/trusted.gpg.d/opscode-keyring.gpg ] then
  sudo rm -f /etc/apt/sources.list.d/opscode.list 
  echo "deb http://apt.opscode.com/ `lsb_release -cs`-0.10 main" | sudo tee /etc/apt/sources.list.d/opscode.list
  sudo mkdir -p /etc/apt/trusted.gpg.d
