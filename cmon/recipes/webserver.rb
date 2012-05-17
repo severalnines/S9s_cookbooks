@@ -31,6 +31,6 @@ execute "set-allow-override" do
   action :run
 end
 
-service ['apache']['service_name'] do
+service "#{node['apache']['service_name']}" do
   action :restart
 end
