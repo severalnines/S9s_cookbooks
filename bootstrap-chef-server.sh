@@ -8,7 +8,6 @@ echo "deb http://apt.opscode.com/ `lsb_release -cs`-0.10 main" | sudo tee /etc/a
 sudo mkdir -p /etc/apt/trusted.gpg.d
 sudo mkdir -p /etc/apt/trusted.gpg.d
 gpg --keyserver keys.gnupg.net --recv-keys 83EF826A
-sudo rm -f /etc/apt/trusted.gpg.d/opscode-keyring.gpg
 gpg --export packages@opscode.com | sudo tee /etc/apt/trusted.gpg.d/opscode-keyring.gpg > /dev/null
 sudo apt-get -y update
 sudo apt-get -y install opscode-keyring

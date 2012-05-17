@@ -35,7 +35,7 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
   default['mysql']['ndb_bin_dir']   = "/usr/bin"
 
-  default['agent']['packages'] = %w(psmisc libaio)
+  default['agent']['packages'] = %w(psmisc libaio sysstat)
   default['controller']['packages'] = %w(rrdtool mysql mysql-server)
 
   default['controller']['mysql_packages'] = %w(mysql mysql-server)
@@ -61,7 +61,7 @@ else
 
   default['mysql']['ndb_bin_dir']   = "/usr/bin"
 
-  default['agent']['packages'] = %w(psmisc libaio1)
+  default['agent']['packages'] = %w(psmisc libaio1 sysstat)
   default['controller']['packages'] = %w(rrdtool mysql-server)
 
   default['controller']['mysql_packages'] = %w(mysql-server)
