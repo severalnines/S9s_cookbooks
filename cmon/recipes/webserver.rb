@@ -25,3 +25,12 @@ packages.each do |name|
     action :install
   end
 end
+
+execute "set-allow-override" do
+  command "sed -i 's/AllowOverride None/AllowOverride All/g' #{node['apache']['default-site']}"
+  action :run
+end
+
+service ['apache']['service_name'] do
+  action :restart
+end

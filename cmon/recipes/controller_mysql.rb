@@ -86,15 +86,6 @@ execute "purge_innodb_logfiles" do
   only_if { FileTest.exists?("#{node['mysql']['data_dir']}/ib_logfile0") }
 end
 
-execute "set-allow-override" do
-  command "sed -i 's/AllowOverride None/AllowOverride All/g' #{node['apache']['default-site']}"
-  action :run
-end
-
-service ['apache']['service_name'] do
-  action :restart
-end
-
 service "mysql" do
   supports :stop => true, :start => true, :restart => true, :reload => true
   action [:enable, :start]
