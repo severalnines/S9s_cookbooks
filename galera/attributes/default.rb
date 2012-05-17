@@ -13,7 +13,7 @@ else
 
   default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql"
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
-  default['mysql']['servicename'] = "mysqld"
+  default['mysql']['servicename'] = "mysql"
 
   default['xtra']['packages'] = "libssl0.9.8 psmisc libaio1"
 

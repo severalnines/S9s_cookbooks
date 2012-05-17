@@ -136,7 +136,7 @@ service "mysql" do
 end 
 
 template "mysqld" do
-  path "/etc/init.d/mysqld"
+  path "#{node['mysql']['servicename']}"
   source "mysqld.erb"
   owner "mysql"
   group "mysql"
