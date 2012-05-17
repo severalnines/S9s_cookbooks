@@ -10,6 +10,7 @@ default['controller']['mysql_hostname']    = "from-databag"
 default['controller']['mysql_password']    = "cmon"
 default['controller']['mysql_port']        = 3306
 default['controller']['ndb_connectstring'] = "from-databag"
+default['controller']['ssh_key'] = "/root/.ssh/id_rsa"
 
 default['cmon_password']      = "cmon"
 
@@ -115,5 +116,4 @@ default['mysql']['script_dir']    = "/usr/bin"
 #default['cmon']['misc']['cmon_core_dir'] = ""
 default['misc']['ndb_binary'] = ""
 default['misc']['BACKUPDIR'] = ""
-default['misc']['IDENTITY']  = ""
-default['misc']['IDENTITY2'] = ""
+default['misc']['IDENTITY']  = default['controller']['ssh_key'] + ".pub"

@@ -31,6 +31,11 @@ remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
   action :create_if_missing
 end
 
+execute "gen-ssh-key" do
+  command "ssh-keygen -t rsa -N \"\" -f #{node['controller']['ssh_key']}"
+  action :run
+  not_if { FileTest.exists? "#{node['controller']['ssh_key']}" }
+end
 
 # install cmon in /usr/local/cmon as default
 directory node['install_dir_cmon'] do
