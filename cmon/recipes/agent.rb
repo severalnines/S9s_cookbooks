@@ -25,9 +25,11 @@ node['cluster_type'] = cmon_config['type']
 
 cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
 cmon_tarball = cmon_package + ".tar.gz"
+cmon_source = cmon_config['cmon_source']
+
 Chef::Log.info "Downloading #{cmon_tarball}"
 remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
-  source "http://www.severalnines.com/downloads/cmon/" + cmon_tarball
+  source "#{cmon_source}/" + cmon_tarball
   action :create_if_missing
 end
 
@@ -63,9 +65,14 @@ execute "agent-install-privileges" do
   only_if "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e 'show databases'"  
 end
 
+grants_file = 'cmon.agent.grants.sql.erb'
+if node['cluster_type'] == 'galera'
+  grants_file = 'cmon.agent.grants.sql.galera.erb'
+end
+
 template "cmon.agent.grants.sql" do
   path "#{node['sql']['agent_grants']}"
-  source "cmon.agent.grants.sql.erb"
+  source "#{grants_file}"
   owner "root"
   group "root"
   mode "0644"

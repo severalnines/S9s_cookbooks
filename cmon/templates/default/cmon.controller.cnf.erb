@@ -53,7 +53,7 @@ hostname=<%= node['ipaddress'] %>
 os_user=<%= node['misc']['os_user'] %>
 
 #location of Configurator script root, e.g /root/mysqlcluster-71/
-cmon_core_dir=
+cmon_core_dir=<% node['misc']['core_dir'] %>
 
 # location of cmon.pid file. The pidfile is written in /tmp/ by default
 pidfile=<%= node['misc']['pid_file'] %>

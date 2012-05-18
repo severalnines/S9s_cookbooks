@@ -29,9 +29,9 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
   default['mysql']['install_dir']   = "/"
   default['mysql']['base_dir']      = "/usr"
-  default['mysql']['bin_dir']       = "/usr/bin"
+  default['mysql']['bin_dir']       = default['mysql']['base_dir'] +"/bin"
 
-  default['mysql']['ndb_bin_dir']   = "/usr/bin"
+  default['mysql']['ndb_bin_dir']   = default['mysql']['base_dir'] +"/bin"
 
   default['agent']['packages'] = %w(psmisc libaio sysstat)
   default['controller']['packages'] = %w(rrdtool mysql mysql-server)
@@ -53,9 +53,9 @@ else
 
   default['mysql']['install_dir']   = "/"
   default['mysql']['base_dir']      = "/usr"
-  default['mysql']['bin_dir']       = "/usr/bin"
+  default['mysql']['bin_dir']       = default['mysql']['base_dir'] +"/bin"
 
-  default['mysql']['ndb_bin_dir']   = "/usr/bin"
+  default['mysql']['ndb_bin_dir']   = default['mysql']['base_dir'] +"/bin"
 
   default['agent']['packages'] = %w(psmisc libaio1 sysstat)
   default['controller']['packages'] = %w(rrdtool mysql-server)

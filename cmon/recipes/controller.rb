@@ -27,9 +27,11 @@ node['cluster_type'] = cmon_config['type']
 
 cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
 cmon_tarball = cmon_package + ".tar.gz"
+cmon_source = cmon_config['cmon_source']
+
 Chef::Log.info "Downloading #{cmon_tarball}"
 remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
-  source "http://www.severalnines.com/downloads/cmon/" + cmon_tarball
+  source "#{cmon_source}/" + cmon_tarball
   action :create_if_missing
 end
 
