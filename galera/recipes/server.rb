@@ -40,7 +40,8 @@ user "mysql" do
 end
 
 galera_config = data_bag_item('s9s_galera', 'config')
-
+# mysqldump, rsync or rsync_wan
+node['wsrep']['sst_method'] = galera_config['sst_method']
 # move source to data bag
 mysql_package = galera_config['mysql_wsrep_package_' + node['kernel']['machine']]
 mysql_tarball = mysql_package + ".tar.gz"
@@ -163,7 +164,7 @@ end
 # next steps. Might need to increase sleep time
 ruby_block 'wait-until-innodb' do
   block do
-    if FileTest.exists?("#{node['mysql']['datadir']}/galera.cache") == false
+    if FileTest.exists?("#{install_flag}") == false
       Chef::Log.info "Temp fix. Sleep a while (#{node['xtra']['sleep']}s) until the mysql server is really up before securing, granting and setting cluster URL..."
       sleep node['xtra']['sleep']
     end
@@ -173,8 +174,7 @@ end
 bash "set-wsrep-grants" do
   user "root"
   code <<-EOH
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; DELETE FROM mysql.user WHERE user=''"
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; DELETE FROM mysql.user WHERE user=''; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
   EOH
   not_if { FileTest.exists?("#{install_flag}") }
 end
@@ -182,48 +182,45 @@ end
 bash "secure-mysql" do
   user "root"
   code <<-EOH
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; FLUSH PRIVILEGES"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; FLUSH PRIVILEGES"
   EOH
   not_if { FileTest.exists?("#{install_flag}") }
 end
 
 my_ip = node['ipaddress']
-primary_node = galera_config['primary']
+init_host = galera_config['init_node']
+sync_host = init_host
 
-if !File.exists?("#{install_flag}") && my_ip == primary_node
-  init_node = true
-end
-
-if init_node
-  Chef::Log.info "Using cluster URL: gcomm://"
-  execute "set-wsrep-address" do
-    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://'\""
-    action :run
-    #subscribes :run, resources(:template => 'my.cnf')
-    not_if { FileTest.exists?("#{install_flag}") }
-  end
-else
-  hosts = galera_config['galera_hosts']
-  sync_host = hosts[rand(hosts.count)]
+hosts = galera_config['galera_nodes']
+if hosts != nil && hosts.length > 0
   i = 0
-  while my_ip == sync_host
+  begin
     sync_host = hosts[rand(hosts.count)]
     i += 1
     if (i > hosts.count)
-      # not in host list
-      init_node = true
+      # no host found, use init node/host
+      sync_host = init_host
       break
     end
-  end
-  Chef::Log.info "Using cluster URL: gcomm://" + sync_host
+  end while my_ip == sync_host
+end
+
+if my_ip == init_host && !File.exists?("#{install_flag}")
+  Chef::Log.info "Creating new cluster, using cluster URL: gcomm://"
   execute "set-wsrep-address" do
-    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://#{sync_host}:#{node['wsrep']['port']}'\""
+    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET wsrep_on=OFF; SET GLOBAL wsrep_cluster_address='gcomm://'\""
     action :run
     #subscribes :run, resources(:template => 'my.cnf')
-    not_if { FileTest.exists?("#{install_flag}") }
+  end
+else
+  Chef::Log.info "Attaching to existing cluster using cluster URL: gcomm://" + sync_host
+  execute "set-wsrep-address" do
+    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET wsrep_on=OFF; SET GLOBAL wsrep_cluster_address='gcomm://#{sync_host}:#{node['wsrep']['port']}'\""
+    action :run
+    #subscribes :run, resources(:template => 'my.cnf')
   end
 end
 

@@ -7,7 +7,7 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysqld"
   
-  default['xtra']['packages'] = "openssl psmisc libaio"
+  default['xtra']['packages'] = "openssl psmisc libaio rsync"
 
 else
 
@@ -15,7 +15,7 @@ else
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysql"
 
-  default['xtra']['packages'] = "libssl0.9.8 psmisc libaio1"
+  default['xtra']['packages'] = "libssl0.9.8 psmisc libaio1 rsync"
 
 end
 

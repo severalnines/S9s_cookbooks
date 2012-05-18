@@ -11,8 +11,9 @@
   },
   "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.5/+download",
   "galera_source": "https://launchpad.net/galera/2.x/23.2.0/+download",
-  "primary": "192.168.122.11",
-  "galera_hosts": [
+  "init_node": "192.168.122.11",
+  "sst_method": "rsync",
+  "galera_nodes": [
      "192.168.122.12",
      "192.168.122.14",
      "192.168.122.16"
