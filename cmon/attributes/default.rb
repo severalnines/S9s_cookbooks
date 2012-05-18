@@ -30,8 +30,6 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
   default['mysql']['install_dir']   = "/"
   default['mysql']['base_dir']      = "/usr"
   default['mysql']['bin_dir']       = "/usr/bin"
-  default['mysql']['libexec']       = "/usr/bin"
-  default['mysql']['lib_dir']       = "/usr/lib"
 
   default['mysql']['ndb_bin_dir']   = "/usr/bin"
 
@@ -56,8 +54,6 @@ else
   default['mysql']['install_dir']   = "/"
   default['mysql']['base_dir']      = "/usr"
   default['mysql']['bin_dir']       = "/usr/bin"
-  default['mysql']['libexec']       = "/usr/bin"
-  default['mysql']['lib_dir']       = "/usr/lib"
 
   default['mysql']['ndb_bin_dir']   = "/usr/bin"
 
@@ -87,7 +83,7 @@ default['mysql']['pid_file']  = "mysqld.pid"
 default['mysql']['socket']    = "/var/run/mysqld/mysqld.sock"
 default['mysql']['port']  = 3306
 
-default['mysql']['repl_user']     = ""
+default['mysql']['repl_user']     = "repl"
 default['mysql']['repl_password'] = "repl"
 
 default['sql']['cmon_schema'] = default['install_dir_cmon'] + "/cmon/sql/cmon_db.sql"
@@ -101,7 +97,7 @@ default['rrd']['rrdtool']   = "/usr/bin/rrdtool"
 default['rrd']['data_dir']  = "/var/lib/cmon"
 
 default['misc']['os_user']  = "root"
-default['misc']['core_dir'] = "/core_cmon_install_dir"
+default['misc']['core_dir'] = "/root/s9s"
 
 default['misc']['pid_file'] = "/var/run/cmon.pid"
 # /run/lock/ for ubuntu but for other dists?
@@ -116,4 +112,4 @@ default['mysql']['script_dir']    = "/usr/bin"
 #default['cmon']['misc']['cmon_core_dir'] = ""
 default['misc']['ndb_binary'] = ""
 default['misc']['BACKUPDIR'] = ""
-default['misc']['IDENTITY']  = default['controller']['ssh_key'] + ".pub"
+default['misc']['IDENTITY']  = default['controller']['ssh_key']

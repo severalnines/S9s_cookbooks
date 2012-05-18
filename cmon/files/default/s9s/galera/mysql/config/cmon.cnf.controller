@@ -1,0 +1,36 @@
+#cmon config file
+# id and name of cluster that this cmon agent is monitoring.
+# Must be unique for each monitored cluster, like server-id in mysql
+cluster_id=1
+name=default_repl_1
+mode=controller
+type=galera
+skip_name_resolve=1
+##port of mysql server holding cmon database
+mysql_port=3306
+##hostname/ip of mysql server holding cmon database
+mysql_hostname=192.168.122.3
+##password for 'cmon' user on  the 'mysql_hostname'
+mysql_password=cmon
+local_mysql_port=3306
+local_mysql_password=cmon
+##hostname/ip of the server of this cmon instance
+hostname=
+##location of Configurator script root, e.g /root/mysqlcluster-71/
+cmon_core_dir=/root/mysqlcluster-71/
+##osuser - the user owning the cmon_core_dir above
+osuser=root
+##logfile is default to syslog.
+logfile=/var/log/cmon.log
+##location of cmon.pid file. The pidfile is written in /tmp/ by default
+pidfile=/var/run/
+nodaemon=0
+monitored_mountpoints=/mnt/data/mysql/
+mysql_server_addresses=192.168.122.4,192.168.122.5,192.168.122.6
+db_stats_collection_interval=60
+host_stats_collection_interval=60
+###### RRD SECTION - graphs ######
+mysql_bindir=/usr/local//mysql/bin/
+imagedir=/var/www/cmon/graphs/
+rrdtool=/usr/bin/rrdtool
+rrd_datadir=/var/lib/cmon/

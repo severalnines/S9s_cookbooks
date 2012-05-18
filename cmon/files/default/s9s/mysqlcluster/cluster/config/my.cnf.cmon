@@ -1,0 +1,55 @@
+# All files in this package is subject to the GPL v2 license
+# More information is in the COPYING file in the top directory of this package.
+# Copyright (C) 2011 severalnines.com
+
+[MYSQLD]
+user=mysql
+basedir=/usr/local//mysql/
+datadir=/mnt/data/mysql/
+pid-file=mysqld.pid
+socket=/var/lib/mysql/mysql.sock
+skip_name_resolve
+port=3306
+log-error=error.log
+#log
+#log-slow-queries
+port=3306
+#OTHER THINGS, BUFFERS ETC
+key_buffer_size = 128M
+max_allowed_packet = 16M
+sort_buffer_size = 512K
+read_buffer_size = 256K
+read_rnd_buffer_size = 512K
+#thread_cache_size=1024
+myisam_sort_buffer_size = 8M
+memlock=0
+### INNODB 
+innodb-buffer-pool-size=614M
+innodb-flush-log-at-trx_commit=2
+innodb-file-per-table=1
+innodb_log_file_size=64M
+innodb-log-files-in-group=3
+#innodb-buffer-pool-instances=4
+innodb-thread-concurrency=0
+#innodb-file-format=barracuda
+innodb-flush-method=O_DIRECT
+innodb_locks_unsafe_for_binlog=1
+event_scheduler=1
+sysdate_is_now=1
+max-connections=200
+thread-cache-size=64
+query-cache-type = 1
+query-cache-size = 32M
+table-open-cache=128
+lower-case-table-names=0
+
+[MYSQL]
+socket=/var/lib/mysql/mysql.sock
+[client]
+socket=/var/lib/mysql/mysql.sock
+
+[MYSQLD_SAFE]
+pid-file=mysqld.pid
+log-error=error.log
+basedir=/usr/local//mysql/
+datadir=/mnt/data/mysql/

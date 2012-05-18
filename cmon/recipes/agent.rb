@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+install_flag = "/root/.s9s_agent_installed"
+
 cmon_config = data_bag_item('s9s_controller', 'config')
 node['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
 node['cluster_type'] = cmon_config['type']
@@ -38,8 +40,6 @@ if cc_pub_key != nil && cc_pub_key.length > 0
   end
 end
 
-
-# installs cmon in /usr/local as default
 directory node['install_dir_cmon'] do
   owner "root"
   mode "0755"
@@ -60,20 +60,15 @@ end
 execute "agent-install-privileges" do
   command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['agent_grants']}"
   action :nothing
+  only_if "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e 'show databases'"  
 end
 
-Chef::Log.info "Create agent grants"
 template "cmon.agent.grants.sql" do
   path "#{node['sql']['agent_grants']}"
   source "cmon.agent.grants.sql.erb"
   owner "root"
   group "root"
   mode "0644"
-#  variables(
-#    :user => node['remote']['mysql_user'],
-#    :password => node['remote']['mysql_password'],
-#    :database => 'cmon'
-#  )
   notifies :run, resources(:execute => "agent-install-privileges"), :immediately
 end
 
@@ -85,7 +80,6 @@ directory node['misc']['lock_dir'] do
 end
 
 service "cmon" do
-  supports :restart => true, :start => true, :stop => true, :reload => true
   action :nothing
 end 
 
@@ -111,3 +105,8 @@ service "cmon" do
   supports :restart => true, :start => true, :stop => true, :reload => true
   action [:enable, :start]
 end 
+
+execute "s9s-agent-installed" do
+  command "touch #{install_flag}"
+  action :run
+end

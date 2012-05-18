@@ -56,4 +56,5 @@ bash "install-web-app" do
     cp -rf #{node['install_dir_cmon']}/cmon/www/*  #{node['misc']['wwwroot']}/
     chown -R #{node['misc']['web_user']}:#{node['misc']['web_user']} #{node['misc']['wwwroot']}/cmon
   EOH
+  not_if { File.directory?("#{node['misc']['wwwroot']}/cmon") }
 end

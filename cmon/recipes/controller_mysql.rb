@@ -27,31 +27,28 @@ packages.each do |name|
   end
 end
 
+install_flag = "/root/.s9s_controller_mysql_installed"
+
 # MySQL installed with no root password!
 # Let's secure it. Get root password from ['mysql']['root_password']
 # todo: maybe erb or tmp file
 bash "secure-mysql" do
   user "root"
   code <<-EOH
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "FLUSH PRIVILEGES"
+  #{node['mysql']['mysql_bin']} -uroot -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
+  #{node['mysql']['mysql_bin']} -uroot -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+  #{node['mysql']['mysql_bin']} -uroot -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+  #{node['mysql']['mysql_bin']} -uroot -e "FLUSH PRIVILEGES"
   EOH
-  only_if "#{node['mysql']['mysql_bin']} -u root -h127.0.0.1 -e 'show databases;'"
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
-# Quick and dirty, stop the mysql server and include our my.cnf to override the default
 
-service "mysql" do
+# Quick and dirty, stop the mysql server and include our my.cnf to override the default
+service "mysql-stop" do
   service_name node['mysql']['service_name']
-  if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
-    restart_command "restart mysql"
-    stop_command "stop mysql"
-    start_command "start mysql"
-  end
-  supports :stop => true, :start => true, :restart => true, :reload => true
   action :stop
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 template "my.cnf" do
@@ -74,19 +71,20 @@ execute "cp2-my.cmon.cnf" do
   only_if { FileTest.exists?("/etc/my.cnf") }
 end
 
-execute "rm-my.cmon.cnf" do
-  command "rm /etc/my.cmon.cnf"
-  action :run
-  only_if { FileTest.exists?("/etc/my.cmon.cnf") }
-end
-
-execute "purge_innodb_logfiles" do
+execute "purge-innodb-logfiles" do
   command "rm #{node['mysql']['data_dir']}/ib_logfile*"
   action :run
-  only_if { FileTest.exists?("#{node['mysql']['data_dir']}/ib_logfile0") }
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 service "mysql" do
+  service_name node['mysql']['service_name']  
   supports :stop => true, :start => true, :restart => true, :reload => true
-  action [:enable, :start]
+  action :start
+  subscribes :restart, resources(:template => 'my.cnf')
+end
+
+execute "s9s-controller-mysql-installed" do
+  command "touch #{install_flag}"
+  action :run
 end

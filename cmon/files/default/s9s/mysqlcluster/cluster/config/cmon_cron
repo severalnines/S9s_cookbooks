@@ -1,0 +1,6 @@
+#
+# cron-jobs for cmon
+CMON_BINDIR=/usr/bin/
+MAILTO=root
+*/5 * * * *     root test -x  $CMON_BINDIR/cmon_rrd_all && $CMON_BINDIR/cmon_rrd_all $CMON_BINDIR > /dev/null 2>&1
+*/10 * * * *     root test -x  $CMON_BINDIR/cmon_create_graphs && bash $CMON_BINDIR/cmon_create_graphs  > /dev/null 2>&1

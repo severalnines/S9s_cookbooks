@@ -1,0 +1,136 @@
+# All files in this package is subject to the GPL v2 license
+# More information is in the COPYING file in the top directory of this package.
+# Copyright (C) 2011 severalnines.com
+#!/bin/bash
+# chkconfig: 235 99 20
+# description: memcached start/stop script
+
+### BEGIN INIT INFO
+# Provides:             cmon
+# Required-Start:       $remote_fs $syslog
+# Required-Stop:        $remote_fs $syslog
+# Default-Start:        2 3 4 5
+# Default-Stop:         0 1 6
+# Short-Description:    memcached
+### END INIT INFO
+
+SBINDIR=/usr/sbin/
+RUNNING_DIR=/var/run/
+PIDFILE=${RUNNING_DIR}/memcached.pid
+
+LOCKFILE=""
+if [ -d /var/lock/subsys ]; then
+  LOCKFILE=/var/lock/subsys/memcached
+else
+  LOCKFILE=/var/lock/memcached
+fi
+
+OPTIONS="-umysql"
+PROGNAME="memcached"
+STARTCMON="$SBINDIR/$PROGNAME $OPTIONS"
+
+RETVAL=0
+pidof_prog() {
+        if [ -e "$PIDFILE" ]; then
+                if pidof $PROGNAME | tr ' ' '
+' | grep $(cat $PIDFILE); then
+                    return 0
+                fi
+        fi
+        return 1
+}
+start() {
+  echo -n "Starting $PROGNAME $OPTIONS :"
+        PID=`pgrep $PROGNAME`
+        if [ -n "$PID" ]; then
+            printf "$PROGNAME is already running with pid $PID"
+            return 0
+        else
+    if [ ! -f $SBINDIR/$PROGNAME ]; then
+          echo -n "$PROGNAME executable not found in $SBINDIR"
+      fi
+            $STARTCMON  > /dev/null 2>&1 &
+            echo $! > $PIDFILE            
+            touch $LOCKFILE
+            sleep 1
+            PID=`cat $PIDFILE`
+            if [ "$PID" ]; then
+                echo " ok"
+                return 1
+            else
+                echo " failed"
+                return 0
+            fi
+       fi
+}
+stop() {
+       echo -n "Stopping $PROGNAME : "
+        PID=`pgrep $PROGNAME`
+        if [ -n "$PID" ]; then
+           kill -15 $PID
+        else
+          `rm -f ${PIDFILE}`
+          `rm -f ${LOCKFILE}`
+           echo " failed"
+          return 0
+        fi
+        i=1
+        while [ "`pgrep $PROGNAME`" ];
+        do
+           if [ $i -eq 60 ]; then
+             echo "giving up after 60 secods"
+             return 0
+           fi
+           i=`expr $i + 1`
+           sleep 1
+        done
+PID=`pgrep $PROGNAME`
+if [ -n "$PID" ]; then
+           echo " failed"
+           return 0
+        else
+          `rm -f ${PIDFILE}`
+          `rm -f ${LOCKFILE}`
+          echo " ok"
+          return 1
+        fi
+}
+case "$1" in
+  init|initial)
+        initial
+        ;;
+  start)
+        start
+        RETVAL=$?
+        ;;
+  stop)
+        stop
+        RETVAL=$?
+        ;;
+  status)
+        PID=$(pidof_prog) || true
+        if [ -n "$PID" ]; then
+             echo "$PROGNAME is running (pid $PID)."
+        else
+             echo "$PROGNAME is NOT running."
+        fi
+        RETVAL=$?
+        ;;
+  condrestart|try-restart)
+        PID=$(pidof_prog) || true
+if [ -n "$PID" ]; then
+         stop     
+ start
+fi
+;;
+  restart|reload|force-reload)
+        stop
+        start
+        RETVAL=$?
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|status}"
+
+        exit 1
+esac
+exit $?

@@ -12,7 +12,7 @@ INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'CMON_
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'CMON_PASSWORD','<%= node['cmon_password'] %>');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'COREDIR','<%= node['misc']['core_dir'] %>');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'SSH_USER','<%= node['misc']['os_user'] %>');
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'SSH_IDENTITY',substr('<%= node['controller']['IDENTITY'] %>',3));
+INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'SSH_IDENTITY', '<%= node['misc']['IDENTITY'] %>');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'BACKUPDIR','<%= node['misc']['BACKUPDIR'] %>');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'BACKUP_RETENTION','0');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'STAGING_DIR','/tmp');

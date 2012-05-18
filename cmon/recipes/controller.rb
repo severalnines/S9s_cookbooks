@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+install_flag = "/root/.s9s_controller_installed"
+
 cmon_config = data_bag_item('s9s_controller', 'config')
 #node['controller']['mysql_hostname'] = node['ipaddress']
 node['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
@@ -56,21 +58,23 @@ bash "untar-cmon-package" do
 end
 
 execute "controller-create-db-schema" do
-  command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['cmon_schema']}"
+  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_schema']}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 execute "controller-import-tables" do
-  command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['cmon_data']}"
+  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_data']}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 execute "controller-install-privileges" do
-  command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['controller_grants']}"
+  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['controller_grants']}"
   action :nothing
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
-Chef::Log.info "Create controller grants"
 template "cmon.controller.grants.sql" do
   path "#{node['sql']['controller_grants']}"
   source "cmon.controller.grants.sql.erb"
@@ -97,19 +101,36 @@ bash "create-agent-grants" do
       echo "GRANT INSERT,UPDATE,DELETE,SELECT ON cmon.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon_password']}';" >> #{node['sql']['controller_agent_grants']}
     done
   EOH
+  not_if { FileTest.exists?(node['sql']['controller_agent_grants']) }  
 end
 
 execute "controller-grant-agents" do
-  command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['controller_agent_grants']}"
+  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['controller_agent_grants']}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
+directory node['misc']['core_dir'] do
+  owner "root"
+  mode "0755"
+  action :create
+  recursive true
+end
+
+remote_directory "#{node['misc']['core_dir']}/mysql" do
+  source "s9s/#{node['cluster_type']}/mysql"
+  files_backup 0
+  files_owner "root"
+  files_group "root"
+  files_mode "0755"
+  not_if { File.directory?("#{node['misc']['core_dir']}/mysql") }
+end
 
 execute "install-core-scripts" do
   command "cp #{node['install_dir_cmon']}/cmon/bin/cmon_* /usr/bin/"
-  action :run
+  action :run  
+  not_if { FileTest.exists?("/usr/bin/cmon_rrd_all") }
 end
-
 
 directory node['misc']['lock_dir'] do
   owner "root"
@@ -145,3 +166,8 @@ service "cmon" do
   supports :restart => true, :start => true, :stop => true, :reload => true
   action [:enable, :start]
 end 
+
+execute "s9s-controller-installed" do
+  command "touch #{install_flag}"
+  action :run
+end

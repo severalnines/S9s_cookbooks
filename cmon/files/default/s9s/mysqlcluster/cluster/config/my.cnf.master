@@ -1,0 +1,62 @@
+# All files in this package is subject to the GPL v2 license
+# More information is in the COPYING file in the top directory of this package.
+# Copyright (C) 2011 severalnines.com
+
+[MYSQLD]
+user=mysql
+basedir=/usr/local//mysql/
+datadir=/mnt/data/mysql/
+socket=/var/lib/mysql/mysql.sock
+pid-file=mysqld.pid
+skip_name_resolve
+port=3306
+ndb-cluster-connection-pool=1
+ndbcluster=1
+ndb-connectstring="192.168.222.111:1186,192.168.122.123:1186"
+ndb-force-send=1
+ndb-use-exact-count=0
+ndb-extra-logging=1
+ndb-batch-size=32M
+ndb-autoincrement-prefetch-sz=1024
+engine-condition-pushdown=1
+
+default-storage-engine=ndbcluster
+
+#REPLICATION SPECIFIC - GENERAL
+#server-id must be unique across all mysql servers participating in replication.
+server-id=SERVERID
+#REPLICATION SPECIFIC - MASTER
+log-bin=binlog
+
+#OTHER THINGS, BUFFERS ETC
+key_buffer_size = 256M
+max_allowed_packet = 16M
+sort_buffer_size = 512K
+read_buffer_size = 256K
+read_rnd_buffer_size = 512K
+#thread_cache_size=1024
+myisam_sort_buffer_size = 8M
+skip_name_resolve
+memlock=0
+sysdate_is_now=1
+max-connections=200
+thread-cache-size=128
+###QUERY CACHE IS DISABLED
+###THE QUERY CACHE IN MYSQL CLUSTER  CAN HAMPER PERFORMANCE A LOT HENCE IT IS DISABLED
+###BECAUSE INVALIDATION OF IT TAKES TIME (REMEMBER, IT IS A DISTRIBUTED ENVIRONMENT)
+###ONLY ENABLE IT AND USE SQL_CACHE TO CACHE ONLY CERTAIN QUERIES ON READONLY TABLES
+query-cache-type = 0
+query-cache-size = 0
+table-open-cache=1024
+lower-case-table-names=0
+
+[MYSQL]
+socket=/var/lib/mysql/mysql.sock
+[client]
+socket=/var/lib/mysql/mysql.sock
+
+[MYSQLD_SAFE]
+pid-file=mysqld.pid
+log-error=error.log
+basedir=/usr/local//mysql/
+datadir=/mnt/data/mysql/
