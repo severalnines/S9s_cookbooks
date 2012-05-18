@@ -17,10 +17,6 @@
 # limitations under the License.
 #
 
-# TODO: Calling SET GLOBAL wsrep_cluster_address='gcomm://' only works once...
-# Doing it a second time a mysql client is not able to connect and the mysql node is no longer a primary
-# We need to restart the mysql server and then set address again
-
 
 # TODO: Firewall, selinux and apparmor
 # iptables --insert RH-Firewall-1-INPUT 1 --proto tcp --source <my IP>/24 --destination <my IP>/32 --dport 3306 -j ACCEPT
@@ -31,6 +27,7 @@
 # sudo ln -s /etc/apparmor.d/usr.sbin.mysqld
 #sudo service apparmor restart
 
+install_flag = "/root/.s9s_galera_installed"
 
 group "mysql" do
 end
@@ -44,11 +41,16 @@ end
 
 galera_config = data_bag_item('s9s_galera', 'config')
 
+# move source to data bag
 mysql_package = galera_config['mysql_wsrep_package_' + node['kernel']['machine']]
 mysql_tarball = mysql_package + ".tar.gz"
+
+mysql_wsrep_source = galera_config['mysql_wsrep_source']
+galera_source = galera_config['galera_source']
+
 Chef::Log.info "Downloading #{mysql_tarball}"
 remote_file "#{Chef::Config[:file_cache_path]}/#{mysql_tarball}" do
-  source "https://launchpad.net/codership-mysql/5.5/5.5.23-23.5/+download/" + mysql_tarball
+  source "#{mysql_wsrep_source}/" + mysql_tarball
   action :create_if_missing
 end
 
@@ -61,7 +63,7 @@ end
 
 Chef::Log.info "Downloading #{galera_package}"
 remote_file "#{Chef::Config[:file_cache_path]}/#{galera_package}" do
-  source "https://launchpad.net/galera/2.x/23.2.0/+download/" + galera_package
+  source "#{galera_source}/" + galera_package
   action :create_if_missing
 end
 
@@ -171,9 +173,10 @@ end
 bash "set-wsrep-grants" do
   user "root"
   code <<-EOH
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; DELETE FROM mysql.user WHERE user=''"
     #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
   EOH
-  only_if "#{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e 'show databases'"
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 bash "secure-mysql" do
@@ -184,46 +187,47 @@ bash "secure-mysql" do
     #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
     #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=OFF; FLUSH PRIVILEGES"
   EOH
-  only_if "#{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e 'show databases'"
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
-# not used atm
-primary = galera_config['primary']
-
-hosts = galera_config['galera_hosts']
 my_ip = node['ipaddress']
+primary_node = galera_config['primary']
 
-sync_host = hosts[rand(hosts.count)]
-i = 0
-single_node = hosts.count == 1 ? true : false
-if single_node == false
+if !File.exists?("#{install_flag}") && my_ip == primary_node
+  init_node = true
+end
+
+if init_node
+  Chef::Log.info "Using cluster URL: gcomm://"
+  execute "set-wsrep-address" do
+    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://'\""
+    action :run
+    #subscribes :run, resources(:template => 'my.cnf')
+    not_if { FileTest.exists?("#{install_flag}") }
+  end
+else
+  hosts = galera_config['galera_hosts']
+  sync_host = hosts[rand(hosts.count)]
+  i = 0
   while my_ip == sync_host
     sync_host = hosts[rand(hosts.count)]
     i += 1
     if (i > hosts.count)
       # not in host list
-      single_node = true
+      init_node = true
       break
     end
   end
-end
-
-# TODO: Cluster restart
-# The first node of a cluster has nowhere to connect to, therefore it has to start
-# with an empty cluster addres
-# We need to have the primary node use the gcomm:// address
-
-if single_node
-  execute "set-wsrep-address" do
-    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://'\""
-    action :run
-    #subscribes :run, resources(:template => 'my.cnf')
-  end
-else
-  Chef::Log.info "Synching with host: " + sync_host
+  Chef::Log.info "Using cluster URL: gcomm://" + sync_host
   execute "set-wsrep-address" do
     command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://#{sync_host}:#{node['wsrep']['port']}'\""
     action :run
     #subscribes :run, resources(:template => 'my.cnf')
+    not_if { FileTest.exists?("#{install_flag}") }
   end
+end
+
+execute "s9s-galera-installed" do
+  command "touch #{install_flag}"
+  action :run
 end
