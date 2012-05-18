@@ -7,6 +7,7 @@
   "cmon_package_i686": "cmon-1.1.27-32bit-glibc23-mc70",
   "cmon_package_i386": "cmon-1.1.27-32bit-glibc23-mc70",
   "cmon_source": "http://www.severalnines.com/downloads/cmon",
+  "cc_pub_key": "",
   "agent_hosts": [
      "192.168.122.12",
      "192.168.122.14",
