@@ -1,6 +1,6 @@
 Description
 ===========
-Installs Codership's MySQL Galera.
+Installs a Codership's MySQL Galera cluster node.
 
 Requirements
 ============
@@ -12,7 +12,7 @@ Platform
 
 Tested on:
 
-* Ubuntu 11.10 w/ Chef-Solo 0.10.8.
+* Ubuntu 11.10/12.04 w/ Chef (Solo) 0.10.8.
 
 Attributes
 ==========
@@ -35,6 +35,7 @@ Attributes
 * ['wsrep']['password'] = "wsrep"
 * ['wsrep']['sst_method'] = "mysqldump"
 
+and more in attributes/default.rb
 
 Usage
 =====
@@ -61,8 +62,11 @@ s9s_galera / config.json
 		  	"deb": "galera-23.2.0-amd64.deb",
 		  	"rpm": "galera-23.2.0-1.rhel5.x86_64.rpm"
 		  },
-		  "primary": "192.168.122.11",
-		  "galera_hosts": [
+		  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.5/+download",
+		  "galera_source": "https://launchpad.net/galera/2.x/23.2.0/+download",
+		  "init_node": "192.168.122.11",
+		  "sst_method": "rsync",
+		  "galera_nodes": [
 		     "192.168.122.12",
 		     "192.168.122.14",
 		     "192.168.122.16"
