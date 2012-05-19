@@ -195,7 +195,7 @@ init_host = galera_config['init_node']
 sync_host = init_host
 
 hosts = galera_config['galera_nodes']
-if hosts != nil && hosts.length > 0
+if File.exists?("#{install_flag}") && hosts != nil && hosts.length > 0
   i = 0
   begin
     sync_host = hosts[rand(hosts.count)]
@@ -209,7 +209,7 @@ if hosts != nil && hosts.length > 0
 end
 
 if my_ip == init_host && !File.exists?("#{install_flag}")
-  Chef::Log.info "Creating new cluster, using cluster URL: gcomm://"
+  Chef::Log.info "Creating new cluster using cluster URL: gcomm://"
   execute "set-wsrep-address" do
     command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET wsrep_on=OFF; SET GLOBAL wsrep_cluster_address='gcomm://'\""
     action :run
