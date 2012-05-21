@@ -81,7 +81,6 @@ default['mysql']['mysql_bin'] = default['mysql']['bin_dir'] + "/mysql"
 default['mysql']['data_dir']  = "/var/lib/mysql"
 default['mysql']['pid_file']  = "mysqld.pid"
 default['mysql']['socket']    = "/var/run/mysqld/mysqld.sock"
-default['mysql']['port']  = 3306
 
 default['mysql']['repl_user']     = "repl"
 default['mysql']['repl_password'] = "repl"

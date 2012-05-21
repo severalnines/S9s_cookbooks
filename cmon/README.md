@@ -26,23 +26,30 @@ N/A
 
 Attributes
 ==========
+The cmon controller recipe uses apt/yum packages and there should not be neccssary to change a lof of the attribtues besides specifying a 'root_password'.
 
-No change to these attributes should be required as default.
+Use overrides for changing for example the MySQL root password to be different than for the cmon controller's.
+
+* ['mysql']['root_password'] - Monitored MySQL root password (password)
+* ['mysql']['mysql_bin'] = ['mysql']['bin_dir'] + "/mysql"    
 
 * ['controller']['mysql_user']     - cmon controller MySQL user (cmon)
-* ['controller']['mysql_hostname'] - cmon controller MySQL hostname (nnn)
 * ['controller']['mysql_password'] - cmon controller MySQL user's password (cmon)
-* ['controller']['mysql_port']     - cmon controller MySQL port (3306)
+* ['controller']['mysql_hostname'] - cmon controller MySQL hostname (nnn)
+* ['controller']['mysql_port']     - cmon controller MySQL port (3306)  
 
 * ['cmon_password']        = cmon controller user's password (cmon)
-* ['mode']['agent']        = run as agent
-* ['mode']['controller']   = run as controller
-* ['mode']['dual']         = run in dual mode, i.e., both as controller and agent
+* ['mode']['agent']        = run as 'agent'
+* ['mode']['controller']   = run as 'controller'
+* ['mode']['dual']         = run in 'dual' mode, i.e., both as controller and agent  
 
-* ['agent']['mysql_user']     - MySQ local user (root)
-* ['local']['mysql_hostname'] - MySQL local hostname (nnn)
-* ['local']['mysql_password'] - MySQL local user's password (cmon)
-* ['local']['mysql_port']     - MySQL local port (3306)
+* ['agent']['mysql_user']     - agent's MySQL user (cmon)
+* ['agent']['mysql_password'] - agent user's password (cmon)
+* ['agent']['mysql_hostname'] - monitored MySQL server hostname (127.0.0.1)
+* ['agent']['mysql_port']     - monitored MySQL port (3306)  
+* ['mysql']['root_password'] - Monitored MySQL root password (password)  
+
+* ['mysql']['data_dir']  = "/var/lib/mysql"  
 
 and others please see attributes/default.rb
 
@@ -59,29 +66,22 @@ s9s_controller / config.json
       "id": "config",
       "controller_host_ipaddress": "192.168.122.11",
       "mode": "controller",
-      "cmon_package_x86_64": "cmon-1.1.27-64bit-glibc23-mc70",
-      "cmon_package_i686": "cmon-1.1.27-32bit-glibc23-mc70",
-      "cmon_package_i386": "cmon-1.1.27-32bit-glibc23-mc70",
+      "type": "replication",
+      "cmon_tarball_x86_64": "cmon-1.1.27-64bit-glibc23-mc70.tar.gz",
+      "cmon_tarball_i686": "cmon-1.1.27-32bit-glibc23-mc70.tar.gz",
+      "cmon_tarball_i386": "cmon-1.1.27-32bit-glibc23-mc70.tar.gz",
+      "cmon_source": "http://www.severalnines.com/downloads/cmon",
+      "cc_pub_key": "",
       "agent_hosts": [
          "192.168.122.12",
          "192.168.122.14",
          "192.168.122.16"
-        ],
-      "mysqlserver_hosts": [
-         "ip1",
-         "ip2"
-      ],    
-      "datanode_hosts": [
-         "ip1",
-         "ip2"
-      ],    
-      "mgm_hosts": [
-         "ip1",
-         "ip2"
-      ]
+        ]
     }
-
-FUTURE: For agentless installations use mysqlserver_hosts, datanode_hosts and mgm_hosts.
+  
+  
+* **agent_hosts** is a list of agents that is deployed. This list is used to setup grants for the agents.  
+* **cc_pub_key** is a place holder for the public ssh key which is generated on the ClusterControl controller host. The agent hosts will have this key authorized to access its server. You would paste in the public key here before deploying agents.
 
 Usage
 =====
@@ -90,11 +90,11 @@ Usage
      Controller Role: cc_controller
         run_list [
           "recipe[cmon::controller_mysql]", 
-          "recipe[cmon::controller_rrdtool]", 
           "recipe[cmon::controller]"
         ]
 
-Installs the Cluster Control Controller process. Instead of our MySQL recipe you can choose to use any other available recipe instead.
+Installs the ClusterControl Controller and a MySQL server to store our monitoring data. 
+Instead of our MySQL recipe you could choose to try any other available MySQL recipe instead.
 
     Agent Role: cc_agent
         run_list [
@@ -102,13 +102,15 @@ Installs the Cluster Control Controller process. Instead of our MySQL recipe you
           "recipe[cmon::agent]"
         ]
 
+Installs the ClusterControl agent. It requires a MySQL root password in order to setup grants correctly on the monitored MySQL server. 
+
     Web App Role: cc_webapp
         run_list [
           "recipe[cmon::webserver]", 
           "recipe[cmon::webapp]"
         ]
 
-The web application and the webserver are usually installed on the controller node.
+The ClusterControl web application and a webserver are usually installed on the controller node.
 
 
 Change History

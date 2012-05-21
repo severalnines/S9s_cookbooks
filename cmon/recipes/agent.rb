@@ -23,8 +23,9 @@ cmon_config = data_bag_item('s9s_controller', 'config')
 node['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
 node['cluster_type'] = cmon_config['type']
 
-cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
-cmon_tarball = cmon_package + ".tar.gz"
+cmon_tarball = cmon_config['cmon_tarball_' + node['kernel']['machine']]
+# strip .tar.gz
+cmon_package = cmon_tarball[0..-8]
 cmon_source = cmon_config['cmon_source']
 
 Chef::Log.info "Downloading #{cmon_tarball}"
@@ -49,7 +50,7 @@ directory node['install_dir_cmon'] do
   recursive true
 end
 
-bash "untar-cmon-package" do
+bash "extract-cmon-package" do
   user "root"
   code <<-EOH
     rm -rf #{node['install_dir_cmon']}/cmon
