@@ -43,8 +43,9 @@ galera_config = data_bag_item('s9s_galera', 'config')
 # mysqldump, rsync or rsync_wan
 node['wsrep']['sst_method'] = galera_config['sst_method']
 # move source to data bag
-mysql_package = galera_config['mysql_wsrep_package_' + node['kernel']['machine']]
-mysql_tarball = mysql_package + ".tar.gz"
+mysql_tarball = galera_config['mysql_wsrep_tarball_' + node['kernel']['machine']]
+# strip .tar.gz
+mysql_package = mysql_tarball[0..-8]
 
 mysql_wsrep_source = galera_config['mysql_wsrep_source']
 galera_source = galera_config['galera_source']
@@ -68,7 +69,7 @@ remote_file "#{Chef::Config[:file_cache_path]}/#{galera_package}" do
   action :create_if_missing
 end
 
-bash "untar-mysql-package" do
+bash "expand-mysql-package" do
   user "root"
   code <<-EOH
     rm -rf #{node['galera']['install_dir']}/mysql
@@ -83,11 +84,11 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
   bash "purge-mysql-n-install-galera" do
     user "root"
     code <<-EOH
-      rpm -e --nodeps --allmatches mysql mysql-devel mysql-server mysql-bench
+      yum remove mysql mysql-devel mysql-server mysql-bench
       rm -rf /var/lib/mysql/*
       rm -rf /etc/my.cnf /etc/mysql
-      rpm -Uhv #{node['xtra']['packages']}
-      rpm -Uhv #{Chef::Config[:file_cache_path]}/#{galera_package}
+      yum -y localinstall #{node['xtra']['packages']}
+      yum -y localinstall #{Chef::Config[:file_cache_path]}/#{galera_package}
     EOH
     not_if { FileTest.exists?("#{node['wsrep']['provider']}") }
   end
@@ -104,6 +105,7 @@ else
       rm -rf /etc/my.cnf /etc/mysql
       apt-get -y install #{node['xtra']['packages']}
       dpkg -i #{Chef::Config[:file_cache_path]}/#{galera_package}
+      apt-get -f install
     EOH
     not_if { FileTest.exists?("#{node['wsrep']['provider']}") }
   end

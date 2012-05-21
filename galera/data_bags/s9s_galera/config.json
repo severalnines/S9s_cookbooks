@@ -1,18 +1,18 @@
 {
   "id": "config",
-  "mysql_wsrep_package_x86_64": "mysql-5.5.23_wsrep_23.5-linux-x86_64",
-  "mysql_wsrep_package_i686": "mysql-5.5.23_wsrep_23.5-linux-i686",
+  "mysql_wsrep_tarball_x86_64": "mysql-5.5.23_wsrep_23.6-linux-x86_64.tar.gz",
+  "mysql_wsrep_tarball_i686": "mysql-5.5.23_wsrep_23.6-linux-i686.tar.gz",
   "galera_package_i386": {
-  	"deb": "galera-23.2.0-i386.deb",
-  	"rpm": "galera-23.2.0-1.rhel5.i386.rpm"},  
+  	"deb": "galera-23.2.1-i386.deb",
+  	"rpm": "galera-23.2.1-1.rhel5.i386.rpm"},  
   "galera_package_x86_64": {
-  	"deb": "galera-23.2.0-amd64.deb",
-  	"rpm": "galera-23.2.0-1.rhel5.x86_64.rpm"
+  	"deb": "galera-23.2.1-amd64.deb",
+  	"rpm": "galera-23.2.1-1.rhel5.x86_64.rpm"
   },
-  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.5/+download",
-  "galera_source": "https://launchpad.net/galera/2.x/23.2.0/+download",
+  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.6/+download",
+  "galera_source": "https://launchpad.net/galera/2.x/23.2.1/+download",
   "init_node": "192.168.122.11",
-  "sst_method": "rsync",
+  "sst_method": "mysqldump",
   "galera_nodes": [
      "192.168.122.12",
      "192.168.122.14",
