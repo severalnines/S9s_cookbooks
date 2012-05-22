@@ -29,16 +29,28 @@ end
 
 install_flag = "/root/.s9s_controller_mysql_installed"
 
+# Temp workaround...wait until log files are created and the mysql server
+# is up and running otherwise we might have some issues connecting for the
+# next steps. Might need to increase sleep time
+ruby_block 'wait-until-innodb' do
+  block do
+    if FileTest.exists?("#{install_flag}") == false
+      Chef::Log.info "Temp fix. Sleep a while (#{node['xtra']['sleep']}s) until the mysql server is really up before securing, granting and setting cluster URL..."
+      sleep node['xtra']['sleep']
+    end
+  end
+end
+
 # MySQL installed with no root password!
 # Let's secure it. Get root password from ['mysql']['root_password']
 # todo: maybe erb or tmp file
 bash "secure-mysql" do
   user "root"
   code <<-EOH
-  #{node['mysql']['mysql_bin']} -uroot -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
-  #{node['mysql']['mysql_bin']} -uroot -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
-  #{node['mysql']['mysql_bin']} -uroot -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
-  #{node['mysql']['mysql_bin']} -uroot -e "FLUSH PRIVILEGES"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "FLUSH PRIVILEGES"
   EOH
   not_if { FileTest.exists?("#{install_flag}") }
 end

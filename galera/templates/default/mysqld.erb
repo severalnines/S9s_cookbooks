@@ -15,6 +15,7 @@
 # Short-Description:    mysqld start/stop script by severalnines (c)
 ### END INIT INFO
 
+
 SBINDIR=<%= node['mysql']['bindir'] %>
 PIDFILE=<%= node['mysql']['pidfile'] %>
 LOCKFILE=""
@@ -27,7 +28,9 @@ OPTIONS=" --defaults-file=/etc/my.cnf"
 PROGNAME="mysqld"
 STARTNDBD="$SBINDIR/$PROGNAME $OPTIONS"
 RETVAL=0
-RETVAL=0
+
+. /lib/lsb/init-functions
+
 pidof_prog() {
         if [ -e "$PIDFILE" ]; then
                 if pidof $PROGNAME | tr ' ' '\n' | grep $(cat $PIDFILE); then
@@ -137,4 +140,4 @@ case "$1" in
 
         exit 1
 esac
-exit $?
+exit $RETVAL

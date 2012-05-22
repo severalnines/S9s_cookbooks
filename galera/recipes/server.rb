@@ -135,7 +135,6 @@ end
 
 service "mysql" do
   service_name node['mysql']['servicename']
-  supports :restart => true, :start => true, :stop => true, :reload => true
   action :nothing
 #  subscribes :restart, resources(:tempate => 'my.cnf')
 end 
@@ -158,6 +157,7 @@ end
 
 service "mysql" do
   service_name node['mysql']['servicename']
+  supports :restart => true, :start => true, :stop => true
   action [:enable, :start]
 end
 

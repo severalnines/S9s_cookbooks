@@ -75,6 +75,7 @@ else
 
 end
 
+default['xtra']['sleep'] = 60
 default['mysql']['root_password'] = "password"
 default['mysql']['mysql_bin'] = default['mysql']['bin_dir'] + "/mysql"
 
