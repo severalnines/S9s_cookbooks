@@ -18,12 +18,14 @@
 #
 
 cmon_config = data_bag_item('s9s_controller', 'config')
+cmon_tarball = cmon_config['cmon_tarball_' + node['kernel']['machine']]
+# strip .tar.gz
+cmon_package = cmon_tarball[0..-8]
+cmon_source = cmon_config['cmon_source']
 
-cmon_package = cmon_config['cmon_package_' + node['kernel']['machine']]
-cmon_tarball = cmon_package + ".tar.gz"
 Chef::Log.info "Downloading #{cmon_tarball}"
 remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
-  source "http://www.severalnines.com/downloads/cmon/" + cmon_tarball
+  source "#{cmon_source}/" + cmon_tarball
   action :create_if_missing
 end
 
