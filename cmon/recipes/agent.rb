@@ -61,9 +61,9 @@ bash "extract-cmon-package" do
 end
 
 execute "agent-install-privileges" do
-  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['agent_grants']}"
+  command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['agent_grants']}"
   action :nothing
-  only_if "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e 'show databases'"  
+  only_if "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} -e 'show databases'"  
 end
 
 grants_file = 'cmon.agent.grants.sql.erb'

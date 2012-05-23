@@ -35,7 +35,7 @@ install_flag = "/root/.s9s_controller_mysql_installed"
 ruby_block 'wait-until-innodb' do
   block do
     if FileTest.exists?("#{install_flag}") == false
-      Chef::Log.info "Temp fix. Sleep a while (#{node['xtra']['sleep']}s) until the mysql server is really up before securing, granting and setting cluster URL..."
+      Chef::Log.info "Temp fix. Sleep a while (#{node['xtra']['sleep']}s) until the mysql server is really up before securing and granting ..."
       sleep node['xtra']['sleep']
     end
   end
