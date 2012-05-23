@@ -110,7 +110,7 @@ cookbook_file "/etc/init.d/cmon" do
 end
 
 service "cmon" do
-  supports :restart => true, :start => true, :stop => true
+  supports :restart => true, :start => true, :stop => true, :status => true
   action [:enable, :start]
 end 
 
