@@ -25,7 +25,7 @@ cmon_source = cmon_config['cmon_source']
 
 Chef::Log.info "Downloading #{cmon_tarball}"
 remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
-  source "#{cmon_source}/" + cmon_tarball
+  source "#{cmon_source}/#{cmon_tarball}"
   action :create_if_missing
 end
 
@@ -37,11 +37,17 @@ directory node['install_dir_cmon'] do
   recursive true
 end
 
-bash "untar-cmon-package" do
+bash "extract-cmon-package" do
   user "root"
   code <<-EOH
     rm -rf #{node['install_dir_cmon']}/cmon
-    zcat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['install_dir_cmon']}
+    gz=`file #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | grep -i gzip`
+    if [ -z "$gz" ]
+    then
+      cat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['install_dir_cmon']}    
+    else
+      zcat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['install_dir_cmon']}
+    fi
     ln -s #{node['install_dir_cmon']}/#{cmon_package} #{node['install_dir_cmon']}/cmon
   EOH
   not_if { File.directory? "#{node['install_dir_cmon']}/#{cmon_package}" }
