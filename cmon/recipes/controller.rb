@@ -143,7 +143,6 @@ directory node['misc']['lock_dir'] do
 end
 
 service "cmon" do
-  supports :restart => true, :start => true, :stop => true, :reload => true
   action :nothing
 end 
 
@@ -166,7 +165,7 @@ cookbook_file "/etc/init.d/cmon" do
 end
 
 service "cmon" do
-  supports :restart => true, :start => true, :stop => true, :reload => true
+  supports :restart => true, :start => true, :stop => true
   action [:enable, :start]
 end 
 
