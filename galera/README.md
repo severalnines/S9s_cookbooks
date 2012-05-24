@@ -42,36 +42,47 @@ Usage
 
 On MySQL Galera Nodes,
 
-	include_recipe "galera:server"
+		include_recipe "galera:server"
+
+Example cc_galera role:
+
+		name "cc_galera"
+		description "MySQL Galera Node"
+		run_list "recipe[galera::server]"
 
 Data Bags
 =========
-
-The 'primary' key is the primary node that should be used for the cluster URL.
 
 s9s_galera / config.json
 -------------------------
 		{
 		  "id": "config",
-		  "mysql_wsrep_package_x86_64": "mysql-5.5.23_wsrep_23.5-linux-x86_64",
-		  "mysql_wsrep_package_i686": "mysql-5.5.23_wsrep_23.5-linux-i686",
+		  "mysql_wsrep_tarball_x86_64": "mysql-5.5.23_wsrep_23.6-linux-x86_64.tar.gz",
+		  "mysql_wsrep_tarball_i686": "mysql-5.5.23_wsrep_23.6-linux-i686.tar.gz",
 		  "galera_package_i386": {
-		  	"deb": "galera-23.2.0-i386.deb",
-		  	"rpm": "galera-23.2.0-1.rhel5.i386.rpm"},  
+		  	"deb": "galera-23.2.1-i386.deb",
+		  	"rpm": "galera-23.2.1-1.rhel5.i386.rpm"},  
 		  "galera_package_x86_64": {
-		  	"deb": "galera-23.2.0-amd64.deb",
-		  	"rpm": "galera-23.2.0-1.rhel5.x86_64.rpm"
+		  	"deb": "galera-23.2.1-amd64.deb",
+		  	"rpm": "galera-23.2.1-1.rhel5.x86_64.rpm"
 		  },
-		  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.5/+download",
-		  "galera_source": "https://launchpad.net/galera/2.x/23.2.0/+download",
+		  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.6/+download",
+		  "galera_source": "https://launchpad.net/galera/2.x/23.2.1/+download",
 		  "init_node": "192.168.122.11",
-		  "sst_method": "rsync",
+		  "sst_method": "mysqldump",
 		  "galera_nodes": [
 		     "192.168.122.12",
 		     "192.168.122.14",
 		     "192.168.122.16"
 		    ]
 		}
+
+* **init_node**  
+This is the IP address which joining Galera nodes should use to connect to the cluster the first time, i.e., right after the installation. Here we can just enter the first Chef Node's private IP address.
+* **galera_nodes**  
+These are the IP addresses where you have MySQL Galera nodes running and a random host in this list will be used as the cluster URL for a galera node if the galera recipe is "reloaded".
+* **sst_method**  
+State Snapshot Transfer method, default is mysqldump and currently ClusterControl only supports mysqldump and not rsync so let's leave it at that for now.
 
 Change History
 ===============

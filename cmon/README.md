@@ -79,7 +79,7 @@ s9s_controller / config.json
         ]
     }
   
-  
+* **controller_host_ipaddress** The controller's IP address.    
 * **agent_hosts** is a list of agents that is deployed. This list is used to setup grants for the agents.  
 * **cc_pub_key** is a place holder for the public ssh key which is generated on the ClusterControl controller host. The agent hosts will have this key authorized to access its server. You would paste in the public key here before deploying agents.
 
@@ -116,7 +116,8 @@ The ClusterControl web application and a webserver are usually installed on the 
 Change History
 ===============
 
-* v0.3 - Code cleanup, better use of roles, data bags and more tests using Chef-Server. Uses cmon v1.1.27.
+* v0.4 - Fixes for Chef 0.10.10 and working with galera cookbook
+* v0.3 - Code cleanup, better use of roles, data bags and more tests using Chef-Server 0.10.8.
 * v0.2 - Bug fixes and making sure it worked on Chef-Solo.
 * v0.1 - Initial recipes based upon cmon v1.1.25. 
 
