@@ -1,7 +1,7 @@
 ###### RRD SECTION - graphs ######
 mysql_port=3306
 mysql_hostname=127.0.0.1
-mysql_password=
+mysql_password=<%= node['controller']['mysql_password'] %>
 mysql_bindir=<%= node['mysql']['bin_dir'] %>
 imagedir=<%= node['rrd']['image_dir'] %>
 rrdtool=<%= node['rrd']['rrdtool'] %>
