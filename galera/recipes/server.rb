@@ -177,6 +177,7 @@ bash "set-wsrep-grants" do
   user "root"
   code <<-EOH
     #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; DELETE FROM mysql.user WHERE user=''; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
+    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'127.0.0.1' IDENTIFIED BY '#{node['wsrep']['password']}'"
   EOH
   not_if { FileTest.exists?("#{install_flag}") }
 end
