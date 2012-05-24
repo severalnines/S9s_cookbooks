@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-
+install_flag = "/root/.s9s_webserver_installed"
 # Install dependency packages
 packages = node['web']['packages']
 packages.each do |name|
@@ -30,8 +30,15 @@ end
 execute "set-allow-override" do
   command "sed -i 's/AllowOverride None/AllowOverride All/g' #{node['apache']['default-site']}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 service "#{node['apache']['service_name']}" do
   action :restart
+  not_if { FileTest.exists?("#{install_flag}") }
+end
+
+execute "s9s-webserver-installed" do
+  command "touch #{install_flag}"
+  action :run
 end
