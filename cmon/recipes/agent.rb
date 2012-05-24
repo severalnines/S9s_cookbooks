@@ -68,8 +68,8 @@ end
 
 execute "agent-install-privileges" do
   command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['agent_grants']}"
-  action :nothing
-  only_if "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} -e 'show databases'"  
+  action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 grants_file = 'cmon.agent.grants.sql.erb'
