@@ -215,14 +215,14 @@ if my_ip == init_host && !File.exists?("#{install_flag}")
   execute "set-wsrep-address" do
     command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://'\""
     action :run
-    #subscribes :run, resources(:template => 'my.cnf')
+    not_if { FileTest.exists?("#{install_flag}") }
   end
 else
   Chef::Log.info "Attaching to existing cluster using cluster URL: gcomm://" + sync_host
   execute "set-wsrep-address" do
     command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://#{sync_host}:#{node['wsrep']['port']}'\""
     action :run
-    #subscribes :run, resources(:template => 'my.cnf')
+    not_if { FileTest.exists?("#{install_flag}") }
   end
 end
 
