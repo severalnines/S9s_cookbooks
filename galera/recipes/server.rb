@@ -103,7 +103,7 @@ else
       apt-get -y autoclean
       rm -rf /var/lib/mysql/*
       rm -rf /etc/my.cnf /etc/mysql
-      apt-get -y install #{node['xtra']['packages']}
+      apt-get -y --force-yes install #{node['xtra']['packages']}
       dpkg -i #{Chef::Config[:file_cache_path]}/#{galera_package}
       apt-get -f install
     EOH
@@ -213,14 +213,14 @@ end
 if my_ip == init_host && !File.exists?("#{install_flag}")
   Chef::Log.info "Creating new cluster using cluster URL: gcomm://"
   execute "set-wsrep-address" do
-    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET wsrep_on=OFF; SET GLOBAL wsrep_cluster_address='gcomm://'\""
+    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://'\""
     action :run
     #subscribes :run, resources(:template => 'my.cnf')
   end
 else
   Chef::Log.info "Attaching to existing cluster using cluster URL: gcomm://" + sync_host
   execute "set-wsrep-address" do
-    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET wsrep_on=OFF; SET GLOBAL wsrep_cluster_address='gcomm://#{sync_host}:#{node['wsrep']['port']}'\""
+    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://#{sync_host}:#{node['wsrep']['port']}'\""
     action :run
     #subscribes :run, resources(:template => 'my.cnf')
   end
