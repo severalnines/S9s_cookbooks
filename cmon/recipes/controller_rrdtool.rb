@@ -24,5 +24,6 @@ packages.each do |name|
   package name do
     Chef::Log.info "Installing #{name}..."
     action :install
+    options "--force-yes"
   end
 end

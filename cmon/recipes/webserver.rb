@@ -23,6 +23,7 @@ packages = node['web']['packages']
 packages.each do |name|
   package name do
     action :install
+    options "--force-yes"
   end
 end
 
