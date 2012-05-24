@@ -49,6 +49,8 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
   default['apache']['service_name'] = "httpd"
   default['apache']['default-site'] = '/etc/httpd/conf/httpd.conf'
 
+  default['rrd']['image_dir'] = "/var/www/html/cmon/graphs"
+
 else
 
   default['mysql']['install_dir']   = "/"
@@ -73,6 +75,8 @@ else
   default['apache']['service_name'] = "apache2"
   default['apache']['default-site'] = '/etc/apache2/sites-enabled/000-default'
 
+  default['rrd']['image_dir'] = "/var/www/cmon/graphs"
+
 end
 
 default['xtra']['sleep'] = 60
@@ -92,7 +96,6 @@ default['sql']['controller_grants'] = default['install_dir_cmon'] + "/cmon/sql/c
 default['sql']['controller_agent_grants'] = default['install_dir_cmon'] + "/cmon/sql/cmon_controller_agent_grants.sql"
 default['sql']['agent_grants'] = default['install_dir_cmon'] + "/cmon/sql/cmon_agent_grants.sql"
 
-default['rrd']['image_dir'] = "/var/www/cmon/graphs"
 default['rrd']['rrdtool']   = "/usr/bin/rrdtool"
 default['rrd']['data_dir']  = "/var/lib/cmon"
 

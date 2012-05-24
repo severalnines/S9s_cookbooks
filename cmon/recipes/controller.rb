@@ -152,6 +152,14 @@ service "cmon" do
   action :nothing
 end 
 
+template "cmon_rrd.cnf" do
+  path "#{node['install_config_path']}/cmon_rrd.cnf"
+  source "cmon_rrd.cnf.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+end
+
 template "cmon.controller.cnf" do
   path "#{node['install_config_path']}/cmon.cnf"
   source "cmon.controller.cnf.erb"
