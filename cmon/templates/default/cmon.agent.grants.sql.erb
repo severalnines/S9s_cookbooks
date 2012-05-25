@@ -1,5 +1,5 @@
 SET SQL_LOG_BIN=0; 
-GRANT PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon_password'] %>';
-GRANT PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';
+GRANT SHOW DATABASES, PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon_password'] %>';
+GRANT SHOW DATABASES, PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';
 GRANT SELECT ON mysql.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';
 GRANT SELECT ON ndbinfo.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';

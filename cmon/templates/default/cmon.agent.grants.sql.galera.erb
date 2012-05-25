@@ -1,5 +1,5 @@
 SET WSREP_ON=OFF; SET SQL_LOG_BIN=0; 
-SET WSREP_ON=OFF; GRANT PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon_password'] %>';
-SET WSREP_ON=OFF; GRANT PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';
+SET WSREP_ON=OFF; GRANT SHOW DATABASES, PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon_password'] %>';
+SET WSREP_ON=OFF; GRANT SHOW DATABASES, PROCESS, SUPER, RELOAD, REPLICATION CLIENT ON *.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';
 SET WSREP_ON=OFF; GRANT SELECT ON mysql.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';
 SET WSREP_ON=OFF; GRANT SELECT ON ndbinfo.* TO 'cmon'@'<%= node['controller']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon_password'] %>';
