@@ -108,6 +108,7 @@ bash "create-agent-grants" do
     do
       echo "GRANT SUPER ON *.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon_password']}';" >> #{node['sql']['controller_agent_grants']}
       echo "GRANT INSERT,UPDATE,DELETE,SELECT ON cmon.* TO 'cmon'@'$h' IDENTIFIED BY '#{node['cmon_password']}';" >> #{node['sql']['controller_agent_grants']}
+      ssh-keyscan -t rsa $h >> /root/.ssh/known_hosts
     done
   EOH
   not_if { FileTest.exists?(node['sql']['controller_agent_grants']) }  
