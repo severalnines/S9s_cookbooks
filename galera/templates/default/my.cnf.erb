@@ -19,8 +19,8 @@ datadir = <%= node['mysql']['datadir'] %>
 pid-file = <%= node['mysql']['pidfile'] %>
 tmpdir = <%= node['mysql']['tmpdir'] %>
 log-error = error.log
-syslog
-
+#syslog
+wsrep_urls=
 
 [MYSQLD]
 user=mysql

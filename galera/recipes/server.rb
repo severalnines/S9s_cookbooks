@@ -139,12 +139,18 @@ service "mysql" do
 #  subscribes :restart, resources(:tempate => 'my.cnf')
 end 
 
-template "mysqld" do
-  path "/etc/init.d/#{node['mysql']['servicename']}"
-  source "mysqld.erb"
-  owner "mysql"
-  group "mysql"
-  mode "0755"
+execute "cp-init.d-mysql.server" do
+  command "cp #{node['mysql']['basedir']}/support-files/mysql.server /etc/init.d/#{node['mysql']['servicename']}"
+  not_if { FileTest.exists?("#{install_flag}") }
+end
+
+bash "set-paths.mysql.server" do
+  user "root"
+  code <<-EOH
+  sed -i 's#^basedir=#basedir=#{node['mysql']['basedir']}#' /etc/init.d/#{node['mysql']['servicename']}
+  sed -i 's#^datadir=#datadir=#{node['mysql']['datadir']}#' /etc/init.d/#{node['mysql']['servicename']}
+  EOH
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 
 template "my.cnf" do
@@ -155,22 +161,27 @@ template "my.cnf" do
   mode "0644"
 end
 
+hosts = galera_config['galera_nodes']
+wsrep_urls=''
+if !File.exists?("#{install_flag}") && hosts != nil && hosts.length > 0
+  hosts.each do |h|
+    wsrep_urls += "gcomm://#{h}:#{node['wsrep']['port']},"
+  end
+  wsrep_urls += "gcomm://"
+end
+
+bash "set-wsrep_urls" do
+  user "root"
+  code <<-EOH
+  sed -i 's#^wsrep_urls=#wsrep_urls=#{wsrep_urls}#' /etc/my.cnf
+  EOH
+  not_if { FileTest.exists?("#{install_flag}") }
+end
+
 service "mysql" do
   service_name node['mysql']['servicename']
   supports :restart => true, :start => true, :stop => true
   action [:enable, :start]
-end
-
-# Temp workaround...wait until log files are created and the mysql server
-# is up and running otherwise we might have some issues connecting for the
-# next steps. Might need to increase sleep time
-ruby_block 'wait-until-innodb' do
-  block do
-    if FileTest.exists?("#{install_flag}") == false
-      Chef::Log.info "Temp fix. Sleep a while (#{node['xtra']['sleep']}s) until the mysql server is really up before securing, granting and setting cluster URL..."
-      sleep node['xtra']['sleep']
-    end
-  end
 end
 
 bash "set-wsrep-grants" do
@@ -191,40 +202,6 @@ bash "secure-mysql" do
     #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; FLUSH PRIVILEGES"
   EOH
   not_if { FileTest.exists?("#{install_flag}") }
-end
-
-my_ip = node['ipaddress']
-init_host = galera_config['init_node']
-sync_host = init_host
-
-hosts = galera_config['galera_nodes']
-if File.exists?("#{install_flag}") && hosts != nil && hosts.length > 0
-  i = 0
-  begin
-    sync_host = hosts[rand(hosts.count)]
-    i += 1
-    if (i > hosts.count)
-      # no host found, use init node/host
-      sync_host = init_host
-      break
-    end
-  end while my_ip == sync_host
-end
-
-if my_ip == init_host && !File.exists?("#{install_flag}")
-  Chef::Log.info "Creating new cluster using cluster URL: gcomm://"
-  execute "set-wsrep-address" do
-    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://'\""
-    action :run
-    not_if { FileTest.exists?("#{install_flag}") }
-  end
-else
-  Chef::Log.info "Attaching to existing cluster using cluster URL: gcomm://" + sync_host
-  execute "set-wsrep-address" do
-    command "#{node['mysql']['mysqlbin']} -uroot -p#{node['mysql']['root_password']} -h127.0.0.1 -e \"SET GLOBAL wsrep_cluster_address='gcomm://#{sync_host}:#{node['wsrep']['port']}'\""
-    action :run
-    not_if { FileTest.exists?("#{install_flag}") }
-  end
 end
 
 execute "s9s-galera-installed" do
