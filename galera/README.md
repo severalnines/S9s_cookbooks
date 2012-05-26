@@ -12,7 +12,7 @@ Platform
 
 Tested on:
 
-* Ubuntu 11.10/12.04 w/ Chef (Solo) 0.10.8.
+* Ubuntu 11.10/12.04 w/ Chef (Solo) 0.10.8/0.10.10
 
 Attributes
 ==========
@@ -68,7 +68,6 @@ s9s_galera / config.json
 		  },
 		  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.6/+download",
 		  "galera_source": "https://launchpad.net/galera/2.x/23.2.1/+download",
-		  "init_node": "192.168.122.11",
 		  "sst_method": "mysqldump",
 		  "galera_nodes": [
 		     "192.168.122.12",
@@ -77,16 +76,15 @@ s9s_galera / config.json
 		    ]
 		}
 
-* **init_node**  
-This is the IP address which joining Galera nodes should use to connect to the cluster the first time, i.e., right after the installation. Here we can just enter the first Chef Node's private IP address.
 * **galera_nodes**  
 These are the IP addresses where you have MySQL Galera nodes running and a random host in this list will be used as the cluster URL for a galera node if the galera recipe is "reloaded".
 * **sst_method**  
-State Snapshot Transfer method, default is mysqldump and currently ClusterControl only supports mysqldump and not rsync so let's leave it at that for now.
+State Snapshot Transfer method, 'mysqldump', 'rsync' or 'rsync_wan'.
 
 Change History
 ===============
 
+* v0.2 - Use wsrep_urls with mysqld_safe
 * v0.1 - Initial recipe based upon MySQL Galera 5.5.23
 
 License and Author
