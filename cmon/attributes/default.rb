@@ -73,7 +73,7 @@ else
   default['misc']['web_user'] = "www-data"
 
   default['apache']['service_name'] = "apache2"
-  default['apache']['default-site'] = '/etc/apache2/sites-enabled/000-default'
+  default['apache']['default-site'] = '/etc/apache2/sites-available/default'
 
   default['rrd']['image_dir'] = "/var/www/cmon/graphs"
 
