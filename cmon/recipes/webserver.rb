@@ -33,6 +33,15 @@ execute "set-allow-override" do
   not_if { FileTest.exists?("#{install_flag}") }
 end
 
+case node['platform']
+when 'centos', 'redhat', 'fedora'
+  execute "enable-httpd-to-connect-db" do
+    command "/usr/sbin/setsebool -P httpd_can_network_connect_db on"
+    action :run
+    not_if { FileTest.exists?("#{install_flag}") }
+  end
+end
+
 service "#{node['apache']['service_name']}" do
   action :restart
   not_if { FileTest.exists?("#{install_flag}") }

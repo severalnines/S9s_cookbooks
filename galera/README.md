@@ -2,6 +2,15 @@ Description
 ===========
 Installs a Codership's MySQL Galera cluster node.
 
+This cookbook should be used initially for development/tests and not in production. 
+
+It currently does not handle a full cluster restart properly by itself, i.e., it does 
+not select a node that has the most recent committed transactions as the donor.
+You might end up loosing data if the wrong node becomes the donor node.
+
+You can deploy ClusterControl which is able to select a correct node to use when doing a 
+complete cluster restart.
+
 Requirements
 ============
 
