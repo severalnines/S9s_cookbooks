@@ -11,6 +11,9 @@ You might end up loosing data if the wrong node becomes the donor node.
 You can deploy ClusterControl which is able to select a correct node to use when doing a 
 complete cluster restart.
 
+Howto: Chef, MySQL Galera and ClusterControl
+http://support.severalnines.com/entries/21453521-opscode-s-chef-mysql-galera-and-clustercontrol
+
 Requirements
 ============
 

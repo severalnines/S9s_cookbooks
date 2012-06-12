@@ -3,6 +3,9 @@ Description
 
 Installs and configures cmon controller and agent.
 
+Howto: Chef, MySQL Galera and ClusterControl
+http://support.severalnines.com/entries/21453521-opscode-s-chef-mysql-galera-and-clustercontrol
+
 Requirements
 ============
 
