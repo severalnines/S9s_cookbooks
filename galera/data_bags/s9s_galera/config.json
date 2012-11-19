@@ -11,10 +11,13 @@
   },
   "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.6/+download",
   "galera_source": "https://launchpad.net/galera/2.x/23.2.1/+download",
-  "sst_method": "mysqldump",
+  "sst_method": "rsync",
+  "init_node": "chef-2",
   "galera_nodes": [
-     "192.168.122.12",
-     "192.168.122.14",
-     "192.168.122.16"
-    ]
+     "chef-2",
+     "chef-3",
+     "chef-4"
+    ],
+  "secure": "yes",
+  "update_wsrep_urls": "no"
 }

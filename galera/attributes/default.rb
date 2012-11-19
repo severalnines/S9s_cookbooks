@@ -6,8 +6,8 @@ when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
   default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql"
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysqld"
-  
-  default['xtra']['packages'] = "openssl psmisc libaio rsync"
+
+  default['xtra']['packages'] = "openssl psmisc libaio wget rsync nc"
 
 else
 
@@ -15,7 +15,7 @@ else
   default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysql"
 
-  default['xtra']['packages'] = "libssl0.9.8 psmisc libaio1 rsync"
+  default['xtra']['packages'] = "libssl0.9.8 psmisc libaio1 wget rsync netcat"
 
 end
 
@@ -34,10 +34,18 @@ default['mysql']['innodb']['buffer_pool_size'] = "128M"
 default['mysql']['innodb']['flush_log_at_trx_commit'] = 2
 default['mysql']['innodb']['file_per_table'] = 1
 default['mysql']['innodb']['doublewrite'] = 0
-default['mysql']['innodb']['log_file_size'] = "256M"
-default['mysql']['innodb']['log_files_in_group'] = 3
-default['mysql']['innodb']['buffer_pool_instances'] = 4
+default['mysql']['innodb']['log_file_size'] = "512M"
+default['mysql']['innodb']['log_files_in_group'] = 2
+default['mysql']['innodb']['buffer_pool_instances'] = 1
+default['mysql']['innodb']['max_dirty_pages_pct'] = 75
 default['mysql']['innodb']['thread_concurrency'] = 0
+default['mysql']['innodb']['concurrency_tickets'] = 5000
+default['mysql']['innodb']['thread_sleep_delay'] = 10000
+default['mysql']['innodb']['lock_wait_timeout'] = 50
+default['mysql']['innodb']['io_capacity'] = 200
+default['mysql']['innodb']['read_io_threads'] = 4
+default['mysql']['innodb']['write_io_threads'] = 4
+
 default['mysql']['innodb']['file_format'] = "barracuda"
 default['mysql']['innodb']['flush_method'] = "O_DIRECT"
 default['mysql']['innodb']['locks_unsafe_for_binlog'] = 1
@@ -89,15 +97,18 @@ default['wsrep']['retry_autocommit'] = 1
 # change auto_increment_increment and auto_increment_offset automatically
 default['wsrep']['auto_increment_control'] = 1
 
+# enable "strictly synchronous" semantics for read operations 
+default['wsrep']['casual_reads'] = 0
+
 ##
 ## WSREP State Transfer options
 ##
 
-default['wsrep']['user'] = "wsrep_sst" 
+default['wsrep']['user'] = "wsrep_sst"
 default['wsrep']['password'] = "wsrep"
 
 # State Snapshot Transfer method
-default['wsrep']['sst_method'] = "mysqldump"
+default['wsrep']['sst_method'] = "rsync"
 
 # Address on THIS node to receive SST at. DON'T SET IT TO DONOR ADDRESS!!!
 # (SST method dependent. Defaults to the first IP of the first interface)
