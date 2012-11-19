@@ -37,7 +37,7 @@ end
 cc_pub_key = cmon_config['cc_pub_key']
 if cc_pub_key != nil && cc_pub_key.length > 0
   execute "append-authorized-keys" do
-    command "echo #{cc_pub_key} >> /root/.ssh/authorized_keys; touch /root/.ssh/.cc_pub_key; chmod 600 /root/.ssh/authorized_keys"
+    command "mkdir -p /root/.ssh; echo #{cc_pub_key} >> /root/.ssh/authorized_keys; touch /root/.ssh/.cc_pub_key; chmod 600 /root/.ssh/authorized_keys"
     action :run
     not_if { FileTest.exists?("/root/.ssh/.cc_pub_key") }
   end

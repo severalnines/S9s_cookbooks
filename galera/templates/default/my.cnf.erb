@@ -16,7 +16,7 @@ socket = <%= node['mysql']['socket'] %>
 [MYSQLD_SAFE]
 basedir = <%= node['mysql']['basedir'] %>
 datadir = <%= node['mysql']['datadir'] %>
-pid_file = <%= node['mysql']['pidfile'] %>
+pid_file = <%= node['mysql']['pid_file'] %>
 tmpdir = <%= node['mysql']['tmpdir'] %>
 log_error = error.log
 #syslog
@@ -26,7 +26,7 @@ wsrep_urls=
 user=mysql
 basedir = <%= node['mysql']['basedir'] %>
 datadir = <%= node['mysql']['datadir'] %>
-pid_file = <%= node['mysql']['pidfile'] %>
+pid_file = <%= node['mysql']['pid_file'] %>
 socket = <%= node['mysql']['socket'] %>
 port = <%= node['mysql']['port'] %>
 tmpdir = <%= node['mysql']['tmpdir'] %>

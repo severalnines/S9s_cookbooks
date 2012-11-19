@@ -20,10 +20,10 @@
 install_flag = "/root/.s9s_controller_installed"
 
 cmon_config = data_bag_item('s9s_controller', 'config')
-#node['controller']['mysql_hostname'] = node['ipaddress']
-node['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
-node['mode']['controller'] = cmon_config['mode']
-node['cluster_type'] = cmon_config['type']
+#node['controller']['mysql_host name'] = node['ipaddress']
+node.set['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
+node.set['mode']['controller'] = cmon_config['mode']
+node.set['cluster_type'] = cmon_config['type']
 
 cmon_tarball = cmon_config['cmon_tarball_' + node['kernel']['machine']]
 # strip .tar.gz
@@ -53,15 +53,16 @@ end
 bash "extract-cmon-package" do
   user "root"
   code <<-EOH
+    killall -9 cmon &> /dev/null
     rm -rf #{node['install_dir_cmon']}/cmon
     gz=`file #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | grep -i gzip`
     if [ -z "$gz" ]
     then
-      cat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['install_dir_cmon']}    
+      cat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['install_dir_cmon']}
     else
       zcat #{Chef::Config[:file_cache_path]}/#{cmon_tarball} | tar xf - -C #{node['install_dir_cmon']}
     fi
-    ln -s #{node['install_dir_cmon']}/#{cmon_package} #{node['install_dir_cmon']}/cmon
+    ln -sf #{node['install_dir_cmon']}/#{cmon_package} #{node['install_dir_cmon']}/cmon
   EOH
   not_if { File.directory? "#{node['install_dir_cmon']}/#{cmon_package}" }
 end
@@ -111,7 +112,7 @@ bash "create-agent-grants" do
       ssh-keyscan -t rsa $h >> /root/.ssh/known_hosts
     done
   EOH
-  not_if { FileTest.exists?(node['sql']['controller_agent_grants']) }  
+  not_if { FileTest.exists?(node['sql']['controller_agent_grants']) }
 end
 
 execute "controller-grant-agents" do
@@ -138,7 +139,7 @@ end
 
 execute "install-core-scripts" do
   command "cp #{node['install_dir_cmon']}/cmon/bin/cmon_* /usr/bin/"
-  action :run  
+  action :run
   not_if { FileTest.exists?("/usr/bin/cmon_rrd_all") }
 end
 
@@ -151,7 +152,7 @@ end
 
 service "cmon" do
   action :nothing
-end 
+end
 
 template "cmon_rrd.cnf" do
   path "#{node['install_config_path']}/cmon_rrd.cnf"
@@ -182,7 +183,7 @@ end
 service "cmon" do
   supports :restart => true, :start => true, :stop => true
   action [:enable, :start]
-end 
+end
 
 execute "s9s-controller-installed" do
   command "touch #{install_flag}"

@@ -25,7 +25,7 @@ default['mysql']['mysqlbin'] = default['mysql']['bindir'] + "/mysql"
 
 default['mysql']['datadir'] = "/var/lib/mysql"
 default['mysql']['rundir']  = "/var/run/mysqld"
-default['mysql']['pidfile'] = default['mysql']['datadir'] + "/mysqld.pid"
+default['mysql']['pid_file'] = default['mysql']['datadir'] + "/mysqld.pid"
 default['mysql']['socket']  = default['mysql']['rundir'] + "/mysqld.sock"
 default['mysql']['port']    = 3306
 default['mysql']['tmpdir']  = "/tmp"

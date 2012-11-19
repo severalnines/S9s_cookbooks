@@ -34,11 +34,6 @@ include_recipe "cmon::agent"
 #
 # cmon Controller
 #
-# cmon::controller_packages
-#   installs 
-#     rrdtool mysql mysql-server (rhel/centos)
-#     rrdtool mysql-server (debian)
-#
 # cmon::controller_mysql
 #   installs 
 #     mysql mysql-server (rhel/centos)
@@ -53,8 +48,6 @@ include_recipe "cmon::agent"
 
 #include_recipe "cmon::controller_mysql"
 #include_recipe "cmon::controller_rrdtool"
-
-#include_recipe "cmon::controller_packages"
 #include_recipe "cmon::controller"
 
 #

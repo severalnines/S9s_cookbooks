@@ -56,7 +56,6 @@ bash "secure-mysql" do
   not_if { FileTest.exists?("#{install_flag}") }
 end
 
-
 # Quick and dirty, stop the mysql server and include our my.cnf to override the default
 service "mysql-stop" do
   service_name node['mysql']['service_name']
@@ -85,13 +84,13 @@ execute "cp2-my.cmon.cnf" do
 end
 
 execute "purge-innodb-logfiles" do
-  command "rm #{node['mysql']['data_dir']}/ib_logfile*"
+  command "rm #{node['mysql']['datadir']}/ib_logfile*"
   action :run
   not_if { FileTest.exists?("#{install_flag}") }
 end
 
 service "mysql" do
-  service_name node['mysql']['service_name']  
+  service_name node['mysql']['service_name']
   supports :stop => true, :start => true, :restart => true, :reload => true
   action :start
   subscribes :restart, resources(:template => 'my.cnf')

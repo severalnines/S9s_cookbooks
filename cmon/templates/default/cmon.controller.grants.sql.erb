@@ -19,7 +19,7 @@ INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'STAGI
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'PURGE','7');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'LOG_COLLECTION','30');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'MYSQL_PORT','<%= node['controller']['mysql_port'] %>');
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'BINDIR','<%= node['mysql']['bin_dir'] %>');
+INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'BINDIR','<%= node['mysql']['bindir'] %>');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'ROOT_PASSWORD','<%= node['mysql']['root_password'] %>');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'REPL_PASSWORD','<%= node['mysql']['repl_password'] %>');
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (1, 'REPL_USER','<%= node['mysql']['repl_user'] %>');
