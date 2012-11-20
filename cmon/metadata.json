@@ -1,0 +1,40 @@
+{
+  "version": "0.5.0",
+  "suggestions": {
+  },
+  "long_description": "Description\n===========\n\nInstalls and configures cmon controller and agent.\n\nHowto: Chef, MySQL Galera and ClusterControl\nhttp://support.severalnines.com/entries/21453521-opscode-s-chef-mysql-galera-and-clustercontrol\n\nRequirements\n============\n\nPlatform\n--------\n\n* Debian, Ubuntu\n* CentOS, Red Hat, Fedora\n\nTested on:\n\n* Ubuntu 12.04 w/ Chef-server v10.16.2.\n* Ubuntu 11.10 w/ Chef-solo and Chef-server v0.10.8.\n\nCookbooks\n---------\nN/A\n\nResources and Providers\n=======================\nN/A\n\nAttributes\n==========\nThe cmon controller recipe uses apt/yum packages and it should not be neccssary to change a many of the attribtues besides specifying a 'root_password' and some MySQL settings like the InnoDB buffer pool etc.\n\nUse role overrides for changing for example the MySQL root password to be different than for the cmon controller's or the location of the MySQL installation for the agents.\n\n    override_attributes({ \n      \"cmon_mysql\" => {\n                  \"install_dir\" => \"/usr/local\",\n                  \"mysql_bin\" => \"/usr/local/mysql/bin/mysql\",\n                  \"root_password\" => \"password\"}\n       }\n    )\n\n* node['cmon_mysql']['root_password']  - Monitored MySQL root password (password)\n\n* node['controller']['mysql_user']     - cmon controller MySQL user (cmon)\n* node['controller']['mysql_password'] - cmon controller MySQL user's password (cmon)\n* node['controller']['mysql_hostname'] - cmon controller MySQL hostname (nnn)\n* node['controller']['mysql_port']     - cmon controller MySQL port (3306)\n* node['cmon_password']                - cmon controller user's password (cmon)\n\n* node['agent']['mysql_user']     - agent's MySQL user (cmon)\n* node['agent']['mysql_password'] - agent user's password (cmon)\n* node['agent']['mysql_hostname'] - monitored MySQL server hostname (127.0.0.1)\n* node['agent']['mysql_port']     - monitored MySQL port (3306)\n* node['mysql']['root_password'] - Monitored MySQL root password (password)\n\n* node['install_dir_cmon']                                = \"/usr/local\"\n* node['cmon_mysql']['install_dir']                       = \"/\"\n* node['cmon_mysql']['basedir']                           = \"/usr\"\n* node['cmon_mysql']['datadir']                           = \"/var/lib/mysql\"\n\n* node['cmon_mysql']['innodb']['buffer_pool_size']        = \"256M\"\n* node['cmon_mysql']['innodb']['flush_log_at_trx_commit'] = 2\n* node['cmon_mysql']['innodb']['file_per_table']          = 1\n* node['cmon_mysql']['innodb']['doublewrite']             = 0\n* node['cmon_mysql']['innodb']['log_file_size']           = \"512M\"\n* node['cmon_mysql']['innodb']['log_files_in_group']      = 2\n* node['cmon_mysql']['innodb']['buffer_pool_instances']   = 1\n* node['cmon_mysql']['innodb']['max_dirty_pages_pct']     = 75\n* node['cmon_mysql']['innodb']['thread_concurrency']      = 0\n* node['cmon_mysql']['innodb']['concurrency_tickets']     = 5000\n* node['cmon_mysql']['innodb']['thread_sleep_delay']      = 10000\n* node['cmon_mysql']['innodb']['lock_wait_timeout']       = 50\n* node['cmon_mysql']['innodb']['io_capacity']             = 200\n* node['cmon_mysql']['innodb']['read_io_threads']         = 4\n* node['cmon_mysql']['innodb']['write_io_threads']        = 4\n\n* node['cmon_mysql']['innodb']['file_format']             = \"barracuda\"\n* node['cmon_mysql']['innodb']['flush_method']            = \"O_DIRECT\"\n\nand others please see attributes/default.rb\n\nData Bags\n=========\n\nData items are used by the controller recipe to for example add agent hosts\nto its grant table and the agent recipe uses the controller_host_ipaddress to\nset a controller host.\n\ns9s_controller / config.json\n----------------------------\n    {\n      \"id\": \"config\",\n      \"controller_host_ipaddress\": \"192.168.122.11\",\n      \"mode\": \"controller\",\n      \"type\": \"galera\",\n      \"cmon_tarball_x86_64\": \"cmon-1.1.35c-64bit-glibc23-mc70.tar.gz\",\n      \"cmon_tarball_i686\": \"cmon-1.1.35c-32bit-glibc23-mc70.tar.gz\",\n      \"cmon_tarball_i386\": \"cmon-1.1.35c-32bit-glibc23-mc70.tar.gz\",\n      \"cmon_source\": \"http://www.severalnines.com/downloads/cmon\",\n      \"cc_pub_key\": \"\",\n      \"agent_hosts\": [\n         \"192.168.122.12\",\n         \"192.168.122.14\",\n         \"192.168.122.16\"\n        ]\n    }\n\n* **controller_host_ipaddress** The controller's IP address.\n* **agent_hosts** is a list of agents that is deployed. This list is used to setup grants for the agents.\n* **cc_pub_key** is a place holder for the public ssh key (/root/.ssh/id_rsa) which is generated on the ClusterControl controller host. During installation of the agents this key will be added to authorized_keys on the servers. \nYou need to paste in the public key here before deploying agents.\n\nUsage\n=====\n\n    Roles:\n     Controller Role: cc_controller\n        run_list [\n          \"recipe[cmon::controller_mysql]\",\n          \"recipe[cmon::controller_rrdtool]\",\n          \"recipe[cmon::controller]\"\n        ]\n\nInstalls the ClusterControl Controller, standard MySQL server to store cluster data and statistics and rrdtool to create graphs.\nInstead of our MySQL recipe you could choose to try any other available MySQL recipe instead.\n\n    Web App Role: cc_webapp\n        run_list [\n          \"recipe[cmon::webserver]\", \n          \"recipe[cmon::webapp]\"\n        ]\n\nInstalls the ClusterControl web application and apache on the Controller node.\n\n    Agent Role: cc_agent\n        run_list [\n          \"recipe[cmon::agent_packages]\",\n          \"recipe[cmon::agent]\"\n        ]\n\nInstalls the ClusterControl agent. It requires the MySQL root password in order to setup grants correctly on the monitored MySQL server.\n\n\nChange History\n===============\n\n* v0.5 - Cleanup/fixes and tested with Chef 10.16.2, only tested with our galera cookbook\n* v0.4 - Fixes for Chef 0.10.10 and working with our galera cookbook\n* v0.3 - Code cleanup, better use of roles, data bags and more tests using Chef-Server 0.10.8.\n* v0.2 - Bug fixes and making sure it worked on Chef-Solo.\n* v0.1 - Initial recipes based upon cmon v1.1.25.\n\nLicense and Author\n==================\n\nAlex Yu (<alex@severalnines.com>)\nDerived from Opscode, Inc cookbook recipes examples.\n\nCopyright (c) 2012 Severalnines AB.\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License.\n",
+  "name": "cmon",
+  "recipes": {
+    "cmon::webapp": "Installs the ClusterControl web application",
+    "cmon::controller_rrdtool": "Installs rrdtool to generate grapsh on the controller node",
+    "cmon::controller_mysql": "Installs ClusterControl's MySQL server",
+    "cmon::webserver": "Installs Apache2",
+    "cmon::agent": "Installs the ClusterControl agent",
+    "cmon::controller": "Installs the ClusterControl controller"
+  },
+  "attributes": {
+  },
+  "license": "Apache 2.0",
+  "description": "Installs and configures ClusterControl controller and agents",
+  "maintainer": "Severalnines AB",
+  "dependencies": {
+  },
+  "conflicting": {
+  },
+  "recommendations": {
+  },
+  "platforms": {
+    "ubuntu": ">= 0.0.0",
+    "fedora": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "debian": ">= 0.0.0"
+  },
+  "groupings": {
+  },
+  "replacing": {
+  },
+  "maintainer_email": "support@severalnines.com",
+  "providing": {
+  }
+}
