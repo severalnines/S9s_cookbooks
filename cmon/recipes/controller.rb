@@ -20,7 +20,6 @@
 install_flag = "/root/.s9s_controller_installed"
 
 cmon_config = data_bag_item('s9s_controller', 'config')
-#node['controller']['mysql_host name'] = node['ipaddress']
 node.set['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
 node.set['mode']['controller'] = cmon_config['mode']
 node.set['cluster_type'] = cmon_config['type']
@@ -68,19 +67,19 @@ bash "extract-cmon-package" do
 end
 
 execute "controller-create-db-schema" do
-  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_schema']}"
+  command "#{node['cmon_mysql']['mysql_bin']} -uroot -p#{node['cmon_mysql']['root_password']} < #{node['sql']['cmon_schema']}"
   action :run
   not_if { FileTest.exists?("#{install_flag}") }
 end
 
 execute "controller-import-tables" do
-  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_data']}"
+  command "#{node['cmon_mysql']['mysql_bin']} -uroot -p#{node['cmon_mysql']['root_password']} < #{node['sql']['cmon_data']}"
   action :run
   not_if { FileTest.exists?("#{install_flag}") }
 end
 
 execute "controller-install-privileges" do
-  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['controller_grants']}"
+  command "#{node['cmon_mysql']['mysql_bin']} -uroot -p#{node['cmon_mysql']['root_password']} < #{node['sql']['controller_grants']}"
   action :nothing
   not_if { FileTest.exists?("#{install_flag}") }
 end
@@ -116,7 +115,7 @@ bash "create-agent-grants" do
 end
 
 execute "controller-grant-agents" do
-  command "#{node['mysql']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['controller_agent_grants']}"
+  command "#{node['cmon_mysql']['mysql_bin']} -uroot -p#{node['cmon_mysql']['root_password']} < #{node['sql']['controller_agent_grants']}"
   action :run
   not_if { FileTest.exists?("#{install_flag}") }
 end
@@ -188,4 +187,5 @@ end
 execute "s9s-controller-installed" do
   command "touch #{install_flag}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end

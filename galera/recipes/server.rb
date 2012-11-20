@@ -167,8 +167,8 @@ template "my.cnf" do
   mode "0644"
 end
 
-my_ip = node['hostname'].downcase
-init_host = galera_config['init_node'].downcase
+my_ip = node['ipaddress']
+init_host = galera_config['init_node']
 sync_host = init_host
 
 Chef::Log.info "My host = #{my_ip}"
@@ -253,5 +253,6 @@ end
 execute "s9s-galera-installed" do
   command "touch #{install_flag}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end
 

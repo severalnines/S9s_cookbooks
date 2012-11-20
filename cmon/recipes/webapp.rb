@@ -23,7 +23,6 @@ cmon_tarball = cmon_config['cmon_tarball_' + node['kernel']['machine']]
 cmon_package = cmon_tarball[0..-8]
 cmon_source = cmon_config['cmon_source']
 
-Chef::Log.info "Downloading #{cmon_tarball}"
 remote_file "#{Chef::Config[:file_cache_path]}/#{cmon_tarball}" do
   source "#{cmon_source}/#{cmon_tarball}"
   action :create_if_missing

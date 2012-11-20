@@ -8,34 +8,34 @@
 
 [MYSQLD]
 user=mysql
-basedir = <%= node['mysql']['basedir'] %>
-datadir = <%= node['mysql']['datadir'] %>
-pid_file = <%= node['mysql']['pid_file'] %>
-socket = <%= node['mysql']['socket'] %>
-port = <%= node['mysql']['port'] %>
+basedir = <%= node['cmon_mysql']['basedir'] %>
+datadir = <%= node['cmon_mysql']['datadir'] %>
+pid_file = <%= node['cmon_mysql']['pid_file'] %>
+socket = <%= node['cmon_mysql']['socket'] %>
+port = <%= node['cmon_mysql']['port'] %>
 log_error = error.log
 #log
 #log_slow_queries
 
 ### INNODB 
-innodb_buffer_pool_size = <%= node['mysql']['innodb']['buffer_pool_size'] %>
+innodb_buffer_pool_size = <%= node['cmon_mysql']['innodb']['buffer_pool_size'] %>
 # buffer pool size > 1GB if you want multiple instances
-innodb_buffer_pool_instances = <%= node['mysql']['innodb']['buffer_pool_instances'] %>
-innodb_flush_log_at_trx_commit = <%= node['mysql']['innodb']['flush_log_at_trx_commit'] %>
-innodb_file_per_table = <%= node['mysql']['innodb']['file_per_table'] %>
-innodb_doublewrite= <%= node['mysql']['innodb']['doublewrite'] %>
-innodb_log_file_size = <%= node['mysql']['innodb']['log_file_size'] %>
-innodb_log_files_in_group = <%= node['mysql']['innodb']['log_files_in_group'] %>
-innodb_max_dirty_pages_pct = <%= node['mysql']['innodb']['max_dirty_pages_pct'] %>
-innodb_io_capacity = <%= node['mysql']['innodb']['io_capacity'] %>
-innodb_thread_concurrency = <%= node['mysql']['innodb']['thread_concurrency'] %>
-innodb_concurrency_tickets = <%= node['mysql']['innodb']['concurrency_tickets'] %>
-innodb_thread_sleep_delay = <%= node['mysql']['innodb']['thread_sleep_delay'] %>
-innodb_lock_wait_timeout = <%= node['mysql']['innodb']['lock_wait_timeout'] %>
-innodb_read_io_threads = <%= node['mysql']['innodb']['read_io_threads'] %>
-innodb_write_io_threads = <%= node['mysql']['innodb']['write_io_threads'] %>
-innodb_file_format = <%= node['mysql']['innodb']['file_format'] %>
-innodb_flush_method = <%= node['mysql']['innodb']['flush_method'] %>
+innodb_buffer_pool_instances = <%= node['cmon_mysql']['innodb']['buffer_pool_instances'] %>
+innodb_flush_log_at_trx_commit = <%= node['cmon_mysql']['innodb']['flush_log_at_trx_commit'] %>
+innodb_file_per_table = <%= node['cmon_mysql']['innodb']['file_per_table'] %>
+innodb_doublewrite= <%= node['cmon_mysql']['innodb']['doublewrite'] %>
+innodb_log_file_size = <%= node['cmon_mysql']['innodb']['log_file_size'] %>
+innodb_log_files_in_group = <%= node['cmon_mysql']['innodb']['log_files_in_group'] %>
+innodb_max_dirty_pages_pct = <%= node['cmon_mysql']['innodb']['max_dirty_pages_pct'] %>
+innodb_io_capacity = <%= node['cmon_mysql']['innodb']['io_capacity'] %>
+innodb_thread_concurrency = <%= node['cmon_mysql']['innodb']['thread_concurrency'] %>
+innodb_concurrency_tickets = <%= node['cmon_mysql']['innodb']['concurrency_tickets'] %>
+innodb_thread_sleep_delay = <%= node['cmon_mysql']['innodb']['thread_sleep_delay'] %>
+innodb_lock_wait_timeout = <%= node['cmon_mysql']['innodb']['lock_wait_timeout'] %>
+innodb_read_io_threads = <%= node['cmon_mysql']['innodb']['read_io_threads'] %>
+innodb_write_io_threads = <%= node['cmon_mysql']['innodb']['write_io_threads'] %>
+innodb_file_format = <%= node['cmon_mysql']['innodb']['file_format'] %>
+innodb_flush_method = <%= node['cmon_mysql']['innodb']['flush_method'] %>
 
 #OTHER THINGS, BUFFERS ETC
 key_buffer_size = 8M
@@ -50,21 +50,21 @@ memlock = 0
 sysdate_is_now = 1
 query_cache_type = 1
 query_cache_size = 32M
-max_connections = <%= node['mysql']['misc']['max_connections'] %>
-thread_cache_size = <%= node['mysql']['misc']['thread_cache_size'] %>
-table_open_cache = <%= node['mysql']['misc']['table_open_cache'] %>
+max_connections = <%= node['cmon_mysql']['misc']['max_connections'] %>
+thread_cache_size = <%= node['cmon_mysql']['misc']['thread_cache_size'] %>
+table_open_cache = <%= node['cmon_mysql']['misc']['table_open_cache'] %>
 lower_case_table_names = 0
 
 [MYSQL]
-socket=<%= node['mysql']['socket'] %>
+socket=<%= node['cmon_mysql']['socket'] %>
 
 [client]
 port            = 3306
-socket=<%= node['mysql']['socket'] %>
+socket=<%= node['cmon_mysql']['socket'] %>
 
 [MYSQLD_SAFE]
-basedir = <%= node['mysql']['basedir'] %>
-datadir = <%= node['mysql']['datadir'] %>
-pid_file = <%= node['mysql']['pid_file'] %>
+basedir = <%= node['cmon_mysql']['basedir'] %>
+datadir = <%= node['cmon_mysql']['datadir'] %>
+pid_file = <%= node['cmon_mysql']['pid_file'] %>
 log_error = error.log
 syslog

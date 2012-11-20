@@ -3,14 +3,14 @@
   "mysql_wsrep_tarball_x86_64": "mysql-5.5.23_wsrep_23.6-linux-x86_64.tar.gz",
   "mysql_wsrep_tarball_i686": "mysql-5.5.23_wsrep_23.6-linux-i686.tar.gz",
   "galera_package_i386": {
-  	"deb": "galera-23.2.1-i386.deb",
-  	"rpm": "galera-23.2.1-1.rhel5.i386.rpm"},  
+  	"deb": "galera-23.2.2-i386.deb",
+  	"rpm": "galera-23.2.2-1.rhel5.i386.rpm"},  
   "galera_package_x86_64": {
-  	"deb": "galera-23.2.1-amd64.deb",
-  	"rpm": "galera-23.2.1-1.rhel5.x86_64.rpm"
+  	"deb": "galera-23.2.2-amd64.deb",
+  	"rpm": "galera-23.2.2-1.rhel5.x86_64.rpm"
   },
   "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.6/+download",
-  "galera_source": "https://launchpad.net/galera/2.x/23.2.1/+download",
+  "galera_source": "https://launchpad.net/galera/2.x/23.2.2/+download",
   "sst_method": "rsync",
   "init_node": "chef-2",
   "galera_nodes": [

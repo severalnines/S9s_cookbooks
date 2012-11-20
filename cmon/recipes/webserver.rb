@@ -50,4 +50,5 @@ end
 execute "s9s-webserver-installed" do
   command "touch #{install_flag}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end

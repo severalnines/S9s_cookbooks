@@ -20,8 +20,8 @@
 install_flag = "/root/.s9s_agent_installed"
 
 cmon_config = data_bag_item('s9s_controller', 'config')
-node['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
-node['cluster_type'] = cmon_config['type']
+node.set['controller']['mysql_hostname'] = cmon_config['controller_host_ipaddress']
+node.set['cluster_type'] = cmon_config['type']
 
 cmon_tarball = cmon_config['cmon_tarball_' + node['kernel']['machine']]
 # strip .tar.gz
@@ -67,7 +67,7 @@ bash "extract-cmon-package" do
 end
 
 execute "agent-install-privileges" do
-  command "#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['mysql']['root_password']} < #{node['sql']['agent_grants']}"
+  command "#{node['cmon_mysql']['mysql_bin']} -uroot -h127.0.0.1 -p#{node['cmon_mysql']['root_password']} < #{node['sql']['agent_grants']}"
   action :nothing
   not_if { FileTest.exists?("#{install_flag}") }
 end
@@ -95,7 +95,7 @@ end
 
 service "cmon" do
   action :nothing
-end 
+end
 
 template "cmon.agent.cnf" do
   path "#{node['install_config_path']}/cmon.cnf"
@@ -118,9 +118,10 @@ end
 service "cmon" do
   supports :restart => true, :start => true, :stop => true, :status => true
   action [:enable, :start]
-end 
+end
 
 execute "s9s-agent-installed" do
   command "touch #{install_flag}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end

@@ -1,36 +1,33 @@
-default['galera']['install_dir'] = "/usr/local"
-
 case node['platform']
 when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
-  default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql"
-  default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysqld"
-
   default['xtra']['packages'] = "openssl psmisc libaio wget rsync nc"
 
 else
 
-  default['mysql']['basedir'] = default['galera']['install_dir'] + "/mysql"
-  default['mysql']['bindir']  = default['mysql']['basedir'] + "/bin"
   default['mysql']['servicename'] = "mysql"
-
   default['xtra']['packages'] = "libssl0.9.8 psmisc libaio1 wget rsync netcat"
 
 end
 
+default['galera']['install_dir'] = "/usr/local"
+
+default['mysql']['basedir'] = "#{galera['install_dir']}/mysql"
+default['mysql']['bindir']  = "#{mysql['basedir']}/bin"
+
 default['xtra']['sleep'] = 60
 default['mysql']['root_password'] = "password"
-default['mysql']['mysqlbin'] = default['mysql']['bindir'] + "/mysql"
+default['mysql']['mysqlbin'] = "#{mysql['bindir']}/mysql"
 
 default['mysql']['datadir'] = "/var/lib/mysql"
 default['mysql']['rundir']  = "/var/run/mysqld"
-default['mysql']['pid_file'] = default['mysql']['datadir'] + "/mysqld.pid"
-default['mysql']['socket']  = default['mysql']['rundir'] + "/mysqld.sock"
+default['mysql']['pid_file'] = "#{mysql['datadir']}/mysqld.pid"
+default['mysql']['socket']  = "#{mysql['rundir']}/mysqld.sock"
 default['mysql']['port']    = 3306
 default['mysql']['tmpdir']  = "/tmp"
 
-default['mysql']['innodb']['buffer_pool_size'] = "128M"
+default['mysql']['innodb']['buffer_pool_size'] = "256M"
 default['mysql']['innodb']['flush_log_at_trx_commit'] = 2
 default['mysql']['innodb']['file_per_table'] = 1
 default['mysql']['innodb']['doublewrite'] = 0

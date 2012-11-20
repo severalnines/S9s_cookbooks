@@ -29,7 +29,7 @@ os=debian
 skip_name_resolve=1
 
 ## CMON DB config  - mysql_password is for the 'cmon' user
-#mysql_basedir=<%= node['mysql']['basedir'] %>
+#mysql_basedir=<%= node['cmon_mysql']['basedir'] %>
 mysql_port=<%= node['controller']['mysql_port'] %>
 #mysql_hostname=<%= node['controller']['mysql_hostname'] %>
 mysql_hostname=127.0.0.1
@@ -77,7 +77,7 @@ datanode_addresses=
 mgmnode_addresses=
 
 ###### LEGACY RRD SECTION - graphs ######
-mysql_bindir=<%= node['mysql']['bindir'] %>
+mysql_bindir=<%= node['cmon_mysql']['bindir'] %>
 imagedir=<%= node['rrd']['imagedir'] %>
 rrdtool=<%= node['rrd']['rrdtool'] %>
 rrd_datadir=<%= node['rrd']['datadir'] %>

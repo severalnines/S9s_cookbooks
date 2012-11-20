@@ -1,16 +1,15 @@
 maintainer "Severalnines AB"
 maintainer_email "support@severalnines.com"
 license "Apache 2.0"
-description "Installs and configures cmon controller and agent"
+description "Installs and configures ClusterControl controller and agents"
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version "0.1"
-recipe "cmon", "Includes the cmon agent"
-recipe "cmon::agent", "Installs cmon agent"
-recipe "cmon::controller", "Installs cmon controller"
-recipe "cmon::web", "Installs cmon web application"
-recipe "cmon::agent_packages", "Installs cmon agent required packages (psmisc libaio)"
-recipe "cmon::controller_packages", "Installs cmon controller requried packages (rrdtool mysql mysql-server)"
-recipe "cmon::web_packages", "Installs cmon web application required packages (apache2 php5-mysql php5-gd libapache2-mod-php5)"
+version "0.5"
+recipe "cmon::agent", "Installs the ClusterControl agent"
+recipe "cmon::controller", "Installs the ClusterControl controller"
+recipe "cmon::controller_mysql", "Installs ClusterControl MySQL server"
+recipe "cmon::controller_rrdtool", "Installs rrdtool to generate grapsh on the controller node"
+recipe "cmon::webapp", "Installs the ClusterControl web application"
+recipe "cmon::webserver", "Installs Apache2"
 
 %w{ debian ubuntu centos fedora redhat }.each do |os|
   supports os

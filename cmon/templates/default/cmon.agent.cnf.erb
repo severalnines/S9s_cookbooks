@@ -29,7 +29,7 @@ os=debian
 skip_name_resolve=1
 
 ## CMON DB config  - mysql_password is for the 'cmon' user
-#mysql_basedir=<%= node['mysql']['basedir'] %>
+#mysql_basedir=<%= node['cmon_mysql']['basedir'] %>
 mysql_port=<%= node['controller']['mysql_port'] %>
 mysql_hostname=<%= node['controller']['mysql_hostname'] %>
 mysql_password=<%= node['controller']['mysql_password'] %>

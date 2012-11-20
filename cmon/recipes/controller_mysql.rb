@@ -43,15 +43,15 @@ ruby_block 'wait-until-innodb' do
 end
 
 # MySQL installed with no root password!
-# Let's secure it. Get root password from ['mysql']['root_password']
+# Let's secure it. Get root password from ['cmon_mysql']['root_password']
 # todo: maybe erb or tmp file
 bash "secure-mysql" do
   user "root"
   code <<-EOH
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
-  #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "FLUSH PRIVILEGES"
+  #{node['cmon_mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['cmon_mysql']['root_password']}') WHERE User='root'"
+  #{node['cmon_mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+  #{node['cmon_mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+  #{node['cmon_mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "FLUSH PRIVILEGES"
   EOH
   not_if { FileTest.exists?("#{install_flag}") }
 end
@@ -84,7 +84,7 @@ execute "cp2-my.cmon.cnf" do
 end
 
 execute "purge-innodb-logfiles" do
-  command "rm #{node['mysql']['datadir']}/ib_logfile*"
+  command "rm #{node['cmon_mysql']['datadir']}/ib_logfile*"
   action :run
   not_if { FileTest.exists?("#{install_flag}") }
 end
@@ -96,7 +96,15 @@ service "mysql" do
   subscribes :restart, resources(:template => 'my.cnf')
 end
 
+service "reload-mysql-cnf" do
+  service_name node['mysql']['service_name']
+  supports :stop => true, :start => true, :restart => true, :reload => true
+  action :restart
+  not_if { FileTest.exists?("#{install_flag}") }
+end
+
 execute "s9s-controller-mysql-installed" do
   command "touch #{install_flag}"
   action :run
+  not_if { FileTest.exists?("#{install_flag}") }
 end
