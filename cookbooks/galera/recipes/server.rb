@@ -77,7 +77,7 @@ case node['platform']
         rm -rf /etc/my.cnf /etc/mysql
         rm -f /root/#{install_flag}
       EOH
-      only_if { galera_config['purge_mysql'] == 'yes' || !FileTest.exists?("#{install_flag}") }
+      only_if { !FileTest.exists?("#{install_flag}") }
     end
   else
     bash "purge-mysql-galera" do
@@ -91,7 +91,7 @@ case node['platform']
         rm -rf /etc/my.cnf /etc/mysql
         rm -f /root/#{install_flag}
       EOH
-      only_if { galera_config['purge_mysql'] == 'yes' || !FileTest.exists?("#{install_flag}") }
+      only_if { !FileTest.exists?("#{install_flag}") }
     end
 end
 
