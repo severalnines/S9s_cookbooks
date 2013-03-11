@@ -1,23 +1,24 @@
 {
   "id": "config",
-  "mysql_wsrep_tarball_x86_64": "mysql-5.5.23_wsrep_23.6-linux-x86_64.tar.gz",
-  "mysql_wsrep_tarball_i686": "mysql-5.5.23_wsrep_23.6-linux-i686.tar.gz",
+  "mysql_wsrep_tarball_x86_64": "mysql-5.5.28_wsrep_23.7-linux-x86_64.tar.gz",
+  "mysql_wsrep_tarball_i686": "mysql-5.5.28_wsrep_23.7-linux-i686.tar.gz",
   "galera_package_i386": {
   	"deb": "galera-23.2.2-i386.deb",
-  	"rpm": "galera-23.2.2-1.rhel5.i386.rpm"},  
+  	"rpm": "galera-23.2.2-1.rhel5.i386.rpm"},
   "galera_package_x86_64": {
   	"deb": "galera-23.2.2-amd64.deb",
   	"rpm": "galera-23.2.2-1.rhel5.x86_64.rpm"
   },
-  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.23-23.6/+download",
+  "mysql_wsrep_source": "https://launchpad.net/codership-mysql/5.5/5.5.28-23.7/+download",
   "galera_source": "https://launchpad.net/galera/2.x/23.2.2/+download",
   "sst_method": "rsync",
-  "init_node": "chef-2",
+  "init_node": "10.0.3.140",
   "galera_nodes": [
-     "chef-2",
-     "chef-3",
-     "chef-4"
+     "10.0.3.140",
+     "10.0.3.150",
+     "10.0.3.160"
     ],
   "secure": "yes",
-  "update_wsrep_urls": "no"
+  "update_wsrep_urls": "yes",
+  "purge_mysql": "yes"
 }
