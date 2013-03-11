@@ -18,7 +18,6 @@
 #
 
 install_flag = "/root/.s9s_galera_installed"
-purge_flag = "/root/.s9s_purge_mysql"
 
 group "mysql" do
 end
@@ -60,11 +59,11 @@ end
 bash "install-mysql-package" do
   user "root"
   code <<-EOH
-    rm -rf #{node['galera']['install_dir']}/mysql
-    zcat #{Chef::Config[:file_cache_path]}/#{mysql_tarball} | tar xf - -C #{node['galera']['install_dir']}
-    ln -sf #{node['galera']['install_dir']}/#{mysql_package} #{node['galera']['install_dir']}/mysql
+    rm -rf #{node['mysql']['base_dir']}
+    zcat #{Chef::Config[:file_cache_path]}/#{mysql_tarball} | tar xf - -C #{node['mysql']['install_dir']}
+    ln -sf #{node['mysql']['install_dir']}/#{mysql_package} #{node['mysql']['base_dir']}
   EOH
-  not_if { File.directory?("#{node['galera']['install_dir']}/#{mysql_package}") }
+  not_if { File.directory?("#{node['mysql']['install_dir']}/#{mysql_package}") }
 end
 
 case node['platform']
@@ -74,7 +73,7 @@ case node['platform']
       code <<-EOH
         killall -9 mysqld_safe mysqld &> /dev/null
         yum remove mysql mysql-libs mysql-devel mysql-server mysql-bench
-        rm -rf #{node['mysql']['datadir']}/*
+        rm -rf #{node['mysql']['data_dir']}/*
         rm -rf /etc/my.cnf /etc/mysql
         rm -f /root/#{install_flag}
       EOH
@@ -88,7 +87,7 @@ case node['platform']
         apt-get -y remove --purge mysql-server mysql-client mysql-common
         apt-get -y autoremove
         apt-get -y autoclean
-        rm -rf #{node['mysql']['datadir']}/*
+        rm -rf #{node['mysql']['data_dir']}/*
         rm -rf /etc/my.cnf /etc/mysql
         rm -f /root/#{install_flag}
       EOH
@@ -118,7 +117,7 @@ else
   end
 end
 
-directory node['mysql']['datadir'] do
+directory node['mysql']['data_dir'] do
   owner "mysql"
   group "mysql"
   mode "0755"
@@ -126,7 +125,7 @@ directory node['mysql']['datadir'] do
   recursive true
 end
 
-directory node['mysql']['rundir'] do
+directory node['mysql']['run_dir'] do
   owner "mysql"
   group "mysql"
   mode "0755"
@@ -136,18 +135,18 @@ end
 
 # install db to the data directory
 execute "setup-mysql-datadir" do
-  command "#{node['mysql']['basedir']}/scripts/mysql_install_db --force --user=mysql --basedir=#{node['mysql']['basedir']} --datadir=#{node['mysql']['datadir']}"
-  not_if { FileTest.exists?("#{node['mysql']['datadir']}/mysql/user.frm") }
+  command "#{node['mysql']['base_dir']}/scripts/mysql_install_db --force --user=mysql --basedir=#{node['mysql']['base_dir']} --datadir=#{node['mysql']['data_dir']}"
+  not_if { FileTest.exists?("#{node['mysql']['data_dir']}/mysql/user.frm") }
 end
 
 
 execute "setup-init.d-mysql-service" do
-  command "cp #{node['mysql']['basedir']}/support-files/mysql.server /etc/init.d/#{node['mysql']['servicename']}"
+  command "cp #{node['mysql']['base_dir']}/support-files/mysql.server /etc/init.d/#{node['mysql']['servicename']}"
   not_if { FileTest.exists?("#{install_flag}") }
 end
 
 template "my.cnf" do
-  path "/etc/my.cnf"
+  path "#{node['mysql']['conf_dir']}/my.cnf"
   source "my.cnf.erb"
   owner "mysql"
   group "mysql"
@@ -186,7 +185,7 @@ Chef::Log.info "wsrep_cluster_address = #{wsrep_cluster_address}"
 bash "set-wsrep-cluster-address" do
   user "root"
   code <<-EOH
-  sed -i 's#.*wsrep_cluster_address.*=.*#wsrep_cluster_address=#{wsrep_cluster_address}#' /etc/my.cnf
+  sed -i 's#.*wsrep_cluster_address.*=.*#wsrep_cluster_address=#{wsrep_cluster_address}#' #{node['mysql']['conf_dir']}/my.cnf
   EOH
   only_if { (galera_config['update_wsrep_urls'] == 'yes') || !FileTest.exists?("#{install_flag}") }
 end
@@ -201,7 +200,7 @@ end
 
 if my_ip != init_host && !File.exists?("#{install_flag}")
 Chef::Log.info "Joiner node sleeping 30 seconds to make sure donor node is up..."
-sleep(30)
+sleep(node['xtra']['sleep'])
 Chef::Log.info "Joiner node cluster address = gcomm://#{sync_host}:#{node['wsrep']['port']}"
 end
 
@@ -224,8 +223,8 @@ end
 bash "set-wsrep-grants-mysqldump" do
   user "root"
   code <<-EOH
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'127.0.0.1' IDENTIFIED BY '#{node['wsrep']['password']}'"
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'127.0.0.1' IDENTIFIED BY '#{node['wsrep']['password']}'"
   EOH
   only_if { my_ip == init_host && (galera_config['sst_method'] == 'mysqldump') && !FileTest.exists?("#{install_flag}") }
 end
@@ -233,8 +232,8 @@ end
 bash "secure-mysql" do
   user "root"
   code <<-EOH
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "DROP DATABASE IF EXISTS test; DELETE FROM mysql.db WHERE DB='test' OR DB='test\\_%'"
-    #{node['mysql']['mysqlbin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'; DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'); FLUSH PRIVILEGES;"
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DROP DATABASE IF EXISTS test; DELETE FROM mysql.db WHERE DB='test' OR DB='test\\_%'"
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'; DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'); FLUSH PRIVILEGES;"
   EOH
   only_if { my_ip == init_host && (galera_config['secure'] == 'yes') && !FileTest.exists?("#{install_flag}") }
 end

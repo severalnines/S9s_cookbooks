@@ -11,50 +11,51 @@ else
 
 end
 
-default['galera']['install_dir'] = "/usr/local"
+default['xtra']['sleep'] = 30
 
-default['mysql']['basedir'] = "#{galera['install_dir']}/mysql"
-default['mysql']['bindir']  = "#{mysql['basedir']}/bin"
+default['mysql']['install_dir'] = "/usr/local"
+default['mysql']['base_dir'] = "#{mysql['install_dir']}/mysql"
+default['mysql']['bin_dir']  = "#{mysql['base_dir']}/bin"
+default['mysql']['mysql_bin'] = "#{mysql['bin_dir']}/mysql"
 
-default['xtra']['sleep'] = 60
 default['mysql']['root_password'] = "password"
-default['mysql']['mysqlbin'] = "#{mysql['bindir']}/mysql"
 
-default['mysql']['datadir'] = "/var/lib/mysql"
-default['mysql']['rundir']  = "/var/run/mysqld"
-default['mysql']['pid_file'] = "#{mysql['datadir']}/mysqld.pid"
-default['mysql']['socket']  = "#{mysql['rundir']}/mysqld.sock"
+default['mysql']['conf_dir']  = '/etc'
+default['mysql']['data_dir'] = "/var/lib/mysql"
+default['mysql']['run_dir']  = "/var/run/mysqld"
+default['mysql']['pid_file'] = "#{mysql['data_dir']}/mysqld.pid"
+default['mysql']['socket']  = "#{mysql['run_dir']}/mysqld.sock"
 default['mysql']['port']    = 3306
-default['mysql']['tmpdir']  = "/tmp"
+default['mysql']['tmp_dir']  = "/tmp"
 
-default['mysql']['innodb']['buffer_pool_size'] = "256M"
-default['mysql']['innodb']['flush_log_at_trx_commit'] = 2
-default['mysql']['innodb']['file_per_table'] = 1
-default['mysql']['innodb']['doublewrite'] = 0
-default['mysql']['innodb']['log_file_size'] = "512M"
-default['mysql']['innodb']['log_files_in_group'] = 2
-default['mysql']['innodb']['buffer_pool_instances'] = 1
-default['mysql']['innodb']['max_dirty_pages_pct'] = 75
-default['mysql']['innodb']['thread_concurrency'] = 0
-default['mysql']['innodb']['concurrency_tickets'] = 5000
-default['mysql']['innodb']['thread_sleep_delay'] = 10000
-default['mysql']['innodb']['lock_wait_timeout'] = 50
-default['mysql']['innodb']['io_capacity'] = 200
-default['mysql']['innodb']['read_io_threads'] = 4
-default['mysql']['innodb']['write_io_threads'] = 4
+default['mysql']['tunable']['buffer_pool_size'] = "256M"
+default['mysql']['tunable']['flush_log_at_trx_commit'] = 2
+default['mysql']['tunable']['file_per_table'] = 1
+default['mysql']['tunable']['doublewrite'] = 0
+default['mysql']['tunable']['log_file_size'] = "512M"
+default['mysql']['tunable']['log_files_in_group'] = 2
+default['mysql']['tunable']['buffer_pool_instances'] = 1
+default['mysql']['tunable']['max_dirty_pages_pct'] = 75
+default['mysql']['tunable']['thread_concurrency'] = 0
+default['mysql']['tunable']['concurrency_tickets'] = 5000
+default['mysql']['tunable']['thread_sleep_delay'] = 10000
+default['mysql']['tunable']['lock_wait_timeout'] = 50
+default['mysql']['tunable']['io_capacity'] = 200
+default['mysql']['tunable']['read_io_threads'] = 4
+default['mysql']['tunable']['write_io_threads'] = 4
 
-default['mysql']['innodb']['file_format'] = "barracuda"
-default['mysql']['innodb']['flush_method'] = "O_DIRECT"
-default['mysql']['innodb']['locks_unsafe_for_binlog'] = 1
-default['mysql']['innodb']['autoinc_lock_mode'] = 2
-default['mysql']['misc']['condition_pushdown'] = 1
+default['mysql']['tunable']['file_format'] = "barracuda"
+default['mysql']['tunable']['flush_method'] = "O_DIRECT"
+default['mysql']['tunable']['locks_unsafe_for_binlog'] = 1
+default['mysql']['tunable']['autoinc_lock_mode'] = 2
+default['mysql']['tunable']['condition_pushdown'] = 1
 
-default['mysql']['misc']['binlog_format'] = "ROW"
+default['mysql']['tunable']['binlog_format'] = "ROW"
 
 #OTHER THINGS, BUFFERS ETC
-default['mysql']['misc']['max_connections'] = 512
-default['mysql']['misc']['thread_cache_size'] = 512
-default['mysql']['misc']['table_open_cache'] = 1024
+default['mysql']['tunable']['max_connections'] = 512
+default['mysql']['tunable']['thread_cache_size'] = 512
+default['mysql']['tunable']['table_open_cache'] = 1024
 #lower-case-table-names = 0
 
 ##
@@ -94,7 +95,7 @@ default['wsrep']['retry_autocommit'] = 1
 # change auto_increment_increment and auto_increment_offset automatically
 default['wsrep']['auto_increment_control'] = 1
 
-# enable "strictly synchronous" semantics for read operations 
+# enable "strictly synchronous" semantics for read operations
 default['wsrep']['casual_reads'] = 0
 
 ##
