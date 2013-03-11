@@ -211,13 +211,20 @@ service "join-cluster" do
   only_if { my_ip != init_host && !FileTest.exists?("#{install_flag}") }
 end
 
-# need to wait a little for the donor to accept connections
-ruby_block "sleep" do
-  block do
-    sleep(5)
-  end
-  only_if { my_ip == init_host && (galera_config['secure'] == 'yes') && !FileTest.exists?("#{install_flag}") }
-  action :create
+bash "wait-until-synced" do
+  user "root"
+  code <<-EOH
+    state=0
+    cnt=0
+    until [[ "$state" == "4" || "$cnt" > 5 ]]
+    do
+      state=$(#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; SHOW GLOBAL STATUS LIKE 'wsrep_local_state'")
+      state=$(echo "$state"  | tr '\n' ' ' | awk '{print $4}')
+      cnt=$(($cnt + 1))
+      sleep 1
+    done
+  EOH
+  only_if { my_ip == init_host && !FileTest.exists?("#{install_flag}") }
 end
 
 bash "set-wsrep-grants-mysqldump" do
