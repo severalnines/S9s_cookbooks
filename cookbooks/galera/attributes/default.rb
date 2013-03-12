@@ -1,3 +1,12 @@
+
+# Vagrant hostonly fix
+# Cookbook Name:: vagrant-ohai
+# Attribute:: default
+#
+# Copyright 2010, Opscode, Inc
+# FHS location would be /var/lib/chef/ohai_plugins or similar.           
+default["vagrant-ohai"]["plugin_path"] = "/etc/chef/vagrant_ohai_plugins"
+
 case node['platform']
 when 'centos', 'redhat', 'fedora', 'suse', 'scientific', 'amazon'
 
