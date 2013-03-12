@@ -12,7 +12,7 @@ Galera Cluster provides synchronous multi-master replication for MySQL (replicat
 This cookbook enables you to install a Galera cluster from scratch. At minimum you would probaly only need to change a few attributes like
 
 * ['mysql']['root_password'] = "password"
-* ['mysql']['innodb']['buffer_pool_size'] = "256M"
+* ['mysql']['tunable']['buffer_pool_size'] = "256M"
 
 You can also deploy our ClusterControl coookbook with the Galera Cluster which provide additional control and monitoring features.
 
@@ -113,18 +113,22 @@ s9s_galera / config.json
 		     "192.168.122.16"
 		    ],
 		   "secure": "yes",
-		   "update_wsrep_urls": "yes",
-		   "purge_mysql": "yes"
+		   "update_wsrep_urls": "yes"
 		}
 
 * **galera_nodes**
 These are the IP addresses where you have MySQL Galera nodes running and a random host in this list will be used as the cluster URL for a galera node if the galera recipe is "reloaded".
 * **sst_method**
-State Snapshot Transfer method, 'mysqldump', 'rsync' or 'rsync_wan'.
+State Snapshot Transfer method, 'mysqldump', 'rsync', 'rsync_wan' or 'xtrabackup' (if installed).
 
 Change History
 ===============
 
+TODO: 
+* Handle my.cnf changes after deployment
+* Galera/MySQL version upgrades
+
+* v0.4 - Vagrant host only fix, attribute names match opscode mysql recipe, update to MySQL version 5.5.29-23.7.3 and Galera 2.4.2
 * v0.3 - Add init_node which specifies the intital donor node.
 * v0.2 - Use wsrep_urls with mysqld_safe
 * v0.1 - Initial recipe based upon MySQL Galera 5.5.23
@@ -132,7 +136,7 @@ Change History
 License and Author
 ==================
 
-Alex Yu (<alex@severalnines.com>)
+Alex Yu (&lt;alex@severalnines.com&gt;)
 
 Copyright (c) 2012 Severalnines AB.
 
