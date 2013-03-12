@@ -87,7 +87,6 @@ end
 bash "install-mysql-package" do
   user "root"
   code <<-EOH
-    rm -rf #{node['mysql']['base_dir']}
     zcat #{Chef::Config[:file_cache_path]}/#{mysql_tarball} | tar xf - -C #{node['mysql']['install_dir']}
     ln -sf #{node['mysql']['install_dir']}/#{mysql_package} #{node['mysql']['base_dir']}
   EOH
@@ -101,7 +100,8 @@ case node['platform']
       code <<-EOH
         killall -9 mysqld_safe mysqld &> /dev/null
         yum remove mysql mysql-libs mysql-devel mysql-server mysql-bench
-        rm -rf #{node['mysql']['data_dir']}/*
+        cd #{node['mysql']['data_dir']}
+        [ $? -eq 0 ] && rm -rf #{node['mysql']['data_dir']}/*
         rm -rf /etc/my.cnf /etc/mysql
         rm -f /root/#{install_flag}
       EOH
@@ -115,7 +115,8 @@ case node['platform']
         apt-get -y remove --purge mysql-server mysql-client mysql-common
         apt-get -y autoremove
         apt-get -y autoclean
-        rm -rf #{node['mysql']['data_dir']}/*
+        cd #{node['mysql']['data_dir']}
+        [ $? -eq 0 ] && rm -rf #{node['mysql']['data_dir']}/*
         rm -rf /etc/my.cnf /etc/mysql
         rm -f /root/#{install_flag}
       EOH
