@@ -1,0 +1,5 @@
+SET SQL_LOG_BIN=0;
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'localhost' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'<%= node['cmon']['mysql_hostname'] %>' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
