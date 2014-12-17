@@ -22,7 +22,7 @@ This cookbook is a replacement for deprecated [cmon](https://supermarket.chef.io
 - Install and configure Apache, check permission and install SSL.
 - Copy the generated SSH key to all nodes.
 
-If you have any questions, you are welcome to get in touch via our [contact us](http://www.severalnines.com/contact-us) page or email us at [info@severalnines.com](info@severalnines.com).
+If you have any questions, you are welcome to get in touch via our [contact us](http://www.severalnines.com/contact-us) page or email us at [info@severalnines.com](mailto:info@severalnines.com).
 
 
 Requirements
