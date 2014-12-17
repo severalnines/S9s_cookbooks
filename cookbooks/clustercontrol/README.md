@@ -67,7 +67,7 @@ $ ./s9s_helper.sh
 ```
 
 Answer all the questions and at the end of the wizard, it will generate a data bag file called `config.json` and a set of command that you can use to create and upload the data bag. If you run the script for the first time, it will ask to re-upload the cookbook since it contains a newly generated SSH key:
-$ knife cookbook upload clustercontrol
+`$ knife cookbook upload clustercontrol`
 
 ### Example data bag - clustercontrol/files/default/config.json
 ```json
@@ -200,7 +200,7 @@ Limitations
 
 This module has been tested on following platforms:
 
-- Debian 7.* (wheezy)
+- Debian 7 (wheezy)
 - Ubuntu 14.04 LTS (trusty)
 - Ubuntu 12.04 LTS (precise)
 - RHEL 5/6
@@ -223,7 +223,7 @@ Copyright (c) 2014 Severalnines AB.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
-```http://www.apache.org/licenses/LICENSE-2.0```
+`http://www.apache.org/licenses/LICENSE-2.0`
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
