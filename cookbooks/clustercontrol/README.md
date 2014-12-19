@@ -219,6 +219,7 @@ This module only supports bootstrapping MySQL servers with IP address only (it e
 Change History
 --------------
 
+- v0.1.3 - Add datadir into s9s_helper
 - v0.1.2 - Fixed sudoer with password
 - v0.1.1 - Cleaning up and updated README
 - v0.1.0 - Initial recipes based on ClusterControl v1.2.8

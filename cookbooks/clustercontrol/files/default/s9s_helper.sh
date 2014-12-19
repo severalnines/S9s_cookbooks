@@ -123,12 +123,13 @@ else
 	[ ! -z "$x" ] && mongodb_server_addresses=$x || value_required
 	datadir=/var/lib/mongodb
 fi
-read -p "Data directory path [$datadir]: " x
+read -p "Database data path [$datadir]: " x
 [ ! -z "$x" ] && datadir=$x
 
 do_rsa_keygen
 api_token=$(python -c 'import uuid; print uuid.uuid4()' | sha1sum | cut -f1 -d' ')
 
+echo ""
 echo 'Generating config.json..'
 echo '{' > $OUTPUT
 echo '	"id" : "config",' >> $OUTPUT
@@ -149,12 +150,14 @@ if [ "$cluster_type" != "mongodb" ]; then
 else
 	echo "	\"mongodb_server_addresses\" : \"$mongodb_server_addresses\"," >> $OUTPUT
 	if [ "$mongodb_type" == "shardedcluster" ]; then
-		echo "	\"mongoarbiter_server_addresses\" : \"$mongoarbiter_server_addresses\"," >> $OUTPUT
 		echo "	\"mongocfg_server_addresses\" : \"$mongocfg_server_addresses\"," >> $OUTPUT
 		echo "	\"mongos_server_addresses\" : \"$mongos_server_addresses\"," >> $OUTPUT
 	fi
+	if [ ! -z "$mongoarbiter_server_addresses" ]; then
+		echo "	\"mongoarbiter_server_addresses\" : \"$mongoarbiter_server_addresses\"," >> $OUTPUT
+	fi
 fi
-echo "  \"datadir\" : \"$datadir\"," >> $OUTPUT
+echo "	\"datadir\" : \"$datadir\"," >> $OUTPUT
 echo "	\"clustercontrol_host\" : \"$clustercontrol_host\"," >> $OUTPUT
 echo "	\"clustercontrol_api_token\" : \"$api_token\"" >> $OUTPUT
 echo '}' >> $OUTPUT
