@@ -3,11 +3,16 @@ clustercontrol CHANGELOG
 
 This file is used to list changes made in each version of the clustercontrol cookbook.
 
+0.1.2
+-----
+- 19-Dec-2014 - Fixed sudoer with password
+
+0.1.1 
+-----
+- 19-Dec-2014 - Cleaning up and updated README
+
+
 0.1.0
 -----
-- [your_name] - Initial release of clustercontrol
+- 17-Dec-2014 - Initial recipes based on ClusterControl v1.2.8
 
-- - -
-Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.
-
-The [Github Flavored Markdown page](http://github.github.com/github-flavored-markdown/) describes the differences between markdown on github and standard markdown.

@@ -11,7 +11,7 @@ INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node[
 <% end -%>
 INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'OS_USER_HOME','<%= node['user_home'] %>');
 <% if node['sudo_password'] != nil then -%>
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'SUDO','<%= node['sudo_password'] %>');
+INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'SUDO','echo '<%= node['sudo_password'] %>' | sudo -S');
 <% end -%>
 UPDATE dcps.users SET email='<%= node['email_address'] %>', uuid='<%=  node['api_token'] %>' WHERE id=1;
 REPLACE INTO dcps.apis (id, company_id, user_id, url, token) VALUES (1, 1, 1, 'https://127.0.0.1/cmonapi','<%= node['api_token'] %>');

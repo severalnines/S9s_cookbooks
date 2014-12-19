@@ -39,7 +39,7 @@ mysql_password=<%= node['cmon']['mysql_password'] %>
 hostname=<%= node['ipaddress'] %>
 
 # The user that can SSH without password to the other nodes
-os_user=<%= node['os_user'] %>
+os_user=<%= node['ssh_user'] %>
 
 # location of cmon.pid file. The pidfile is written in /tmp/ by default
 pidfile=<%= node['cmon']['pid_file'] %>
@@ -67,6 +67,7 @@ mongocfg_server_addresses=<%= node['cmon']['mongocfg_server_addresses'] %>
 mongos_server_addresses=<%= node['cmon']['mongos_server_addresses'] %>
 <% end -%>
 <% end -%>
+monitored_mountpoints=<%= node['cmon']['monitored_mountpoints'] %>
 
 # daemonize = 0, not daemonize = 1
 nodaemon=<%= node['cmon']['daemonize'] %>
@@ -78,4 +79,4 @@ host_stats_collection_interval=30
 
 # SSH settings
 ssh_port=<%= node['ssh_port'] %>
-ssh_identity=<%= node['ssh_identity'] %>
+ssh_identity=<%= node['ssh_key'] %>

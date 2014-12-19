@@ -30,7 +30,9 @@ node.set['cmon']['mongodb_server_addresses'] = cc_config['mongodb_server_address
 node.set['cmon']['mongoarbiter_server_addresses'] = cc_config['mongoarbiter_server_addresses']
 node.set['cmon']['mongocfg_server_addresses'] = cc_config['mongocfg_server_addresses']
 node.set['cmon']['mongos_server_addresses'] = cc_config['mongos_server_addresses']
+node.set['cmon']['monitored_mountpoints'] = cc_config['datadir']
 node.set['mysql']['vendor'] = cc_config['vendor']
+node.set['mysql']['root_password'] = cc_config['mysql_root_password']
 
 mysql_flag = "#{node['user_home']}/.mysql_installed"
 cc_flag = "#{node['user_home']}/.cc_installed"
@@ -135,23 +137,23 @@ template "#{node['mysql']['conf_file']}" do
 end
 
 execute "purge-innodb-logfiles" do
-  command "rm #{node['cmon']['mysql_datadir']}/ib_logfile*"
-  action :run
-  not_if { FileTest.exists?("#{mysql_flag}") }
+	command "rm #{node['cmon']['mysql_datadir']}/ib_logfile*"
+	action :run
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 service "mysql" do
-  service_name node['mysql']['service_name']
-  supports :stop => true, :start => true, :restart => true, :reload => true
-  action :start
-  subscribes :restart, resources(:template => "#{node['mysql']['conf_file']}")
+	service_name node['mysql']['service_name']
+	supports :stop => true, :start => true, :restart => true, :reload => true
+	action :start
+	subscribes :restart, resources(:template => "#{node['mysql']['conf_file']}")
 end
 
 service "reload-mysql-cnf" do
-  service_name node['mysql']['service_name']
-  supports :stop => true, :start => true, :restart => true, :reload => true
-  action :restart
-  not_if { FileTest.exists?("#{mysql_flag}") }
+	service_name node['mysql']['service_name']
+	supports :stop => true, :start => true, :restart => true, :reload => true
+	action :restart
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 bash "secure-mysql" do
@@ -166,38 +168,38 @@ bash "secure-mysql" do
 end
 
 execute "cmon-import-structure" do
-  command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_schema']}"
-  action :run
-  not_if { FileTest.exists?("#{mysql_flag}") }
+	command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_schema']}"
+	action :run
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 execute "cmon-import-data" do
-  command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_data']}"
-  action :run
-  not_if { FileTest.exists?("#{mysql_flag}") }
+	command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cmon_data']}"
+	action :run
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 execute "cc-import-structure-data" do
-  command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cc_schema']}"
-  action :run
-  not_if { FileTest.exists?("#{mysql_flag}") }
+	command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{node['sql']['cc_schema']}"
+	action :run
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 configure_cmon_db_sql = "#{Chef::Config[:file_cache_path]}/configure_cmon_db.sql"
 
 execute "configure-cmon-db" do
-  command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{configure_cmon_db_sql}"
-  action :nothing
-  not_if { FileTest.exists?("#{mysql_flag}") }
+	command "#{node['cmon']['mysql_bin']} -uroot -p#{node['mysql']['root_password']} < #{configure_cmon_db_sql}"
+	action :nothing
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 template "configure_cmon_db.sql" do
-  path "#{configure_cmon_db_sql}"
-  source "configure_cmon_db.sql.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  notifies :run, resources(:execute => "configure-cmon-db"), :immediately
+	path "#{configure_cmon_db_sql}"
+	source "configure_cmon_db.sql.erb"
+	owner "root"
+	group "root"
+	mode "0644"
+	notifies :run, resources(:execute => "configure-cmon-db"), :immediately
 end
 
 execute "mysql-flag" do
@@ -275,8 +277,8 @@ template "cmon.cnf" do
 end
 
 service "cmon" do
-  supports :restart => true, :start => true, :stop => true, :reload => true
-  action [ :enable, :start ]
+	supports :restart => true, :start => true, :stop => true, :reload => true
+	action [ :enable, :start ]
 end
 
 execute "cc-flag" do

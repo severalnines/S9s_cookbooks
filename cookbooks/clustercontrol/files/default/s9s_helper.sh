@@ -14,6 +14,7 @@ ssh_port=22
 ssh_key="id_rsa"
 mongodb_type="replicaset"
 vendor="percona"
+datadir="/var/lib/mysql"
 
 rel_dir=`dirname "$0"`
 root_dir=`cd $rel_dir;pwd`
@@ -106,7 +107,6 @@ if [ "$cluster_type" != "mongodb" ]; then
 	echo "We presume all database nodes are using the same MySQL root password."
 	echo ""
 else
-	echo ""
 	echo "What type of MongoDB cluster do you have?"
 	read -p "(replicaset|shardedcluster) [replicaset]: " x
 	[ ! -z "$x" ] && [ "$x" != "replicaset" ]  && [ "$x" != "shardedcluster" ] && echo "Unsupported cluster." && exit 1
@@ -121,7 +121,10 @@ else
 	fi
 	read -p "MongoDB shardsvr/replSet instances (ip:port - comma-separated list): " x
 	[ ! -z "$x" ] && mongodb_server_addresses=$x || value_required
+	datadir=/var/lib/mongodb
 fi
+read -p "Data directory path [$datadir]: " x
+[ ! -z "$x" ] && datadir=$x
 
 do_rsa_keygen
 api_token=$(python -c 'import uuid; print uuid.uuid4()' | sha1sum | cut -f1 -d' ')
@@ -151,6 +154,7 @@ else
 		echo "	\"mongos_server_addresses\" : \"$mongos_server_addresses\"," >> $OUTPUT
 	fi
 fi
+echo "  \"datadir\" : \"$datadir\"," >> $OUTPUT
 echo "	\"clustercontrol_host\" : \"$clustercontrol_host\"," >> $OUTPUT
 echo "	\"clustercontrol_api_token\" : \"$api_token\"" >> $OUTPUT
 echo '}' >> $OUTPUT
