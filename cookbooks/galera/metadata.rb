@@ -1,3 +1,4 @@
+name             "galera"
 maintainer       "Severalnines AB"
 maintainer_email "support@severalnines.com"
 license          "Apache 2.0"
