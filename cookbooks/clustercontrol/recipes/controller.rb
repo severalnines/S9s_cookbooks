@@ -9,29 +9,10 @@
 
 cc_config = data_bag_item('clustercontrol','config')
 
-node.set['cluster_type'] = cc_config['cluster_type']
 node.set['api_token'] = cc_config['clustercontrol_api_token']
-node.set['email_address'] = cc_config['email_address']
-node.set['ssh_user'] = cc_config['ssh_user']
-node.set['ssh_port'] = cc_config['ssh_port']
-if "#{node['ssh_user']}" == "root"
-	node.set['user_home'] = "/root"
-else
-	node.set['user_home'] = "/home/#{node['ssh_user']}"
-end
-node.set['ssh_key'] = "#{node['user_home']}/.ssh/id_rsa"
-node.set['sudo_password'] = cc_config['sudo_password']
 node.set['cmon']['mysql_password'] = cc_config['cmon_password']
-node.set['cmon']['mysql_server_addresses'] = cc_config['mysql_server_addresses']
-node.set['cmon']['datanode_addresses'] = cc_config['datanode_addresses']
-node.set['cmon']['mgmnode_addresses'] = cc_config['mgmnode_addresses']
-node.set['cmon']['ndb_connectstring'] = cc_config['ndb_connectstring']
-node.set['cmon']['mongodb_server_addresses'] = cc_config['mongodb_server_addresses']
-node.set['cmon']['mongoarbiter_server_addresses'] = cc_config['mongoarbiter_server_addresses']
-node.set['cmon']['mongocfg_server_addresses'] = cc_config['mongocfg_server_addresses']
-node.set['cmon']['mongos_server_addresses'] = cc_config['mongos_server_addresses']
-node.set['cmon']['monitored_mountpoints'] = cc_config['datadir']
-node.set['mysql']['vendor'] = cc_config['vendor']
+node.set['cmon']['mysql_root_password'] = cc_config['mysql_root_password']
+node.set['cmon']['mysql_port'] = cc_config['cmon_port']
 node.set['mysql']['root_password'] = cc_config['mysql_root_password']
 
 mysql_flag = "#{node['user_home']}/.mysql_installed"
@@ -63,12 +44,23 @@ execute "update-repository" do
 end
 
 # install required packages
-packages = node['packages']
-packages.each do |name|
-  package name do
-  	Chef::Log.info "Installing #{name}"
-    action :install
-    #options "--force-yes"
+case node[:platform_family]
+when 'debian'
+  packages = node['packages']
+  packages.each do |name|
+    package name do
+        Chef::Log.info "Installing #{name}"
+    	action :install
+    	options "--force-yes"
+    end
+  end
+when 'redhat'
+  packages = node['packages']
+  packages.each do |name|
+    package name do
+        Chef::Log.info "Installing #{name}"
+    	action :install
+    end
   end
 end
 
@@ -102,26 +94,6 @@ cookbook_file "id_rsa.pub" do
 	owner "#{node['ssh_user']}"
 	group "#{node['ssh_user']}"
 	action :create_if_missing
-end
-
-bash "ssh-keyscan-nodes" do
-	user "root"
-	code <<-EOH
-	if [ #{node['cluster_type']} != "mongodb" ] || [ #{node['cluster_type']} != "mysqlcluster" ]; then
-		all_hosts=$(echo "#{node['ipaddress']} #{node['cmon']['mysql_server_addresses']}" | tr ',' ' ')
-	elif [ #{node['cluster_type']} == "mysqlcluster" ]; then
-		db_hosts=$(echo "#{node['ipaddress']} #{node['cmon']['mysql_server_addresses']} #{node['cmon']['mgmnode_addresses']} #{node['cmon']['datanode_addresses']}" | tr ',' ' ')
-		all_hosts=$(echo "${db_hosts[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')
-	else
-		db_hosts=$(echo "#{node['ipaddress']} #{node['cmon']['mongodb_server_addresses']} #{node['cmon']['mongoarbiter_server_addresses']} #{node['cmon']['mongocfg_server_addresses']} #{node['cmon']['mongos_server_addresses']}"  | tr ',' ' ')
-		all_hosts=$(echo "${db_hosts[@]}" | tr ' ' '\n' | sort -u | sed 's|:.*||g' | tr '\n' ' ')
-	fi
-	for h in $all_hosts
-	do
-		ssh-keyscan -t rsa $h >> #{node['user_home']}/.ssh/known_hosts
-	done
-	cat #{node['ssh_key']}.pub >> #{node['user_home']}/.ssh/authorized_keys
-	EOH
 end
 
 service "#{node['mysql']['service_name']}" do
@@ -212,8 +184,8 @@ service "#{node['apache']['service_name']}" do
 	action :nothing
 end
 
-if platform?("ubuntu")
-	if node['platform_version'].to_f >= 14.04
+if platform?("ubuntu","debian")
+	if (node["platform"] == "ubuntu" && node['platform_version'].to_f >= 14.04) || (node["platform"] == "debian" && node['platform_version'].to_f >= 8)
 		bash "pre-configure-web-app" do
 			user "root"
 			code <<-EOH
@@ -259,6 +231,8 @@ bash "configure-web-app" do
 		chown -Rf #{node['apache']['user']}:#{node['apache']['user']} #{node['apache']['wwwroot']}/cmon
 		chown -Rf #{node['apache']['user']}:#{node['apache']['user']} #{node['apache']['wwwroot']}/cmonapi
 		chown -Rf #{node['apache']['user']}:#{node['apache']['user']} #{node['apache']['wwwroot']}/clustercontrol
+		cat #{node['user_home']}/.ssh/id_rsa.pub >> #{node['user_home']}/.ssh/authorized_keys
+		chmod 600 #{node['user_home']}/.ssh/authorized_keys
 	EOH
 	notifies :restart, resources(:service => "#{node['apache']['service_name']}"), :immediately
 end
@@ -272,7 +246,7 @@ template "cmon.cnf" do
 	source "cmon.cnf.erb"
 	owner "root"
 	group "root"
-	mode "0644"
+	mode "0600"
 	notifies :restart, resources(:service => "cmon")
 end
 

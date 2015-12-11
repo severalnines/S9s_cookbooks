@@ -1,21 +1,4 @@
 SET SQL_LOG_BIN=0;
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'CLUSTER_NAME','<%= node['cluster_name'] %>');
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'BACKUPDIR','<%= node['backup_dir'] %>');
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'BACKUP_RETENTION','7');
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'VENDOR','<%= node['mysql']['vendor'] %>');
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'ROOT_PASSWORD','<%= node['mysql']['root_password'] %>');
-<% case node['cluster_type'] %>
-<% when 'mysqlcluster' -%>
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'NDB_CONNECTSTRING','<%= node['cmon']['ndb_connectstring'] %>');
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'NDB_BINARY','<%= node['cmon']['ndb_binary'] %>');
-<% end -%>
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'OS_USER_HOME','<%= node['user_home'] %>');
-<% if node['sudo_password'] != nil then -%>
-INSERT IGNORE INTO cmon.cmon_configuration (cid, param, value) VALUES (<%= node['cluster_id'] %>, 'SUDO','echo '<%= node['sudo_password'] %>' | sudo -S');
-<% end -%>
-UPDATE dcps.users SET email='<%= node['email_address'] %>', uuid='<%=  node['api_token'] %>' WHERE id=1;
-REPLACE INTO dcps.apis (id, company_id, user_id, url, token) VALUES (1, 1, 1, 'https://127.0.0.1/cmonapi','<%= node['api_token'] %>');
-REPLACE INTO dcps.clusters(id, company_id, cluster_id, api_id, name, type, status, created, created_by) VALUES (<%= node['cluster_id'] %>, 1, <%= node['cluster_id'] %>, 1, '<%= node['cluster_name'] %>', '<%= node['cluster_type'] %>', 100, NOW(), 1);
 GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'localhost' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
 GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'<%= node['ipaddress'] %>' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;

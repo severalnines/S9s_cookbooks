@@ -1,6 +1,7 @@
 clustercontrol Cookbook
 =======================
-Installs ClusterControl on your existing database cluster. ClusterControl is an agentless management and automation software for database clusters. It helps deploy, monitor, manager and scale your database cluster. This cookbook will install ClusterControl and configure it to manage and monitor an **existing** database cluster.
+
+Installs ClusterControl for your new database node/cluster deployment or on top of your existing database node/cluster. ClusterControl is a management and automation software for database clusters. It helps deploy, monitor, manage and scale your database node/cluster.
 
 Supported database clusters:
 
@@ -8,19 +9,21 @@ Supported database clusters:
 - Percona XtraDB Cluster
 - MariaDB Galera Cluster
 - MySQL Replication
+- MySQL single instance
 - MySQL Cluster
 - MongoDB Replica Set
 - MongoDB Sharded Cluster
 - TokuMX Cluster
+- PostgreSQL single instance
 
-More details at [Severalnines](http://www.severalnines.com/clustercontrol) website.
+Details at [Severalnines](http://www.severalnines.com/clustercontrol) website.
 
 This cookbook is a replacement for deprecated [cmon](https://supermarket.chef.io/cookbooks/cmon) cookbook that we have built earlier. It manages and configures ClusterControl and all of its components:
 
 - Install ClusterControl controller, cmonapi and UI via Severalnines package repository.
 - Install and configure MySQL, create CMON DB, grant cmon user and configure DB for ClusterControl UI.
 - Install and configure Apache, check permission and install SSL.
-- Copy the generated SSH key to all nodes.
+- Copy the generated SSH key to all nodes (optional).
 
 If you have any questions, you are welcome to get in touch via our [contact us](http://www.severalnines.com/contact-us) page or email us at [info@severalnines.com](mailto:info@severalnines.com).
 
@@ -32,20 +35,21 @@ Requirements
 
 - CentOS, Redhat, Fedora
 - Debian, Ubuntu
-- x86_64 architecture only
+- x86\_64 architecture only
 
-Tested on Chef Server 11.1/12.0 on following platforms:
+Tested on Chef Server 11.1/12.0 on following platforms (x86\_64 only):
 
-- CentOS 6.5 64bit
-- Ubuntu 12.04 64bit
-- Ubuntu 14.04 64bit
-- Debian 7 64bit
+- CentOS 6.5
+- CentOS 7
+- Ubuntu 12.04
+- Ubuntu 14.04
+- Debian 7
+- Debian 8
 
 Make sure you meet following criteria prior to the deployment:
 
 - ClusterControl node must run on a clean dedicated host with internet connection.
-- ClusterControl node must run on the same operating system distribution with your database hosts (mixing Debian with Ubuntu or CentOS with Red Hat is possible)
-- Make sure your database cluster is up and running.
+- If you want to add an existing cluster, ensure your database cluster is up and running.
 - If you are running as sudo user, make sure the user is able to escalate to root with sudo command.
 - SELinux/AppArmor must be turned off. Services or ports to be enabled are listed [here](http://www.severalnines.com/docs/clustercontrol-administration-guide/administration/securing-clustercontrol).
 
@@ -75,13 +79,8 @@ $ knife cookbook upload clustercontrol
 ```json
 {
   "id"                      : "config",
-  "cluster_type"            : "galera",
-  "email_address"           : "admin@localhost.xyz",
-  "ssh_user"                : "ubuntu",
   "cmon_password"           : "cmonP4ss",
   "mysql_root_password"     : "myR00tP4ssword",
-  "mysql_server_addresses"  : "192.168.1.11,192.168.1.12,192.168.1.13",
-  "clustercontrol_host"     : "192.168.1.10",
   "clustercontrol_api_token": "b7e515255db703c659677a66c4a17952515dbaf5"
 }
 ```
@@ -95,80 +94,17 @@ Following options are used for the general ClusterControl set up:
 `id`
 The data item identifier. Do not change this value.
 
-`cluster_type`
-The database cluster type. MySQL replication falls under mysql_single. Supported values: galera, mysqlcluster, replication, mysql_single, mongodb
-- Default: 'galera'
-
-`email_address`
-Specify an email as root user for ClusterControl UI. You will login using this email with default password 'admin'.
-- Default: 'admin@localhost.xyz'
-
-`ssh_user`
-Specify the SSH user that ClusterControl will use to manage the database nodes. Unless root, make sure this user is in sudoers list. 
-- Default: 'root'
-
-`ssh_port`
-Specify the SSH port used by ClusterControl to SSH into database hosts. All nodes in the cluster must use the same SSH port.
-- Default: 22
-
 `cmon_password`
-Specify the MySQL password for user cmon. The recipe will grant this user with specified password, and is needed by ClusterControl.
--Default: 'cmon'
-
-`clustercontrol_host`
-The ClusterControl host IP address
-- Example: '11.22.33.44'
-
-`clustercontrol_api_token`
-40-character ClusterControl token generated from s9s_helper script. 
-- Example: 'b7e515255db703c659677a66c4a17952515dbaf5'
-
-`datadir`
-Path to the database cluster's data directory that ClusterControl should monitor
-- Default: `/var/lib/mysql`
-
-### MySQL specific options
-
-Following options are used for supported MySQL-based cluster type particularly MySQL standalone, Galera Cluster, MySQL Replication or MySQL Cluster.
-
-`mysql_server_addresses`
-Comma-separated list of MySQL servers' IP address that ClusterControl should monitor. For MySQL cluster, specify the MySQL API nodes list instead. 
-- Example: '12.12.12.12,13.13.13.13,14.14.14.14'
-
-`vendor`
-Database cluster provider (Galera Clusters only). Supported values: percona, mariadb or codership. 
-- Default: 'percona'
+Specify the MySQL password for user cmon. The recipe will grant this user with specified password, and is required by ClusterControl.
+- Default: 'cmon'
 
 `mysql_root_password`
-MySQL root password of your database cluster to be monitored by ClusterControl.
+Specify the MySQL root password. This recipe will install a fresh MySQL server and it will create a MySQL user.
 - Default: 'password'
 
-`datanode_addresses`
-Comma-separated list of MySQL data nodes' IP address that ClusterControl should monitor (MySQL Cluster only).
-- Example: '12.12.12.12,13.13.13.13,14.14.14.14'
-
-`mgmnode_addresses`
-Comma-separated list of MySQL data nodes' IP address that ClusterControl should monitor (MySQL Cluster only).
-- Example: '12.12.12.12,13.13.13.13,14.14.14.14'
-
-### MongoDB specific options
-Following options are used for supported MongoDB and TokuMX cluster type particularly Sharded Cluster or Replica Set.
-
-`mongodb_server_addresses`
-Comma-separated list of IP address/hostname with port of MongoDB/TokuMX shard/replica set nodes that ClusterControl should monitor.
-- Example: '12.12.12.12:27017,13.13.13.13:27017'
-
-`mongoarbiter_server_addresses`
-Comma-separated list of IP address/hostname with port of MongoDB/TokuMX arbiter node (if any) that ClusterControl should monitor.
-- Example: '12.12.12.12:30000,13.13.13.13:30000'
-
-`mongocfg_server_addresses`
-Comma-separated list of IP address/hostname with port of MongoDB/TokuMX config node (sharded cluster only) that ClusterControl should monitor.
-- Example: '12.12.12.12:27019,13.13.13.13:27019'
-
-`mongos_server_addresses`
-Comma-separated list of IP address/hostname with port of MongoDB/TokuMX mongos node (sharded cluster only) that ClusterControl should monitor.
-- Example: '12.12.12.12:27017,13.13.13.13:27017'
+`clustercontrol_api_token`
+40-character ClusterControl token generated from s9s\_helper script.
+- Example: 'b7e515255db703c659677a66c4a17952515dbaf5'
 
 
 Usage
@@ -186,7 +122,7 @@ For ClusterControl host, just include `clustercontrol` or `clustercontrol::contr
 }
 ```
 
-### clustercontrol::db_hosts
+### clustercontrol::db\_hosts
 
 For database hosts, include `clustercontrol::db_hosts` in your node's `run_list`:
 
@@ -199,7 +135,7 @@ For database hosts, include `clustercontrol::db_hosts` in your node's `run_list`
 }
 ```
 
-** Do not forget to generate databag before the deployment begins! Once the cookbook is applied to all nodes, open ClusterControl web UI at `https://[ClusterControl IP address]/clustercontrol` and login using specified email address with default password 'admin'.
+** Do not forget to generate databag before the deployment begins! Once the cookbook is applied to all nodes, open ClusterControl web UI at `https://[ClusterControl IP address]/clustercontrol` and create the default admin user with valid email address.
 
 Limitations
 -----------
@@ -207,19 +143,20 @@ Limitations
 This module has been tested on following platforms:
 
 - Debian 7 (wheezy)
+- Debian 8 (jessie)
 - Ubuntu 14.04 LTS (trusty)
 - Ubuntu 12.04 LTS (precise)
-- RHEL 5/6
-- CentOS 5/6
+- RHEL 6/7
+- CentOS 6/7
 
-This module only supports bootstrapping MySQL servers with IP address only (it expects skip-name-resolve is enabled on all MySQL nodes). However, for MongoDB you can specify hostname as described under MongoDB Specific Options.
 
 [ClusterControl known issues and limitations](http://www.severalnines.com/docs/clustercontrol-troubleshooting-guide/known-issues-limitations).
 
 Change History
 --------------
 
-- v0.1.3 - Add datadir into s9s_helper
+- v0.1.4 - Follow install-cc installation method. Tested with ClusterControl v1.2.11 on Chef 12. Support RHEL/CentOS 7, Debian 8 (Jessie).
+- v0.1.3 - Add datadir into s9s\_helper
 - v0.1.2 - Fixed sudoer with password
 - v0.1.1 - Cleaning up and updated README
 - v0.1.0 - Initial recipes based on ClusterControl v1.2.8

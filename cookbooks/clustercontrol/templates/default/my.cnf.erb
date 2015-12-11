@@ -7,13 +7,11 @@
 user=mysql
 basedir=<%= node['cmon']['mysql_basedir'] %>
 datadir=<%= node['cmon']['mysql_datadir'] %>
-pid-file=<% if node['platform_family'] == 'debian' %>mysqld.pid<% else %>/var/run/mysqld/mysqld.pid<% end %>
-socket=/var/run/mysqld/mysqld.sock
 port=3306
 log-error=error.log
 
 ### INNODB 
-innodb-buffer-pool-size = 128M
+innodb-buffer-pool-size = 256M
 innodb-flush-log-at-trx_commit = 2
 innodb-file-per-table = 1
 #innodb_log_file_size = 256M
@@ -42,15 +40,7 @@ thread-cache-size = 64
 table-open_cache = 512
 lower-case-table-names = 0
 
-[MYSQL]
-socket=/var/run/mysqld/mysqld.sock
-
-[client]
-port=3306
-socket=/var/run/mysqld/mysqld.sock
-
 [MYSQLD_SAFE]
 basedir=<%= node['cmon']['mysql_basedir'] %>
 datadir=<%= node['cmon']['mysql_datadir'] %>
-pid-file=<% if node['platform_family'] == 'debian' %>mysqld.pid<% else %>/var/run/mysqld/mysqld.pid<% end %>
 log-error=error.log
