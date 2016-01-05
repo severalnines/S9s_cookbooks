@@ -54,7 +54,7 @@ when 'debian'
     	options "--force-yes"
     end
   end
-when 'redhat'
+when 'rhel'
   packages = node['packages']
   packages.each do |name|
     package name do
