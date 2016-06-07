@@ -1,14 +1,12 @@
 case node['platform']
-when 'centos', 'redhat', 'fedora', 'scientific', 'amazon'
+when 'centos', 'rhel', 'fedora', 'scientific', 'amazon'
 	default['repo_path'] = "/etc/yum.repos.d"
 	default['repo_file'] = "s9s-repo.repo"
 	default['update_repo'] = "yum clean all"
 
-	if node['platform_version'].to_f <= 6
-		default['packages'] = %w(httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mysql mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi)
+	if node['platform_version'].to_f < 7
 		default['mysql']['service_name'] = "mysqld"
 	else
-		default['packages'] = %w(httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mariadb mariadb-server clustercontrol-controller clustercontrol clustercontrol-cmonapi)
 		default['mysql']['service_name'] = "mariadb"
 	end
 
@@ -29,8 +27,6 @@ when 'debian', 'ubuntu'
 	default['repo_path'] = "/etc/apt/sources.list.d"
 	default['repo_file'] = "s9s-repo.list"
 	default['update_repo'] = "apt-get update"
-
-	default['packages']	= %w(apache2 libapache2-mod-php5 php5-common php5-mysql php5-gd php5-ldap php5-json php5-curl dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi)
 
 	default['apache']['service_name'] = "apache2"
 	default['apache']['extra_opt'] = nil
@@ -66,6 +62,7 @@ default['cmon']['mysql_hostname'] = "#{ipaddress}"
 default['cmon']['mysql_root_password'] = "password"
 default['cmon']['mysql_password'] = "cmon"
 default['cmon']['mysql_port'] = 3306
+default['cmon']['mysql_basedir'] = "/usr"
 default['cmon']['mysql_datadir'] = "/var/lib/mysql"
 default['mysql']['root_password'] = "password"
 default['cmon']['mysql_bin'] = "/usr/bin/mysql"

@@ -10,10 +10,13 @@
 cc_config = data_bag_item('clustercontrol','config')
 
 node.set['api_token'] = cc_config['clustercontrol_api_token']
+node.set['cmon']['rpc_key'] = cc_config['clustercontrol_api_token']
 node.set['cmon']['mysql_password'] = cc_config['cmon_password']
 node.set['cmon']['mysql_root_password'] = cc_config['mysql_root_password']
 node.set['cmon']['mysql_port'] = cc_config['cmon_port']
 node.set['mysql']['root_password'] = cc_config['mysql_root_password']
+node.set['ssh_user'] = cc_config['ssh_user']
+node.set['user_home'] = cc_config['user_home']
 
 mysql_flag = "#{node['user_home']}/.mysql_installed"
 cc_flag = "#{node['user_home']}/.cc_installed"
@@ -44,9 +47,9 @@ execute "update-repository" do
 end
 
 # install required packages
-case node[:platform_family]
+case node['platform_family']
 when 'debian'
-  packages = node['packages']
+  packages = %w{apache2 libapache2-mod-php5 php5-common php5-mysql php5-gd php5-ldap php5-json php5-curl dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-nodejs}
   packages.each do |name|
     package name do
         Chef::Log.info "Installing #{name}"
@@ -55,7 +58,11 @@ when 'debian'
     end
   end
 when 'rhel'
-  packages = node['packages']
+  if node['platform_version'].to_f < 7
+    packages = %w{httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mysql mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-nodejs}
+  else
+    packages = %w{httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mariadb mariadb-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-nodejs}
+  end
   packages.each do |name|
     package name do
         Chef::Log.info "Installing #{name}"
@@ -228,6 +235,7 @@ bash "configure-web-app" do
 		sed -i 's|MYSQL_PORT|#{node['cmon']['mysql_port']}|g' #{node['cmonapi']['database']}
 		sed -i 's|DBPASS|#{node['cmon']['mysql_password']}|g' #{node['ccui']['bootstrap']}
 		sed -i 's|DBPORT|#{node['cmon']['mysql_port']}|g' #{node['ccui']['bootstrap']}
+		sed -i 's|RPCTOKEN|#{node['cmon']['rpc_key']}|g' #{node['ccui']['bootstrap']}
 		chown -Rf #{node['apache']['user']}:#{node['apache']['user']} #{node['apache']['wwwroot']}/cmon
 		chown -Rf #{node['apache']['user']}:#{node['apache']['user']} #{node['apache']['wwwroot']}/cmonapi
 		chown -Rf #{node['apache']['user']}:#{node['apache']['user']} #{node['apache']['wwwroot']}/clustercontrol
@@ -248,6 +256,11 @@ template "cmon.cnf" do
 	group "root"
 	mode "0600"
 	notifies :restart, resources(:service => "cmon")
+end
+
+file "#{node['apache']['wwwroot']}/clustercontrol/bootstrap.php" do
+	owner "#{node['apache']['user']}"
+	group "#{node['apache']['user']}"
 end
 
 service "cmon" do

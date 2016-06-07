@@ -18,7 +18,7 @@ Supported database clusters:
 
 Details at [Severalnines](http://www.severalnines.com/clustercontrol) website.
 
-This cookbook is a replacement for deprecated [cmon](https://supermarket.chef.io/cookbooks/cmon) cookbook that we have built earlier. It manages and configures ClusterControl and all of its components:
+This cookbook is a replacement for the deprecated [cmon](https://supermarket.chef.io/cookbooks/cmon) cookbook that we have built earlier. It manages and configures ClusterControl and all of its components:
 
 - Install ClusterControl controller, cmonapi and UI via Severalnines package repository.
 - Install and configure MySQL, create CMON DB, grant cmon user and configure DB for ClusterControl UI.
@@ -155,11 +155,12 @@ This module has been tested on following platforms:
 Change History
 --------------
 
+- v0.1.5 - Tested with ClusterControl v.1.3.1 on Chef 12.
 - v0.1.4 - Follow install-cc installation method. Tested with ClusterControl v1.2.11 on Chef 12. Support RHEL/CentOS 7, Debian 8 (Jessie).
-- v0.1.3 - Add datadir into s9s\_helper
-- v0.1.2 - Fixed sudoer with password
-- v0.1.1 - Cleaning up and updated README
-- v0.1.0 - Initial recipes based on ClusterControl v1.2.8
+- v0.1.3 - Add datadir into s9s\_helper.
+- v0.1.2 - Fixed sudoer with password.
+- v0.1.1 - Cleaning up and updated README.
+- v0.1.0 - Initial recipes based on ClusterControl v1.2.8.
 
 License and Authors
 -------------------
