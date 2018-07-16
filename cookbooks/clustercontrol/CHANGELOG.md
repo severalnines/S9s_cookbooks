@@ -4,10 +4,12 @@ clustercontrol CHANGELOG
 This file is used to list changes made in each version of the clustercontrol cookbook.
 
 0.1.6
------ 
-- 12-Jul-2018
+-----
+- 16-Jul-2018
 -- Tested with ClusterControl v1.6.1 on Chef 12.
 -- Added s9s cli installation via package manager
+-- Converted node.set to node.override
+-- Added cmon-cloud, cmon-ssh, cmon-events
 
 0.1.5
 -----
