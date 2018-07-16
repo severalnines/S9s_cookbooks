@@ -1,0 +1,7 @@
+[s9s-tools]
+name=s9s-tools (<%= node['s9s_repo_name'] %>)
+type=rpm-md
+baseurl=http://repo.severalnines.com/s9s-tools/<%= node['s9s_repo_name'] %>/
+gpgcheck=1
+gpgkey=http://repo.severalnines.com/s9s-tools/<%= node['s9s_repo_name'] %>/repodata/repomd.xml.key
+enabled=1

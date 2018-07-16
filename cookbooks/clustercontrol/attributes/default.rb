@@ -2,7 +2,18 @@ case node['platform']
 when 'centos', 'rhel', 'fedora', 'scientific', 'amazon'
 	default['repo_path'] = "/etc/yum.repos.d"
 	default['repo_file'] = "s9s-repo.repo"
+	default['s9s_repo_file'] = "s9s-tools.repo"
 	default['update_repo'] = "yum clean all"
+
+if (node['platform'] == "centos" && node['platform_version'].to_i = 6 )
+	default['s9s_repo_name'] = 'CentOS_6'
+elsif (node['platform'] == "centos" && node['platform_version'].to_i = 7 )
+	default['s9s_repo_name'] = 'CentOS_7'
+elsif (node['platform'] == "rhel" && node['platform_version'].to_i = 6 )
+	default['s9s_repo_name'] = 'RHEL_6'
+elsif (node['platform'] == "rhel" && node['platform_version'].to_i = 7 )
+	default['s9s_repo_name'] = 'RHEL_7'
+end
 
 	if node['platform_version'].to_f < 7
 		default['mysql']['service_name'] = "mysqld"
@@ -26,7 +37,33 @@ when 'centos', 'rhel', 'fedora', 'scientific', 'amazon'
 when 'debian', 'ubuntu'
 	default['repo_path'] = "/etc/apt/sources.list.d"
 	default['repo_file'] = "s9s-repo.list"
+	default['s9s_repo_file'] = "s9s-tools.list"
 	default['update_repo'] = "apt-get update"
+	if (node['platform'] == "ubuntu" && node['platform_version'].to_f = 12.04 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/precise/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/precise/Release.key'
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 14.04 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/trusty/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/trusty/Release.key'
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 16.04 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/xenial/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/xenial/Release.key'
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 17.04 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/zesty/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/zesty/Release.key'
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 18.04 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/bionic/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/bionic/Release.key'
+	elsif (node['platform'] == "debian" && node['platform_version'].to_i = 7 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/wheezy/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/wheezy/Release.key'
+	elsif (node['platform'] == "debian" && node['platform_version'].to_i = 8 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/jessie/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/jessie/Release.key'
+	elsif (node['platform'] == "debian" && node['platform_version'].to_i = 9 )
+		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/stretch/'
+		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/stretch/Release.key'
+	end
 
 	default['apache']['service_name'] = "apache2"
 	default['apache']['extra_opt'] = nil

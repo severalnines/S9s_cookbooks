@@ -2,7 +2,7 @@
 # Cookbook Name:: clustercontrol
 # Recipe:: default
 #
-# Copyright 2014, Severalnines AB
+# Copyright 2018, Severalnines AB
 #
 # All rights reserved - Do Not Redistribute
 #
@@ -32,6 +32,10 @@ when 'debian'
 		command "wget http://repo.severalnines.com/severalnines-repos.asc -O- | apt-key add -"
 		action :run
 	end
+	execute "setup-s9s-key" do
+		command "wget #{node['s9s_repo_key_url']} -O- | apt-key add -"
+		action :run
+	end
 end
 
 template "#{node['repo_path']}/#{node['repo_file']}" do
@@ -39,6 +43,13 @@ template "#{node['repo_path']}/#{node['repo_file']}" do
 	owner 'root'
 	group 'root'
 	source "#{node['repo_file']}.erb"
+end
+
+template "#{node['repo_path']}/#{node['s9s_repo_file']}" do
+	mode '0644'
+	owner 'root'
+	group 'root'
+	source "#{node['s9s_repo_file']}.erb"
 end
 
 execute "update-repository" do
@@ -49,7 +60,7 @@ end
 # install required packages
 case node['platform_family']
 when 'debian'
-  packages = %w{apache2 libapache2-mod-php5 php5-common php5-mysql php5-gd php5-ldap php5-json php5-curl dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-nodejs}
+  packages = %w{apache2 libapache2-mod-php5 php5-common php5-mysql php5-gd php5-ldap php5-json php5-curl dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
   packages.each do |name|
     package name do
         Chef::Log.info "Installing #{name}"
@@ -59,9 +70,9 @@ when 'debian'
   end
 when 'rhel'
   if node['platform_version'].to_f < 7
-    packages = %w{httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mysql mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-nodejs}
+    packages = %w{httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mysql mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
   else
-    packages = %w{httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mariadb mariadb-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-nodejs}
+    packages = %w{httpd php php-mysql php-ldap php-gd mod_ssl openssl bind-utils nc curl cronie mailx wget mariadb mariadb-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
   end
   packages.each do |name|
     package name do

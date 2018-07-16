@@ -3,6 +3,12 @@ clustercontrol CHANGELOG
 
 This file is used to list changes made in each version of the clustercontrol cookbook.
 
+0.1.6
+----- 
+- 12-Jul-2018
+-- Tested with ClusterControl v1.6.1 on Chef 12.
+-- Added s9s cli installation via package manager
+
 0.1.5
 -----
 - 7-Jun-2016 - Tested with ClusterControl v1.3.1 on Chef 12.
@@ -19,11 +25,10 @@ This file is used to list changes made in each version of the clustercontrol coo
 -----
 - 19-Dec-2014 - Fixed sudoer with password
 
-0.1.1 
+0.1.1
 -----
 - 19-Dec-2014 - Cleaning up and updated README
 
 0.1.0
 -----
 - 17-Dec-2014 - Initial recipes based on ClusterControl v1.2.8
-
