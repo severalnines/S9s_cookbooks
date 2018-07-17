@@ -31,7 +31,7 @@ end
 	default['apache']['key_file'] = "/etc/pki/tls/certs/s9server.key"
 	default['apache']['cert_regex'] = "s|^SSLCertificateFile.*|SSLCertificateFile"
 	default['apache']['key_regex'] = "s|^SSLCertificateKeyFile.*|SSLCertificateKeyFile"
-
+	default['mysql']['socket'] = "/var/lib/mysql/mysql.sock"
 	default['mysql']['conf_file'] = "/etc/my.cnf"
 
 when 'debian', 'ubuntu'
@@ -87,6 +87,7 @@ when 'debian', 'ubuntu'
 	end
 
 	default['mysql']['service_name'] = "mysql"
+	default['mysql']['socket'] = "/var/run/mysqld/mysqld.sock"
 	default['mysql']['conf_file'] = "/etc/mysql/my.cnf"
 end
 

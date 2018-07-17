@@ -1,4 +1,4 @@
-clustercontrol Cookbook
+ClusterControl Cookbook
 =======================
 
 Installs ClusterControl for your new database node/cluster deployment or on top of your existing database node/cluster. ClusterControl is a management and automation software for database clusters. It helps deploy, monitor, manage and scale your database node/cluster.
@@ -8,13 +8,13 @@ Supported database clusters:
 - Galera Cluster for MySQL
 - Percona XtraDB Cluster
 - MariaDB Galera Cluster
-- MySQL Replication
+- MySQL Replication (master-slave and master-master)
+- MySQL Group Replication
 - MySQL single instance
-- MySQL Cluster
+- MySQL Cluster (NDB)
 - MongoDB Replica Set
 - MongoDB Sharded Cluster
-- TokuMX Cluster
-- PostgreSQL single instance
+- PostgreSQL Streaming Replication
 
 Details at [Severalnines](http://www.severalnines.com/clustercontrol) website.
 
@@ -23,7 +23,6 @@ This cookbook is a replacement for the deprecated [cmon](https://supermarket.che
 - Install ClusterControl controller, cmonapi and UI via Severalnines package repository.
 - Install and configure MySQL, create CMON DB, grant cmon user and configure DB for ClusterControl UI.
 - Install and configure Apache, check permission and install SSL.
-- Copy the generated SSH key to all nodes (optional).
 
 If you have any questions, you are welcome to get in touch via our [contact us](http://www.severalnines.com/contact-us) page or email us at [info@severalnines.com](mailto:info@severalnines.com).
 
@@ -43,6 +42,7 @@ Tested on Chef Server 11.1/12.0 on following platforms (x86\_64 only):
 - CentOS 7
 - Ubuntu 12.04
 - Ubuntu 14.04
+- Ubuntu 16.04
 - Debian 7
 - Debian 8
 
@@ -122,19 +122,6 @@ For ClusterControl host, just include `clustercontrol` or `clustercontrol::contr
 }
 ```
 
-### clustercontrol::db\_hosts
-
-For database hosts, include `clustercontrol::db_hosts` in your node's `run_list`:
-
-```json
-{
-  "name":"database_nodes",
-  "run_list": [
-    "recipe[clustercontrol::db_hosts]"
-  ]
-}
-```
-
 ** Do not forget to generate databag before the deployment begins! Once the cookbook is applied to all nodes, open ClusterControl web UI at `https://[ClusterControl IP address]/clustercontrol` and create the default admin user with valid email address.
 
 Limitations
@@ -144,8 +131,10 @@ This module has been tested on following platforms:
 
 - Debian 7 (wheezy)
 - Debian 8 (jessie)
+- Debian 9 (stretch)
 - Ubuntu 14.04 LTS (trusty)
 - Ubuntu 12.04 LTS (precise)
+- Ubuntu 16.04 LTS (xenial)
 - RHEL 6/7
 - CentOS 6/7
 
@@ -155,6 +144,12 @@ This module has been tested on following platforms:
 Change History
 --------------
 
+- v0.1.6
+-- Tested with ClusterControl v1.6.2 on Chef 12.
+-- Added s9s cli installation via package manager
+-- Converted node.set to node.override
+-- Added cmon-cloud, cmon-ssh, cmon-events
+-- Code cleanup. Support Debian 9.
 - v0.1.5 - Tested with ClusterControl v.1.3.1 on Chef 12.
 - v0.1.4 - Follow install-cc installation method. Tested with ClusterControl v1.2.11 on Chef 12. Support RHEL/CentOS 7, Debian 8 (Jessie).
 - v0.1.3 - Add datadir into s9s\_helper.

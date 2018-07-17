@@ -6,10 +6,11 @@ This file is used to list changes made in each version of the clustercontrol coo
 0.1.6
 -----
 - 16-Jul-2018
--- Tested with ClusterControl v1.6.1 on Chef 12.
+-- Tested with ClusterControl v1.6.2 on Chef 12.
 -- Added s9s cli installation via package manager
 -- Converted node.set to node.override
 -- Added cmon-cloud, cmon-ssh, cmon-events
+-- Code cleanup. Support Debian 9.
 
 0.1.5
 -----

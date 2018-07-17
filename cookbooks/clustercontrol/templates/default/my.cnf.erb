@@ -9,7 +9,8 @@ basedir=<%= node['cmon']['mysql_basedir'] %>
 datadir=<%= node['cmon']['mysql_datadir'] %>
 port=3306
 log-error=error.log
-socket=<%= node['cmon']['mysql_datadir'] %>/mysql.sock
+socket=<%= node['mysql']['socket'] %>
+pid-file=mysql.pid
 
 ### INNODB
 innodb-buffer-pool-size = <%= (node['memory']['total'].to_i / 1024 * 0.5).round %>M
@@ -42,11 +43,11 @@ table-open_cache = 512
 lower-case-table-names = 0
 
 [MYSQL]
-socket=<%= node['cmon']['mysql_datadir'] %>/mysql.sock
+socket=<%= node['mysql']['socket'] %>
 
 [client]
 port=3306
-socket=<%= node['cmon']['mysql_datadir'] %>/mysql.sock
+socket=<%= node['mysql']['socket'] %>
 
 [MYSQLD_SAFE]
 basedir=<%= node['cmon']['mysql_basedir'] %>

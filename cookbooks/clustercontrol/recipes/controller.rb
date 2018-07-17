@@ -60,7 +60,11 @@ end
 # install required packages
 case node['platform_family']
 when 'debian'
-  packages = %w{apache2 libapache2-mod-php5 php5-common php5-mysql php5-gd php5-ldap php5-json php5-curl dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
+	if (node['platform'] == 'ubuntu' && node['platform_version'].to_f >= 16.04 || node['platform'] == 'debian' && node['platform_version'].to_f >= 9)
+		packages = %w{apache2 libapache2-mod-php php-common php-mysql php-gd php-ldap php-json php-curl dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
+	else
+		packages = %w{apache2 libapache2-mod-php5 php5-common php5-mysql php5-gd php5-ldap php5-json php5-curl dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol clustercontrol-cmonapi clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
+	end
   packages.each do |name|
     package name do
         Chef::Log.info "Installing #{name}"
@@ -88,7 +92,13 @@ service "#{node['apache']['service_name']}" do
 end
 
 service "#{node['mysql']['service_name']}" do
-	action [ :enable, :restart ]
+	action [ :enable, :stop ]
+end
+
+execute 'sleep 10'
+
+service "#{node['mysql']['service_name']}" do
+	action [ :enable, :start ]
 end
 
 directory "#{node['user_home']}/.ssh" do
