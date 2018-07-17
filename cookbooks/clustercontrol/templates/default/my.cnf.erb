@@ -12,7 +12,7 @@ log-error=error.log
 socket=<%= node['cmon']['mysql_datadir'] %>/mysql.sock
 
 ### INNODB
-innodb-buffer-pool-size = <%= node['memory']['total'].to_i / 1024 * 0.5 %>M
+innodb-buffer-pool-size = <%= (node['memory']['total'].to_i / 1024 * 0.5).round %>M
 innodb-flush-log-at-trx_commit = 2
 innodb-file-per-table = 1
 #innodb_log_file_size = 256M
