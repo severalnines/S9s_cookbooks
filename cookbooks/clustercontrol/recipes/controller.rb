@@ -9,14 +9,14 @@
 
 cc_config = data_bag_item('clustercontrol','config')
 
-node.set['api_token'] = cc_config['clustercontrol_api_token']
-node.set['cmon']['rpc_key'] = cc_config['clustercontrol_api_token']
-node.set['cmon']['mysql_password'] = cc_config['cmon_password']
-node.set['cmon']['mysql_root_password'] = cc_config['mysql_root_password']
-node.set['cmon']['mysql_port'] = cc_config['cmon_port']
-node.set['mysql']['root_password'] = cc_config['mysql_root_password']
-node.set['ssh_user'] = cc_config['ssh_user']
-node.set['user_home'] = cc_config['user_home']
+node.override['api_token'] = cc_config['clustercontrol_api_token']
+node.override['cmon']['rpc_key'] = cc_config['clustercontrol_api_token']
+node.override['cmon']['mysql_password'] = cc_config['cmon_password']
+node.override['cmon']['mysql_root_password'] = cc_config['mysql_root_password']
+node.override['cmon']['mysql_port'] = cc_config['cmon_port']
+node.override['mysql']['root_password'] = cc_config['mysql_root_password']
+node.override['ssh_user'] = cc_config['ssh_user']
+node.override['user_home'] = cc_config['user_home']
 
 mysql_flag = "#{node['user_home']}/.mysql_installed"
 cc_flag = "#{node['user_home']}/.cc_installed"
@@ -276,6 +276,21 @@ end
 
 service "cmon" do
 	supports :restart => true, :start => true, :stop => true, :reload => true
+	action [ :enable, :start ]
+end
+
+service "cmon-ssh" do
+	supports :restart => true, :start => true, :stop => true
+	action [ :enable, :start ]
+end
+
+service "cmon-cloud" do
+	supports :restart => true, :start => true, :stop => true
+	action [ :enable, :start ]
+end
+
+service "cmon-events" do
+	supports :restart => true, :start => true, :stop => true
 	action [ :enable, :start ]
 end
 

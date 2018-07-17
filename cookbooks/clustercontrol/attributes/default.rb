@@ -5,13 +5,13 @@ when 'centos', 'rhel', 'fedora', 'scientific', 'amazon'
 	default['s9s_repo_file'] = "s9s-tools.repo"
 	default['update_repo'] = "yum clean all"
 
-if (node['platform'] == "centos" && node['platform_version'].to_i = 6 )
+if (node['platform'] == "centos" && node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7 )
 	default['s9s_repo_name'] = 'CentOS_6'
-elsif (node['platform'] == "centos" && node['platform_version'].to_i = 7 )
+elsif (node['platform'] == "centos" && node['platform_version'].to_f >= 7 )
 	default['s9s_repo_name'] = 'CentOS_7'
-elsif (node['platform'] == "rhel" && node['platform_version'].to_i = 6 )
+elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7 )
 	default['s9s_repo_name'] = 'RHEL_6'
-elsif (node['platform'] == "rhel" && node['platform_version'].to_i = 7 )
+elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 7 )
 	default['s9s_repo_name'] = 'RHEL_7'
 end
 
@@ -39,28 +39,28 @@ when 'debian', 'ubuntu'
 	default['repo_file'] = "s9s-repo.list"
 	default['s9s_repo_file'] = "s9s-tools.list"
 	default['update_repo'] = "apt-get update"
-	if (node['platform'] == "ubuntu" && node['platform_version'].to_f = 12.04 )
+	if (node['platform'] == "ubuntu" && node['platform_version'].to_f == 12.04 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/precise/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/precise/Release.key'
-	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 14.04 )
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f == 14.04 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/trusty/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/trusty/Release.key'
-	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 16.04 )
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f == 16.04 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/xenial/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/xenial/Release.key'
-	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 17.04 )
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f == 17.04 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/zesty/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/zesty/Release.key'
-	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f = 18.04 )
+	elsif (node['platform'] == "ubuntu" && node['platform_version'].to_f == 18.04 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/bionic/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/bionic/Release.key'
-	elsif (node['platform'] == "debian" && node['platform_version'].to_i = 7 )
+	elsif (node['platform'] == "debian" && node['platform_version'].to_f >= 7 && node['platform_version'].to_f < 8 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/wheezy/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/wheezy/Release.key'
-	elsif (node['platform'] == "debian" && node['platform_version'].to_i = 8 )
+	elsif (node['platform'] == "debian" && node['platform_version'].to_f >= 8 && node['platform_version'].to_f < 9 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/jessie/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/jessie/Release.key'
-	elsif (node['platform'] == "debian" && node['platform_version'].to_i = 9 )
+	elsif (node['platform'] == "debian" && node['platform_version'].to_i >= 9 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/stretch/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/stretch/Release.key'
 	end
@@ -95,7 +95,7 @@ default['ssh_user'] = "root"
 default['user_home'] = "/root"
 default['ssh_key'] = "/root/.ssh/id_rsa"
 default['cmon']['mysql_user'] = "cmon"
-default['cmon']['mysql_hostname'] = "#{ipaddress}"
+default['cmon']['mysql_hostname'] = "localhost"
 default['cmon']['mysql_root_password'] = "password"
 default['cmon']['mysql_password'] = "cmon"
 default['cmon']['mysql_port'] = 3306
@@ -105,8 +105,8 @@ default['mysql']['root_password'] = "password"
 default['cmon']['mysql_bin'] = "/usr/bin/mysql"
 default['sql']['cmon_schema'] = "/usr/share/cmon/cmon_db.sql"
 default['sql']['cmon_data'] = "/usr/share/cmon/cmon_data.sql"
-default['sql']['cc_schema'] = "#{apache['wwwroot']}/clustercontrol/sql/dc-schema.sql"
+default['sql']['cc_schema'] = "#{node['apache']['wwwroot']}/clustercontrol/sql/dc-schema.sql"
 
-default['cmonapi']['bootstrap']	= "#{apache['wwwroot']}/cmonapi/config/bootstrap.php"
-default['cmonapi']['database'] = "#{apache['wwwroot']}/cmonapi/config/database.php"
-default['ccui']['bootstrap'] = "#{apache['wwwroot']}/clustercontrol/bootstrap.php"
+default['cmonapi']['bootstrap']	= "#{node['apache']['wwwroot']}/cmonapi/config/bootstrap.php"
+default['cmonapi']['database'] = "#{node['apache']['wwwroot']}/cmonapi/config/database.php"
+default['ccui']['bootstrap'] = "#{node['apache']['wwwroot']}/clustercontrol/bootstrap.php"

@@ -35,7 +35,7 @@
   "recipes": {
 
   },
-  "version": "0.1.5",
+  "version": "0.1.6",
   "source_url": "https://github.com/severalnines/S9s_cookbooks/",
   "issues_url": "https://github.com/severalnines/S9s_cookbooks/issues",
   "privacy": false
