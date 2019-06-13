@@ -161,7 +161,7 @@ bash "secure-mysql" do
   code <<-EOH
   #{node['cmon']['mysql_bin']} -uroot -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'"
   #{node['cmon']['mysql_bin']} -uroot -e "DELETE FROM mysql.user WHERE User='';DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
-  #{node['cmon']['mysql_bin']} -uroot -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db='test\\_%;"
+  #{node['cmon']['mysql_bin']} -uroot -e "DROP DATABASE test; DELETE FROM mysql.db WHERE DB='test' OR Db like 'test_%';"
   #{node['cmon']['mysql_bin']} -uroot -e "FLUSH PRIVILEGES"
   EOH
   not_if { FileTest.exists?("#{mysql_flag}") }
@@ -286,7 +286,7 @@ end
 
 service "cmon" do
 	supports :restart => true, :start => true, :stop => true, :reload => true
-	action [ :enable, :start ]
+	action [ :enable, :restart ]
 end
 
 service "cmon-ssh" do
