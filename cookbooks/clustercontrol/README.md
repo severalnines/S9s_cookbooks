@@ -145,7 +145,7 @@ Change History
 --------------
 
 - v0.1.7
--- Tested with ClusterControl 1.7.x version.
+-- Tested with ClusterControl 1.7.2 version.
 -- Fixed some minor bugs where adding a cluster does not shows up in the dashboard due to absence of cmon API configuration in the database
 -- Fixed bug when automating an installation of CC then afterwards, automate and create a Cluster. It needs to restart the cmon daemon in order to reload the configuration such as the RPC token into the memory.
 - v0.1.6
