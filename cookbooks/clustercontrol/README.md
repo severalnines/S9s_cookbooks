@@ -1,4 +1,4 @@
-ClusterControl Cookbook
+Clustercontrol Cookbook
 =======================
 
 Installs ClusterControl for your new database node/cluster deployment or on top of your existing database node/cluster. ClusterControl is a management and automation software for database clusters. It helps deploy, monitor, manage and scale your database node/cluster.
@@ -8,9 +8,8 @@ Supported database clusters:
 - Galera Cluster for MySQL
 - Percona XtraDB Cluster
 - MariaDB Galera Cluster
-- MySQL Replication (master-slave and master-master)
-- MySQL Group Replication
-- MySQL single instance
+- MySQL/MariaDB Replication
+- MySQL/MariaDB single instance
 - MySQL Cluster (NDB)
 - MongoDB Replica Set
 - MongoDB Sharded Cluster
@@ -23,6 +22,7 @@ This cookbook is a replacement for the deprecated [cmon](https://supermarket.che
 - Install ClusterControl controller, cmonapi and UI via Severalnines package repository.
 - Install and configure MySQL, create CMON DB, grant cmon user and configure DB for ClusterControl UI.
 - Install and configure Apache, check permission and install SSL.
+- Copy the generated SSH key to all nodes (optional).
 
 If you have any questions, you are welcome to get in touch via our [contact us](http://www.severalnines.com/contact-us) page or email us at [info@severalnines.com](mailto:info@severalnines.com).
 
@@ -40,19 +40,21 @@ Tested on Chef Server 11.1/12.0 on following platforms (x86\_64 only):
 
 - CentOS 6.5
 - CentOS 7
+- CentOS 8
 - Ubuntu 12.04
 - Ubuntu 14.04
 - Ubuntu 16.04
+- Ubuntu 18.04
 - Debian 7
 - Debian 8
+- Debian 9
+- Debian 10
 
-Make sure you meet following criteria prior to the deployment:
+Make sure you meet the following criteria prior to the deployment:
 
 - ClusterControl node must run on a clean dedicated host with internet connection.
 - If you want to add an existing cluster, ensure your database cluster is up and running.
-- If you are running as sudo user, make sure the user is able to escalate to root with sudo command.
-- SELinux/AppArmor must be turned off. Services or ports to be enabled are listed [here](http://www.severalnines.com/docs/clustercontrol-administration-guide/administration/securing-clustercontrol).
-
+- SELinux/AppArmor must be turned off. Services or ports to be enabled are listed [here](https://severalnines.com/docs/requirements.html#firewall-and-security-groups).
 
 Attributes
 ----------
@@ -62,50 +64,117 @@ Please refer to `attributes/default.rb`
 Data Bags
 ---------
 
-Data items are used by the ClusterControl controller recipe to configure SSH public key on database hosts, grants cmon database user and setting up CMON configuration file. We provide a helper script located under `clustercontrol/files/default/s9s_helper.sh`. Please run this script prior to the deployment.
+Data items are used by the recipe to configure SSH public key on database hosts, grants cmon database user and setting up CMON configuration file. We provide a helper script located under `clustercontrol/files/default/s9s_helper.sh`. Please run this script prior to the deployment.
 
 ### Helper script - s9s_helper.sh
+
 ```bash
 $ cd ~/chef-repo/cookbooks/clustercontrol/files/default
 $ ./s9s_helper.sh
-```
+==============================================
+Helper script for ClusterControl Chef cookbook
+==============================================
 
-Answer all the questions and at the end of the wizard, it will generate a data bag file called `config.json` and a set of command that you can use to create and upload the data bag. If you run the script for the first time, it will ask to re-upload the cookbook since it contains a newly generated SSH key:
-```bash
+ClusterControl will install a MySQL server and setup the MySQL root user.
+Enter the password for MySQL root user [default: 's3cr3tcc'] : R00tP4ssw0rd
+
+ClusterControl will create a MySQL user called 'cmon' for automation tasks.
+Enter the password for user cmon [default: 's3cr3tcc'] : Bj990sPkj
+
+ClusterControl will need a sudo user (from ClusterControl to all managed nodes) to perform automation tasks via SSH.
+Enter the SSH user [default: root] : dbadmin
+
+Generating config.json..
+{
+    "id" : "config",
+    "mysql_root_password" : "R00tP4ssw0rd",
+    "cmon_password" : "Bj990sPkj",
+    "cmon_ssh_user" : "dbadmin",
+    "cmon_user_home" : "/home/dbadmin",
+    "clustercontrol_api_token" : "fe74e6d6918b71a48eb039e495b68b41d19e49ad"
+}
+
+Data bag file generated at /home/vagrant/.chef/cookbooks/clustercontrol/files/default/config.json
+To upload the data bag, you can use following command:
+$ knife data bag create clustercontrol
+$ knife data bag from file clustercontrol /home/vagrant/.chef/cookbooks/clustercontrol/files/default/config.json
+
+Reupload the cookbook since it contains a newly generated SSH key:
 $ knife cookbook upload clustercontrol
 ```
 
-### Example data bag - clustercontrol/files/default/config.json
-```json
-{
-  "id"                      : "config",
-  "cmon_password"           : "cmonP4ss",
-  "mysql_root_password"     : "myR00tP4ssword",
-  "clustercontrol_api_token": "b7e515255db703c659677a66c4a17952515dbaf5"
-}
+Answer all questions and at the end of the wizard, it will generate a data bag file called `config.json` and a set of command that you can use to create and upload the data bag. If you run the script for the first time, it will ask to re-upload the cookbook since it contains a newly generated SSH key:
+
+```bash
+$ knife data bag create clustercontrol
+Created data_bag[clustercontrol]
+ 
+$ knife data bag from file clustercontrol /home/ubuntu/chef-repo/cookbooks/clustercontrol/files/default/config.json
+Updated data_bag_item[clustercontrol::config]
+ 
+$ knife cookbook upload clustercontrol
+Uploading clustercontrol [0.1.8]
+Uploaded 1 cookbook.
 ```
 
+
 *We highly recommend you to use encrypted data bag since it contains confidential information*
+
+Then, create a role, cc_controller:
+
+```ruby
+$ cat cc_controller.rb
+name "cc_controller"
+description "ClusterControl Controller"
+run_list ["recipe[clustercontrol]"]
+```
+
+Add the defined roles into Chef Server:
+
+```bash
+$ knife role from file cc_controller.rb
+Updated Role cc_controller!
+```
+
+Assign the roles to the relevant nodes:
+
+```bash
+$ knife node run_list add clustercontrol.domain.com "role[cc_controller]"
+```
+
+Finally, on the client side (ClusterControl host), apply the cookbook:
+
+```bash
+$ sudo chef-client
+```
 
 ### ClusterControl general options
 
 Following options are used for the general ClusterControl set up:
 
 `id`
-The data item identifier. Do not change this value.
+
+- The data item identifier. Do not change this value.
 
 `cmon_password`
-Specify the MySQL password for user cmon. The recipe will grant this user with specified password, and is required by ClusterControl.
-- Default: 'cmon'
+
+- Specify the MySQL password for user cmon. The recipe will grant this user with specified password, and is required by ClusterControl.
+- Default: 's3cr3tcc'
 
 `mysql_root_password`
-Specify the MySQL root password. This recipe will install a fresh MySQL server and it will create a MySQL user.
-- Default: 'password'
+
+- Specify the MySQL root password. This recipe will install a fresh MySQL server and it will create a MySQL user.
+- Default: 's3cr3tcc'
 
 `clustercontrol_api_token`
-40-character ClusterControl token generated from s9s\_helper script.
+
+- 40-character ClusterControl token generated from s9s\_helper script.
 - Example: 'b7e515255db703c659677a66c4a17952515dbaf5'
 
+`cmon_ssh_user`
+
+- SSH user that will be used by ClusterControl to connect to all managed nodes. This user must be able to escalate as super-user.
+- Default: 'root'
 
 Usage
 -----
@@ -122,44 +191,21 @@ For ClusterControl host, just include `clustercontrol` or `clustercontrol::contr
 }
 ```
 
-** Do not forget to generate databag before the deployment begins! Once the cookbook is applied to all nodes, open ClusterControl web UI at `https://[ClusterControl IP address]/clustercontrol` and create the default admin user with valid email address.
+### clustercontrol::db\_hosts
 
-Limitations
------------
+For database hosts, include `clustercontrol::db_hosts` in your node's `run_list`:
 
-This module has been tested on following platforms:
+```json
+{
+  "name":"database_nodes",
+  "run_list": [
+    "recipe[clustercontrol::db_hosts]"
+  ]
+}
+```
 
-- Debian 7 (wheezy)
-- Debian 8 (jessie)
-- Debian 9 (stretch)
-- Ubuntu 14.04 LTS (trusty)
-- Ubuntu 12.04 LTS (precise)
-- Ubuntu 16.04 LTS (xenial)
-- RHEL 6/7
-- CentOS 6/7
+** Do not forget to generate databag before the deployment begins! Once the cookbook is applied to all nodes, open ClusterControl web UI at `https://[ClusterControl IP address]/clustercontrol` and create the default admin user with a valid email address.
 
-
-[ClusterControl known issues and limitations](http://www.severalnines.com/docs/clustercontrol-troubleshooting-guide/known-issues-limitations).
-
-Change History
---------------
-
-- v0.1.7
--- Tested with ClusterControl 1.7.2 version.
--- Fixed some minor bugs where adding a cluster does not shows up in the dashboard due to absence of cmon API configuration in the database
--- Fixed bug when automating an installation of CC then afterwards, automate and create a Cluster. It needs to restart the cmon daemon in order to reload the configuration such as the RPC token into the memory.
-- v0.1.6
--- Tested with ClusterControl v1.6.2 on Chef 12.
--- Added s9s cli installation via package manager
--- Converted node.set to node.override
--- Added cmon-cloud, cmon-ssh, cmon-events
--- Code cleanup. Support Debian 9.
-- v0.1.5 - Tested with ClusterControl v.1.3.1 on Chef 12.
-- v0.1.4 - Follow install-cc installation method. Tested with ClusterControl v1.2.11 on Chef 12. Support RHEL/CentOS 7, Debian 8 (Jessie).
-- v0.1.3 - Add datadir into s9s\_helper.
-- v0.1.2 - Fixed sudoer with password.
-- v0.1.1 - Cleaning up and updated README.
-- v0.1.0 - Initial recipes based on ClusterControl v1.2.8.
 
 License and Authors
 -------------------

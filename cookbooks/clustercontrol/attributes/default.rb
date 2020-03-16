@@ -5,15 +5,15 @@ when 'centos', 'rhel', 'fedora', 'scientific', 'amazon'
 	default['s9s_repo_file'] = "s9s-tools.repo"
 	default['update_repo'] = "yum clean all"
 
-if (node['platform'] == "centos" && node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7 )
-	default['s9s_repo_name'] = 'CentOS_6'
-elsif (node['platform'] == "centos" && node['platform_version'].to_f >= 7 )
-	default['s9s_repo_name'] = 'CentOS_7'
-elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7 )
-	default['s9s_repo_name'] = 'RHEL_6'
-elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 7 )
-	default['s9s_repo_name'] = 'RHEL_7'
-end
+	if (node['platform'] == "centos" && node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7 )
+		default['s9s_repo_name'] = 'CentOS_6'
+	elsif (node['platform'] == "centos" && node['platform_version'].to_f >= 7 )
+		default['s9s_repo_name'] = 'CentOS_7'
+	elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7 )
+		default['s9s_repo_name'] = 'RHEL_6'
+	elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 7 )
+		default['s9s_repo_name'] = 'RHEL_7'
+	end
 
 	if node['platform_version'].to_f < 7
 		default['mysql']['service_name'] = "mysqld"
@@ -22,15 +22,15 @@ end
 	end
 
 	default['apache']['service_name'] = "httpd"
-	default['apache']['config'] = '/etc/httpd/conf/httpd.conf'
-	default['apache']['ssl_config'] = '/etc/httpd/conf.d/ssl.conf'
+	default['apache']['config'] = '/etc/httpd/conf.d/s9s.conf'
+	default['apache']['ssl_config'] = '/etc/httpd/conf.d/s9s-ssl.conf'
 	default['apache']['wwwroot'] = '/var/www/html'
 	default['apache']['user'] = 'apache'
 	default['apache']['extra_opt'] = nil
 	default['apache']['cert_file'] = "/etc/pki/tls/certs/s9server.crt"
 	default['apache']['key_file'] = "/etc/pki/tls/certs/s9server.key"
-	default['apache']['cert_regex'] = "s|^SSLCertificateFile.*|SSLCertificateFile"
-	default['apache']['key_regex'] = "s|^SSLCertificateKeyFile.*|SSLCertificateKeyFile"
+	default['apache']['cert_regex'] = "s|^[ \t]*SSLCertificateFile.*|SSLCertificateFile"
+	default['apache']['key_regex'] = "s|^[ \t]*SSLCertificateKeyFile.*|SSLCertificateKeyFile"
 	default['mysql']['socket'] = "/var/lib/mysql/mysql.sock"
 	default['mysql']['conf_file'] = "/etc/my.cnf"
 
@@ -60,7 +60,7 @@ when 'debian', 'ubuntu'
 	elsif (node['platform'] == "debian" && node['platform_version'].to_f >= 8 && node['platform_version'].to_f < 9 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/jessie/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/jessie/Release.key'
-	elsif (node['platform'] == "debian" && node['platform_version'].to_i >= 9 )
+	elsif (node['platform'] == "debian" && node['platform_version'].to_f >= 9 )
 		default['s9s_repo_url'] = 'http://repo.severalnines.com/s9s-tools/stretch/'
 		default['s9s_repo_key_url'] = 'http://repo.severalnines.com/s9s-tools/stretch/Release.key'
 	end
@@ -94,11 +94,11 @@ end
 default['api_token'] = ""
 default['ssh_user'] = "root"
 default['user_home'] = "/root"
-default['ssh_key'] = "/root/.ssh/id_rsa"
+default['ssh_key'] = "#{node['user_home']}/.ssh/id_rsa"
 default['cmon']['mysql_user'] = "cmon"
 default['cmon']['mysql_hostname'] = "localhost"
-default['cmon']['mysql_root_password'] = "password"
-default['cmon']['mysql_password'] = "cmon"
+default['cmon']['mysql_root_password'] = "s3cr3tcc"
+default['cmon']['mysql_password'] = "s3cr3tcc"
 default['cmon']['mysql_port'] = 3306
 default['cmon']['mysql_basedir'] = "/usr"
 default['cmon']['mysql_datadir'] = "/var/lib/mysql"
@@ -108,6 +108,4 @@ default['sql']['cmon_schema'] = "/usr/share/cmon/cmon_db.sql"
 default['sql']['cmon_data'] = "/usr/share/cmon/cmon_data.sql"
 default['sql']['cc_schema'] = "#{node['apache']['wwwroot']}/clustercontrol/sql/dc-schema.sql"
 
-default['cmonapi']['bootstrap']	= "#{node['apache']['wwwroot']}/cmonapi/config/bootstrap.php"
-default['cmonapi']['database'] = "#{node['apache']['wwwroot']}/cmonapi/config/database.php"
 default['ccui']['bootstrap'] = "#{node['apache']['wwwroot']}/clustercontrol/bootstrap.php"

@@ -5,8 +5,7 @@ echo "=============================================="
 echo "Helper script for ClusterControl Chef cookbook"
 echo "=============================================="
 
-cmon_mysql_password="cmon"
-mysql_root_password="password"
+default_password="s3cr3tcc"
 ssh_key="id_rsa"
 
 rel_dir=`dirname "$0"`
@@ -38,13 +37,18 @@ function do_rsa_keygen()
 
 echo ""
 echo "ClusterControl will install a MySQL server and setup the MySQL root user."
-read -p "Enter the password for MySQL root user [password] : " x
+read -p "Enter the password for MySQL root user [default: '$default_password'] : " x
 [ ! -z "$x" ] && mysql_root_password=$x
 
 echo ""
 echo "ClusterControl will create a MySQL user called 'cmon' for automation tasks."
-read -p "Enter the password for user cmon [cmon] : " x
+read -p "Enter the password for user cmon [default: '$default_password'] : " x
 [ ! -z "$x" ] && cmon_mysql_password=$x
+
+echo ""
+echo "ClusterControl will need a sudo user (from ClusterControl to all managed nodes) to perform automation tasks via SSH."
+read -p "Enter the SSH user [default: root] : " x
+[ ! -z "$x" ] && cmon_ssh_user=$x
 
 do_rsa_keygen
 api_token=$(python -c 'import uuid; print uuid.uuid4()' | sha1sum | cut -f1 -d' ')
@@ -53,8 +57,26 @@ echo ""
 echo 'Generating config.json..'
 echo '{' > $OUTPUT
 echo '    "id" : "config",' >> $OUTPUT
-[ "$mysql_root_password" != "password" ] && echo "    \"mysql_root_password\" : \"$mysql_root_password\"," >> $OUTPUT
-[ "$cmon_mysql_password" != "cmon" ] && echo "    \"cmon_password\" : \"$cmon_mysql_password\"," >> $OUTPUT
+if [ "$mysql_root_password" != $default_password ] && [ ! -z "$mysql_root_password" ]; then
+	echo "    \"mysql_root_password\" : \"$mysql_root_password\"," >> $OUTPUT
+else
+	echo "    \"mysql_root_password\" : \"$default_password\"," >> $OUTPUT
+fi
+if [ "$cmon_mysql_password" != $default_password ] && [ ! -z "$cmon_mysql_password" ]; then
+	echo "    \"cmon_password\" : \"$cmon_mysql_password\"," >> $OUTPUT
+else
+	echo "    \"cmon_password\" : \"$default_password\"," >> $OUTPUT
+fi
+if [ "$cmon_ssh_user" != "root" ] && [ ! -z "$cmon_ssh_user" ]; then
+	echo "    \"cmon_ssh_user\" : \"$cmon_ssh_user\"," >> $OUTPUT
+else
+	echo "    \"cmon_ssh_user\" : \"root\",">> $OUTPUT
+fi
+if [ "$cmon_ssh_user" != "root" ] && [ ! -z "$cmon_ssh_user" ]; then
+	echo "    \"cmon_user_home\" : \"/home/$cmon_ssh_user\"," >> $OUTPUT
+else
+	echo "    \"cmon_user_home\" : \"/root\"," >> $OUTPUT
+fi
 echo "    \"clustercontrol_api_token\" : \"$api_token\"" >> $OUTPUT
 echo '}' >> $OUTPUT
 

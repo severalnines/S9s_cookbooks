@@ -3,14 +3,36 @@ clustercontrol CHANGELOG
 
 This file is used to list changes made in each version of the clustercontrol cookbook.
 
-0.1.6
+0.1.9
 -----
+
+- 16-Mar-2020
+-- Updated README
+
+0.1.8
+-----
+- 16-Mar-2020
+-- Tested with ClusterControl 1.7.5 version.
+-- Updated the default password values.
+-- Added /etc/default/cmon
+-- Use s9s.conf and s9s-ssl.conf for RHEL-based servers.
+-- Removed all CMONAPI references.
+-- Improvements on s9s-helper.sh
+-- Support new OSes: RHEL8, Debian 10, Ubuntu 18.04
+
+0.1.7
+-----
+-- Tested with ClusterControl 1.7.2 version.
+-- Fixed some minor bugs where adding a cluster does not shows up in the dashboard due to absence of cmon API configuration in the database
+-- Fixed bug when automating an installation of CC then afterwards, automate and create a Cluster. It needs to restart the cmon daemon in order to reload the configuration such as the RPC token into the memory.
+
+0.1.6
+----- 
 - 16-Jul-2018
--- Tested with ClusterControl v1.6.2 on Chef 12.
+-- Tested with ClusterControl v1.6.1 on Chef 12.
 -- Added s9s cli installation via package manager
 -- Converted node.set to node.override
 -- Added cmon-cloud, cmon-ssh, cmon-events
--- Code cleanup. Support Debian 9.
 
 0.1.5
 -----
