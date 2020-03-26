@@ -32,7 +32,7 @@ Requirements
 
 ### Platform
 
-- CentOS, Redhat, Fedora
+- CentOS, Redhat, Fedora, Oracle Linux
 - Debian, Ubuntu
 - x86\_64 architecture only
 

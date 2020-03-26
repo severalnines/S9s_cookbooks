@@ -3,9 +3,16 @@ clustercontrol CHANGELOG
 
 This file is used to list changes made in each version of the clustercontrol cookbook.
 
+0.1.10
+------
+- 26-Mar-2020
+-- Tested with Oracle Enterprise 7
+-- Added gpg installation for Debian
+-- Added flag checks for MySQL/Apache/CMON to restart only when necessary
+-- Removed sql directory after setup
+
 0.1.9
 -----
-
 - 16-Mar-2020
 -- Updated README
 

@@ -1,5 +1,5 @@
 case node['platform']
-when 'centos', 'rhel', 'fedora', 'scientific', 'amazon'
+when 'centos', 'rhel', 'fedora', 'scientific', 'amazon', 'oracle'
 	default['repo_path'] = "/etc/yum.repos.d"
 	default['repo_file'] = "s9s-repo.repo"
 	default['s9s_repo_file'] = "s9s-tools.repo"
@@ -12,6 +12,10 @@ when 'centos', 'rhel', 'fedora', 'scientific', 'amazon'
 	elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7 )
 		default['s9s_repo_name'] = 'RHEL_6'
 	elsif (node['platform'] == "rhel" && node['platform_version'].to_f >= 7 )
+		default['s9s_repo_name'] = 'RHEL_7'
+        elsif (node['platform_version'].to_f >= 6 && node['platform_version'].to_f < 7)
+                default['s9s_repo_name'] = 'RHEL_6'
+	elsif node['platform_version'].to_f >= 7
 		default['s9s_repo_name'] = 'RHEL_7'
 	end
 
@@ -106,6 +110,6 @@ default['mysql']['root_password'] = "password"
 default['cmon']['mysql_bin'] = "/usr/bin/mysql"
 default['sql']['cmon_schema'] = "/usr/share/cmon/cmon_db.sql"
 default['sql']['cmon_data'] = "/usr/share/cmon/cmon_data.sql"
-default['sql']['cc_schema'] = "#{node['apache']['wwwroot']}/clustercontrol/sql/dc-schema.sql"
-
+default['sql']['directory'] = "#{node['apache']['wwwroot']}/clustercontrol/sql"
+default['sql']['cc_schema'] = "#{node['sql']['directory']}/dc-schema.sql"
 default['ccui']['bootstrap'] = "#{node['apache']['wwwroot']}/clustercontrol/bootstrap.php"

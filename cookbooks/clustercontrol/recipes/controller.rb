@@ -46,6 +46,10 @@ when 'rhel', 'fedora'
 	end
 
 when 'debian'
+	apt_package 'install-gpg' do
+		package_name "gpg"
+		action :install
+	end
 	apt_repository "s9s-repo" do
 		uri "http://repo.severalnines.com/deb"
 		components ['ubuntu','main']
@@ -54,7 +58,6 @@ when 'debian'
 		distribution ''
 		action :add
 	end
-
 	apt_repository "s9s-tools" do
 		uri "http://repo.severalnines.com/s9s-tools/#{node['lsb']['codename']}/"
 		key "http://repo.severalnines.com/s9s-tools/#{node['lsb']['codename']}/Release.key"
@@ -102,23 +105,30 @@ end
 # restart services after installed
 service "#{node['apache']['service_name']}" do
 	action [ :enable, :restart ]
+	not_if { FileTest.exists?("#{cc_flag}") }
+end
+
+execute "sleep-10" do
+        command "sleep 10"
+        action :nothing
 end
 
 service "#{node['mysql']['service_name']}" do
 	action :stop
+	notifies :run, resources(:execute => "sleep-10"), :immediately
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
-
-execute 'sleep 10'
 
 service "#{node['mysql']['service_name']}" do
         action [ :enable, :start ]
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 directory "#{node['ssh_user_home']}/.ssh" do
-  owner "#{node['ssh_user']}"
-  group "#{node['ssh_user']}"
-  mode '0700'
-  action :create
+	owner "#{node['ssh_user']}"
+	group "#{node['ssh_user']}"
+	mode '0700'
+	action :create
 end
 
 cookbook_file "id_rsa" do
@@ -139,6 +149,7 @@ end
 
 service "#{node['mysql']['service_name']}" do
 	action :stop
+	not_if { FileTest.exists?("#{mysql_flag}") }
 end
 
 template "#{node['mysql']['conf_file']}" do
@@ -213,6 +224,12 @@ template "configure_cmon_db.sql" do
 	group "root"
 	mode "0644"
 	notifies :run, resources(:execute => "configure-cmon-db"), :immediately
+	not_if { FileTest.exists?("#{mysql_flag}") }
+end
+
+directory "#{node['sql']['directory']}" do
+	recursive true
+	action :delete
 end
 
 execute "mysql-flag" do
@@ -238,6 +255,7 @@ if platform?("ubuntu","debian")
 				ln -sfn #{node['apache']['config']} /etc/apache2/sites-enabled/001-s9s.conf
 				ln -sfn #{node['apache']['ssl_config']} /etc/apache2/sites-enabled/001-s9s-ssl.conf
 			EOH
+			not_if { FileTest.exists?("#{cc_flag}") }
 		end
 	end
 elsif platform_family?("rhel")
@@ -247,6 +265,7 @@ elsif platform_family?("rhel")
 			cp -f #{node['apache']['wwwroot']}/clustercontrol/app/tools/apache2/s9s.conf /etc/httpd/conf.d/
 			cp -f #{node['apache']['wwwroot']}/clustercontrol/app/tools/apache2/s9s-ssl.conf /etc/httpd/conf.d/
 		EOH
+		not_if { FileTest.exists?("#{cc_flag}") }
 	end
 end
 
@@ -255,6 +274,7 @@ if platform_family?("debian")
 		command "a2enmod rewrite ssl proxy proxy_http proxy_wstunnel; a2ensite #{node['apache']['ssl_vhost']}"
 		action :run
 		notifies :restart, resources(:service => "#{node['apache']['service_name']}"), :immediately
+		not_if { FileTest.exists?("#{cc_flag}") }
 	end
 end
 
@@ -277,6 +297,7 @@ bash "configure-web-app" do
 		chmod 600 #{node['ssh_user_home']}/.ssh/authorized_keys
 	EOH
 	notifies :restart, resources(:service => "#{node['apache']['service_name']}"), :immediately
+	not_if { FileTest.exists?("#{cc_flag}") }
 end
 
 service "cmon" do
@@ -298,7 +319,7 @@ template "cmon.cnf" do
 	owner "root"
 	group "root"
 	mode "0600"
-	notifies :restart, resources(:service => "cmon")
+	notifies :restart, resources(:service => ["cmon"])
 end
 
 file "#{node['apache']['wwwroot']}/clustercontrol/bootstrap.php" do
