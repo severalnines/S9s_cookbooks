@@ -125,7 +125,7 @@ $ knife data bag from file clustercontrol /root/chef-repo/cookbooks/clustercontr
 ```
 
 As mentioned, you must have to create a data bug to upload it to the Chef server repo. This means, doing that you have to run the following:
-```
+```bash
 $ knife data bag create clustercontrol
 Created data_bag[clustercontrol]
  
@@ -170,8 +170,7 @@ $ sudo chef-client
 ```
 
 Alternatively, you can also run this from the Workstation as follows,
-```
-bash
+```bash
 $ knife ssh 'name:clustercontrol.domain.com' 'sudo chef-client' -x vagrant
 ```
 where in this example, `vagrant` is my OS user that both exist in my workstation and on the target client node (node to be setup for ClusterControl deployment).
