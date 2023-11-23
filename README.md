@@ -126,7 +126,6 @@ $ knife data bag from file clustercontrol /root/chef-repo/cookbooks/clustercontr
 
 As mentioned, you must have to create a data bug to upload it to the Chef server repo. This means, doing that you have to run the following:
 ```
-bash
 $ knife data bag create clustercontrol
 Created data_bag[clustercontrol]
  
