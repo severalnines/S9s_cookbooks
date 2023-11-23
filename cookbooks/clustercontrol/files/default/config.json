@@ -1,0 +1,10 @@
+{
+    "id" : "config",
+    "mysql_root_password" : "R00tP@55",
+    "cmon_password" : "cmonP@55",
+    "cmon_ssh_user" : "vagrant",
+    "cmon_user_home" : "/home/vagrant",
+    "cmon_server_host" : "192.168.40.195",
+    "clustercontrol_api_token" : "ad0550711ce40708fd5b9a583705c5820804de08",
+    "clustercontrol_controller_id" : "1ec1dfd4236bebc025463135062769e073768616"
+}

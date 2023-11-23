@@ -50,8 +50,15 @@ echo "ClusterControl will need a sudo user (from ClusterControl to all managed n
 read -p "Enter the SSH user [default: root] : " x
 [ ! -z "$x" ] && cmon_ssh_user=$x
 
+echo "Your desired ServerName in apache and your hostname in your cmon."
+echo "If you have multiple network device and IP addresses in your server, specify here your desired hostname/IP addresses."
+read -p "Enter your desired IP address or hostname [default: set to FQDN detection by Chef] : " x
+[ ! -z "$x" ] && cmon_server_host=$x
+
 do_rsa_keygen
-api_token=$(python -c 'import uuid; print uuid.uuid4()' | sha1sum | cut -f1 -d' ')
+# api_token=$(python -c 'import uuid; print uuid.uuid4()' | sha1sum | cut -f1 -d' ')
+api_token=$(cat /proc/sys/kernel/random/uuid | sha1sum | cut -f1 -d' ')
+controller_id=$(cat /proc/sys/kernel/random/uuid | sha1sum | cut -f1 -d' ')
 
 echo ""
 echo 'Generating config.json..'
@@ -77,7 +84,14 @@ if [ "$cmon_ssh_user" != "root" ] && [ ! -z "$cmon_ssh_user" ]; then
 else
 	echo "    \"cmon_user_home\" : \"/root\"," >> $OUTPUT
 fi
-echo "    \"clustercontrol_api_token\" : \"$api_token\"" >> $OUTPUT
+if [ "$cmon_server_host" != "127.0.0.1" ] && [ ! -z "$cmon_server_host" ]; then
+	echo "    \"cmon_server_host\" : \"${cmon_server_host}\"," >> $OUTPUT
+else
+	echo "    \"cmon_server_host\" : \"Chef will detect your FQDN on this host\"," >> $OUTPUT
+fi
+
+echo "    \"clustercontrol_api_token\" : \"$api_token\"," >> $OUTPUT
+echo "    \"clustercontrol_controller_id\" : \"$controller_id\"" >> $OUTPUT
 echo '}' >> $OUTPUT
 
 cat $OUTPUT

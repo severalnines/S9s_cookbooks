@@ -1,0 +1,14 @@
+SET SQL_LOG_BIN=0;
+
+
+CREATE USER 'cmon'@'localhost' IDENTIFIED BY '<%= @cmon_mysql_password %>';
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'localhost' WITH GRANT OPTION;
+
+CREATE USER 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= @cmon_mysql_password %>';
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'127.0.0.1' WITH GRANT OPTION;
+
+CREATE USER 'cmon'@'<%= @cmon_hostname %>' IDENTIFIED BY '<%= @cmon_mysql_password %>';
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'<%= @cmon_hostname %>' WITH GRANT OPTION;	
+
+
+SET SQL_LOG_BIN=1;

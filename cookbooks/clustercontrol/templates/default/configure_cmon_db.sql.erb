@@ -1,7 +1,7 @@
 SET SQL_LOG_BIN=0;
-GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'localhost' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'<%= node['ipaddress'] %>' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'<%= node['fqdn'] %>' IDENTIFIED BY '<%= node['cmon']['mysql_password'] %>' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'127.0.0.1' IDENTIFIED BY '<%= @cmon_mysql_password %>' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'localhost' IDENTIFIED BY '<%= @cmon_mysql_password %>' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'cmon'@'<%= @cmon_hostname %>' IDENTIFIED BY '<%=@cmon_mysql_password %>' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-REPLACE INTO dcps.apis (id, company_id, user_id, url, token) VALUES (1,1,1,'http://127.0.0.1','<%= node['cmon']['rpc_key'] %>');
+
+SET SQL_LOG_BIN=1;

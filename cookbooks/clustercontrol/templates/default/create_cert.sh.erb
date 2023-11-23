@@ -1,0 +1,56 @@
+#!/bin/bash
+
+create_cert() {
+    local domain=*.severalnines.local
+    local commonname=$domain
+    local san=dev.severalnines.local
+    local country=SE
+    local state=Stockholm
+    local locality=Stockholm
+    local organization='Severalnines AB'
+    local organizationalunit=Severalnines
+    local email=support@severalnines.com
+    local keylength=2048
+    local expires=1825
+    local keyname=server.key
+    local certname=server.crt
+    local csrname=server.csr
+
+    cat > /tmp/v3.ext << EOF
+basicConstraints = CA:FALSE
+#authorityKeyIdentifier=keyid,issuer
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = clientAuth, serverAuth
+subjectAltName = DNS:${san}
+EOF
+
+    echo "==> Generating tls certificate for $domain"
+    # ubunutu 18.0x workaround
+    touch $HOME/.rnd
+    openssl genrsa -out $keyname $keylength
+
+    openssl req -new -key $keyname -out $csrname \
+        -addext "subjectAltName = DNS:${san}" \
+        -subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email" &>/dev/null
+
+    if [[ $? -ne 0 ]]; then
+        # centos 6 -addtext is not avaiable
+        openssl req -new -key $keyname -out $csrname \
+            -subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
+    fi
+    openssl x509 -req -extfile /tmp/v3.ext -days $expires -sha256 -in $csrname -signkey $keyname -out $certname
+
+    rm -f /tmp/v3.ext
+    cd - &>/dev/null
+}
+
+
+
+if command -v openssl &>/dev/null; then
+    mkdir -p /tmp/ssl && cd /tmp/ssl
+    create_cert
+    # copy the files from the clustercontrol package
+    cp -f /tmp/ssl/server.crt <%= @cert_file %> &>/dev/null
+    cp -f /tmp/ssl/server.key <%= @key_file %> &>/dev/null
+    rm -rf /tmp/ssl &>/dev/null
+fi
