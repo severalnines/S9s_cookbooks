@@ -334,16 +334,15 @@ case node['platform_family']
         
   when 'debian', 'ubuntu'
 
-    if node['platform_family'] == 'ubuntu' and node['platform_version'].to_f < 18.04
+    if node['platform'] == 'ubuntu' and node['platform_version'].to_f < 18.04
       raise "S9S Chef Cookbooks does not support versions of Ubuntu < 18.04"
-   elsif node['platform_family'] == 'debian' and node['platform_version'].to_f < 9
+   elsif node['platform'] == 'debian' and node['platform_version'].to_f < 9
       raise "S9S Chef Cookbooks does not support Debian versions < 9"
-   elsif node['platform_family'] == 'ubuntu' and node['platform_version'].to_f > 22
-      raise "S9S Chef Cookbooks does not support recent versionf of Ubuntu from versions > 22.x"
+   elsif node['platform'] == 'ubuntu' and node['platform_version'].to_f >= 23
+      raise "S9S Chef Cookbooks and its packages are not yet tested to work on recent versions of Ubuntu from versions >= 23.x"
     end
-    
 
-    if node['platform_family'] == 'ubuntu' and node['platform_version'].to_f == 18.04
+    if node['platform'] == 'ubuntu' and node['platform_version'].to_f == 18.04
       lsb_code_name = "xUbuntu_18.04"
     else
       lsb_code_name = node['lsb']['codename']
@@ -477,16 +476,33 @@ case node['platform_family']
        
        ## due to problems and issues with Ubuntu 22.04 (Kinetic), we need to make sure that
        ## ClusterControl will set the 
-       bash "enable-php7-repo" do
-         action :run
-       	 user "root"
-           code <<-EOH
-             cat <<EOF > /etc/apt/sources.list.d/ondrej-ubuntu-php-kinetic.list
-deb https://ppa.launchpadcontent.net/ondrej/php/ubuntu/ jammy main
-# deb-src https://ppa.launchpadcontent.net/ondrej/php/ubuntu/ jammy main
-EOF
-            apt update
-           EOH
+       if (node['platform'] == 'ubuntu' && node['platform_version'].to_f >= 22)
+#          bash "enable-php7-repo" do
+#            action :run
+#             user "root"
+#            code <<-EOH
+#              cat <<EOF > /etc/apt/sources.list.d/ondrej-ubuntu-php-kinetic.list
+# deb https://ppa.launchpadcontent.net/ondrej/php/ubuntu/ jammy main
+# # deb-src https://ppa.launchpadcontent.net/ondrej/php/ubuntu/ jammy main
+# EOF
+#              apt update
+#            EOH
+#          end
+
+       #   apt_repository 'add-apt-repo-ondrej-php' do
+       #     uri 'ppa:ondrej/php'
+       #     components ['main']
+       #     distribution 'jammy'
+       #     action :add
+       #   end
+       # else
+       ## for versions of Ubuntu 22, use Jammy. Take note, Kinetic is already EOF.
+         apt_repository 'add-apt-repo-ondrej-php' do
+           uri 'ppa:ondrej/php'
+           components ['main']
+           distribution 'jammy'
+           action :add
+         end
        end
 
   		 Chef::Log.info "Using PHP 7 repository ..."

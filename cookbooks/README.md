@@ -3,6 +3,8 @@ Clustercontrol Cookbook
 
 Installs ClusterControl for your new database node/cluster deployment or on top of your existing database node/cluster. ClusterControl is a management and automation software for database clusters. It helps deploy, monitor, manage and scale your database node/cluster.
 
+Since the release of ClusterControl Cookbook 2.0.0 version, this gear towards maximizing the deployment of ClusterControl version 2 (CCv2). The CCv2 does not depend anymore with PHP technology as it is engineered using React (or React.js/ReactJS). Using CCv2 means its lightweight compared to ClusterControl version 1 (CCv1). If you use CCv1, make sure you have `only_cc_v2` parameter is set to *false*. Check out below to about its general options of this cookbook.
+
 Supported database clusters:
 
 - Galera Cluster for MySQL
@@ -63,7 +65,7 @@ Targetted supported platforms are the following:
 
 - RHEL/CentOS/Rocky Linux /AlmaLinux versions 7, 8, and 9
 - Suse Enterprise Linux (SLES)/OpenSUSE version 15.x
-- Ubuntu 18.04, 20.04, 22.04 (Jammy), and 22.10 (Kinetic)
+- Ubuntu 18.04, 20.04, 22.04 (Jammy), and 22.10 (Kinetic--already EOF) 
 - Debian 9, 10, 11
 
 Make sure you meet the following criteria prior to the deployment:
@@ -271,7 +273,7 @@ ClusterControl version 1 UI does not support PHP 8.x version. In fact, there is 
 you want to install ClusterControl.
 
 * Currently, the PHP 7.x that ClusterControl installs is coming from Ondrej's PPA repository for Debian/Ubuntu. For RHEL 9, it uses the remi repository. In case you have doubts of this repository, please review in case of security issues. 
-* *For Ubuntu 22.10 (Kinetic)*: On the other hand, their current repository also does not support Ubuntu Kinetic (22.10), but this cookbook uses the Jammy version of their repository to allow installation of PHP 7.x version and have it deployed smoothly. This has been tested in Ubuntu Kinetic and works properly.
+* *For Ubuntu 22.10 (Kinetic--already EOF)*: On the other hand, their current repository also does not support Ubuntu Kinetic (22.10), but this cookbook uses the Jammy version of their repository to allow installation of PHP 7.x version and have it deployed smoothly. This has been tested in Ubuntu Kinetic and works properly. Take note, Ubuntu Kinetic is already EOF so you might not use this version of Ubuntu.
 
 
 License and Authors

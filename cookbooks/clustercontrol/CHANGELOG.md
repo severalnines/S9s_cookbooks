@@ -3,6 +3,12 @@ clustercontrol CHANGELOG
 
 This file is used to list changes made in each version of the clustercontrol cookbook.
 
+2.0.3
+------
+- 19-Mar-2024
+-- fix issue in Jammy for PHP 7.x installation. 
+-- Kinetic is also considered now as doubtful case since its EOL.
+
 2.0.2
 ------
 - 18-Mar-2024
@@ -13,7 +19,7 @@ This file is used to list changes made in each version of the clustercontrol coo
 - 18-Mar-2024
 -- update README.md
 
-2.0.1
+2.0.0
 ------
 - 18-Mar-2024
 -- This version is aligned to use the most recent version of ClusterControl (1.9.8) as of this writing

@@ -4,7 +4,7 @@
     "cmon_password" : "R00tP@55",
     "cmon_ssh_user" : "root",
     "cmon_user_home" : "/root",
-    "cmon_server_host" : "192.168.40.13",
+    "cmon_server_host" : "192.168.40.14",
     "clustercontrol_api_token" : "be84ced4057dbae7046dbbaea874c5db210eb8ee",
     "clustercontrol_controller_id" : "985edb23dc87d028e980a402df27c692679de012"
 }
