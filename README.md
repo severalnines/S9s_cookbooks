@@ -36,33 +36,35 @@ Requirements
 ### Platform
 
 - CentOS, Redhat, Fedora, Oracle Linux
+- SLES/OpenSUSE
 - Debian, Ubuntu
 - x86\_64 architecture only
 
 This has been tested on Chef with the most recently versions:
 
 ```
-root@pupnode1	51:~# chef --version
-Chef Workstation version: 23.7.1042
-Chef Infra Client version: 18.2.7
-Chef InSpec version: 5.22.3
-Chef CLI version: 5.6.12
+root@chefwork:~/chef-repo/cookbooks# chef --version
+Chef Workstation version: 24.2.1058
+Chef Infra Client version: 18.3.0
+Chef InSpec version: 5.22.40
+Chef CLI version: 5.6.14
 Chef Habitat version: 1.6.652
-Test Kitchen version: 3.5.0
-Cookstyle version: 7.32.2
+Test Kitchen version: 3.6.0
+Cookstyle version: 7.32.7
 ```
 
 and tested on Chef Server 
 ```
-root@pupnode150:~# chef-server-ctl version
-15.8.0
+root@chefmas:~# chef-server-ctl version
+15.9.20
 ```
 
 Targetted supported platforms are the following:
 
 - RHEL/CentOS/Rocky Linux /AlmaLinux versions 7, 8, and 9
-- Ubuntu 18.04, 20.04, 22.04
-- Debian 8, 9, 10, 11, 12
+- Suse Enterprise Linux (SLES)/OpenSUSE version 15.x
+- Ubuntu 18.04, 20.04, 22.04 (Jammy), and 22.10 (Kinetic)
+- Debian 9, 10, 11
 
 Make sure you meet the following criteria prior to the deployment:
 
@@ -87,7 +89,7 @@ Below is an example of a successful run using he `s9s_helper.sh` script.
 ```bash
 $ cd ~/chef-repo/cookbooks/clustercontrol/files/default
 
-root@pupnode151:~/chef-repo/cookbooks/clustercontrol/files/default# ./s9s_helper.sh
+root@chefwork:~/chef-repo/cookbooks/clustercontrol/files/default# ./s9s_helper.sh
 ==============================================
 Helper script for ClusterControl Chef cookbook
 ==============================================
@@ -125,7 +127,8 @@ $ knife data bag from file clustercontrol /root/chef-repo/cookbooks/clustercontr
 ```
 
 As mentioned, you must have to create a data bug to upload it to the Chef server repo. This means, doing that you have to run the following:
-```bash
+```
+bash
 $ knife data bag create clustercontrol
 Created data_bag[clustercontrol]
  
@@ -170,14 +173,16 @@ $ sudo chef-client
 ```
 
 Alternatively, you can also run this from the Workstation as follows,
-```bash
+```
+bash
 $ knife ssh 'name:clustercontrol.domain.com' 'sudo chef-client' -x vagrant
 ```
 where in this example, `vagrant` is my OS user that both exist in my workstation and on the target client node (node to be setup for ClusterControl deployment).
 
-### ClusterControl general options
+S9s_cookbooks general options
+-----
 
-Following options are used for the general ClusterControl set up:
+Following options are used for the general ClusterControl data bag set up: (see _files/default/config.json_)
 
 `id`
 
@@ -217,7 +222,16 @@ Following options are used for the general ClusterControl set up:
 
 - 40-character ClusterControl token generated from s9s\_helper script. Basically, this is your controller id.
 - Example: 'bb47df956c69a4c24d8e24ce983b30f1be923a30'
-	
+
+`only_cc_v2`
+
+- Accepts boolean parameter. Set either *true* or *false*. When set to *true*, this means that only ClusterControl version 2 (CCv2) will be installed and setup. Setting it to *false* will allow both ClusterControl version 1 and CCv2 will be installed. To set this parameter, check the file _attributes/default.rb_ and find the parameter `default['only_cc_v2']`.
+- Default: true (only CCv2)
+
+`ccsetup_email`
+
+- Accepts string value. Set your desired e-mail address to be used when and during registration of your user after deployment and installation of ClusterControl. To set this parameter, check the file _attributes/default.rb_ and find the parameter `default['ccsetup_email']`.
+- Default: admin@clustercontrol.com
 	
 	
 Usage
@@ -249,6 +263,15 @@ For database hosts, include `clustercontrol::db_hosts` in your node's `run_list`
 ```
 
 ** Do not forget to generate databag before the deployment begins! Once the cookbook is applied to all nodes, open ClusterControl web UI at `https://[ClusterControl IP address]/clustercontrol` and create the default admin user with a valid email address.
+
+
+Limitations
+-------------------
+ClusterControl version 1 UI does not support PHP 8.x version. In fact, there is little hope for improvement here since Severlanines is moving towards ClusterControl version 2 (CCv2). With that regard, this cookbook will automatically setup the PHP 7.x for you which means it downgrades the version of your PHP in the target server where
+you want to install ClusterControl.
+
+* Currently, the PHP 7.x that ClusterControl installs is coming from Ondrej's PPA repository for Debian/Ubuntu. For RHEL 9, it uses the remi repository. In case you have doubts of this repository, please review in case of security issues. 
+* *For Ubuntu 22.10 (Kinetic)*: On the other hand, their current repository also does not support Ubuntu Kinetic (22.10), but this cookbook uses the Jammy version of their repository to allow installation of PHP 7.x version and have it deployed smoothly. This has been tested in Ubuntu Kinetic and works properly.
 
 
 License and Authors
