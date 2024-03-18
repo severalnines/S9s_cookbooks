@@ -63,8 +63,8 @@ Targetted supported platforms are the following:
 
 - RHEL/CentOS/Rocky Linux /AlmaLinux versions 7, 8, and 9
 - Suse Enterprise Linux (SLES)/OpenSUSE version 15.x
-- Ubuntu 18.04, 20.04, 22.04
-- Debian 8, 9, 10, 11, 12
+- Ubuntu 18.04, 20.04, 22.04 (Jammy), and 22.10 (Kinetic)
+- Debian 9, 10, 11
 
 Make sure you meet the following criteria prior to the deployment:
 
@@ -225,8 +225,13 @@ Following options are used for the general ClusterControl data bag set up: (see 
 
 `only_cc_v2`
 
-- Accepts only boolean parameter. Set either *true* or *false*. When set to *true*, this means that only ClusterControl version 2 (CCv2) will be installed and setup. Setting it to *false* will allow both ClusterControl version 1 and CCv2 will be installed. To set this parameter, check the file _attributes/default.rb_ and find the parameter `default['only_cc_v2']`.
+- Accepts boolean parameter. Set either *true* or *false*. When set to *true*, this means that only ClusterControl version 2 (CCv2) will be installed and setup. Setting it to *false* will allow both ClusterControl version 1 and CCv2 will be installed. To set this parameter, check the file _attributes/default.rb_ and find the parameter `default['only_cc_v2']`.
 - Default: true (only CCv2)
+
+`ccsetup_email`
+
+- Accepts string value. Set your desired e-mail address to be used when and during registration of your user after deployment and installation of ClusterControl. To set this parameter, check the file _attributes/default.rb_ and find the parameter `default['ccsetup_email']`.
+- Default: admin@clustercontrol.com
 	
 	
 Usage
@@ -258,6 +263,15 @@ For database hosts, include `clustercontrol::db_hosts` in your node's `run_list`
 ```
 
 ** Do not forget to generate databag before the deployment begins! Once the cookbook is applied to all nodes, open ClusterControl web UI at `https://[ClusterControl IP address]/clustercontrol` and create the default admin user with a valid email address.
+
+
+Limitations
+-------------------
+ClusterControl version 1 UI does not support PHP 8.x version. In fact, there is little hope for improvement here since Severlanines is moving towards ClusterControl version 2 (CCv2). With that regard, this cookbook will automatically setup the PHP 7.x for you which means it downgrades the version of your PHP in the target server where
+you want to install ClusterControl.
+
+* Currently, the PHP 7.x that ClusterControl installs is coming from Ondrej's PPA repository for Debian/Ubuntu. For RHEL 9, it uses the remi repository. In case you have doubts of this repository, please review in case of security issues. 
+* *For Ubuntu 22.10 (Kinetic)*: On the other hand, their current repository also does not support Ubuntu Kinetic (22.10), but this cookbook uses the Jammy version of their repository to allow installation of PHP 7.x version and have it deployed smoothly. This has been tested in Ubuntu Kinetic and works properly.
 
 
 License and Authors

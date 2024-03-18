@@ -3,6 +3,17 @@ clustercontrol CHANGELOG
 
 This file is used to list changes made in each version of the clustercontrol cookbook.
 
+0.2.0
+------
+- 18-Mar-2024
+-- This version is aligned to use the most recent version of ClusterControl (1.9.8) as of this writing
+-- Allows setup to have ClusterControl version 2
+-- Allows user to setup deployment to have ClusterControl version 1 (CCv1)and ClusterControl version 2 or just ClusterControl version 2 (CCv2), which is default deployment setup.
+-- Automatic downgrade of PHP 7.x version for most recent versions of RHEL (version 9) and Ubuntu >= 22. This OS uses PHP 8.x as its default deployment but only when CCv1 has to be deployed. CCv2 does not depend on PHP anymore.
+-- Updates support for OS SLES/OpenSUSE 15, RHEL 9, Ubuntu >= 22 but not Ubuntu < 23 versions, Debian 9 - 11. Other versions of OS are considered as unsupported whereas RHEL < 7, Ubuntu < 18, Debian < 9, and SLES/OpenSUSE < 15 versions.
+-- handles bug on restart of cmon daemon when chef client runs. This is fixed in this version.
+
+
 0.1.10
 ------
 - 26-Mar-2020

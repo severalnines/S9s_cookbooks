@@ -135,12 +135,14 @@ case node['platform_family']
   		only_if "grep '^SELINUX=enforcing' /etc/selinux/config"
   		action :run
   	end
+    
   	yum_repository 's9s-repo' do
   		baseurl "http://#{repo_host}/rpm/os/x86_64"
   		description "Severalnines Release Repository"
   		gpgkey "http://#{repo_host}/severalnines-repos.asc"
   		action :create
   	end
+    
   	yum_repository 's9s-tools' do
   		baseurl "http://#{repo_host}/s9s-tools/#{node['platform_family'].upcase}_#{node['platform_version'].to_i}/"
   		description "s9s-tools (#{node['platform_family'].upcase}_#{node['platform_version'].to_i})"
@@ -148,12 +150,64 @@ case node['platform_family']
   		action :create
   	end
 
-    if node['platform_version'].to_i == 7
-      packages = %w{httpd php php-mysql php-ldap php-gd php-json php-xml ntp ntpdate mod_ssl openssl net-tools bind-utils nc curl cronie mailx wget mariadb mariadb-server clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
-    else # RHEL 8 and later
-      packages = %w{httpd php php-mysqlnd php-ldap php-gd php-json php-xml mod_ssl openssl net-tools bind-utils nc curl cronie mailx wget mariadb mariadb-server clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
-    end
+  	if (node['only_cc_v2'] == false && node['platform_version'].to_f >= 9)
+       ## When CCv1 and CCv2 is to be deployed and when its Jammy or Kinetic, we need to setup like this.
+       Chef::Log.info "ClusterControl UI version 1 does not support PHP 8.x."
+       Chef::Log.info "Instead, ClusterControl will downgrade and setup PHP 7 for you..."
+       Chef::Log.info "Setting up PHP 7 ..."
+   
+    	 execute 'yum-install-remi-release-9' do
+    		 command "dnf install -y https://rpms.remirepo.net/enterprise/remi-release-9.rpm"
+         not_if "rpm -qa|egrep -i remi"
+    		 action :run
+    	 end
+    
+     	 execute "set-php-module-reset" do
+     		 command "yum module reset php -y"
+     		 action :run
+     	 end
+    
+     	 execute "set-php-module-enable" do
+     		 command "yum module enable php:remi-7.4 -y"
+     		 action :run
+     	 end
+       
+  		 Chef::Log.info "Using PHP 7 repository ..."
+  	end    
+    
+
   
+    if (node['only_cc_v2'] == false)
+      if node['platform_version'].to_i == 7
+        php_packages = %w{php php-mysql php-ldap php-gd php-json php-xml}
+      else 
+        php_packages = %w{php php-mysqlnd php-ldap php-gd php-json php-xml}
+      end
+    end
+    
+    db_packages = %w{mariadb mariadb-server}
+    cc_packages = %w{clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
+
+
+    packages = %w{httpd mod_ssl openssl net-tools bind-utils nc curl cronie wget}
+    
+    if node['platform_version'].to_i >= 9
+      diff_packages = %w{s-nail}
+    elsif node['platform_version'].to_i == 7
+      diff_packages = %w{ntp ntpdate mailx}
+    else # RHEL 8 and others??
+      diff_packages = %w{mailx}
+    end
+    
+    packages += diff_packages
+  
+    if (node['only_cc_v2'] == false)
+      packages += php_packages
+    end
+    packages += db_packages
+    packages += cc_packages
+    
+    
     if (node['only_cc_v2'])
       packages.push("clustercontrol2")
     else 
@@ -163,10 +217,10 @@ case node['platform_family']
 
   when 'opensuseleap', 'suse'
 
-    Chef::Log.info "platform_family: #{node['platform_family']}"
-    Chef::Log.info "os: #{node['os']}"
-    Chef::Log.info "os-arch: #{node['platform_build']}"
-    Chef::Log.info "platform_version: #{node['platform_version']}"
+    # Chef::Log.info "platform_family: #{node['platform_family']}"
+    # Chef::Log.info "os: #{node['os']}"
+    # Chef::Log.info "os-arch: #{node['platform_build']}"
+    # Chef::Log.info "platform_version: #{node['platform_version']}"
     
     if ['opensuseleap', 'suse'].include?(node['platform_family']) and node['platform_version'].to_f < 15
       raise "S9S Chef Cookbooks does not support OpenSUSE or SUSE Linux versions < 15"
@@ -282,6 +336,10 @@ case node['platform_family']
 
     if node['platform_family'] == 'ubuntu' and node['platform_version'].to_f < 18.04
       raise "S9S Chef Cookbooks does not support versions of Ubuntu < 18.04"
+   elsif node['platform_family'] == 'debian' and node['platform_version'].to_f < 9
+      raise "S9S Chef Cookbooks does not support Debian versions < 9"
+   elsif node['platform_family'] == 'ubuntu' and node['platform_version'].to_f > 22
+      raise "S9S Chef Cookbooks does not support recent versionf of Ubuntu from versions > 22.x"
     end
     
 
@@ -388,16 +446,82 @@ case node['platform_family']
   		action :add
   	end
 
-  	apt_update
-  
+		 if (node['only_cc_v2'] == false && node['platform'] == 'ubuntu' && node['platform_version'].to_f >= 22)
+       ## When CCv1 and CCv2 is to be deployed and when its Jammy or Kinetic, we need to setup like this.
+       Chef::Log.info "ClusterControl UI version 1 does not support PHP 8.x."
+       Chef::Log.info "Instead, ClusterControl will downgrade and setup PHP 7 for you..."
+       Chef::Log.info "Setting up PHP 7 ..."
+     
+       apt_update
 
-    if (node['platform'] == 'debian' && node['platform_version'].to_f >= 10)
-      packages = %w{apache2 libapache2-mod-php php-common php-mysql php-gd php-ldap php-json php-curl php-xml net-tools dnsutils curl mailutils wget mariadb-client mariadb-server clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
-    elsif (node['platform'] == 'ubuntu' && node['platform_version'].to_f >= 16.04 || node['platform'] == 'debian' && node['platform_version'].to_f >= 9)
-      packages = %w{apache2 libapache2-mod-php php-common php-mysql php-gd php-ldap php-json php-curl php-xml net-tools dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
+       package "software-properties-common" do
+          action :install
+         	options "--force-yes"
+       end
+
+       package "apt-transport-https" do
+          action :install
+         	options "--force-yes"
+       end
+       
+       # execute "apt-get-update" do
+       #   command "apt update"
+       #   ignore_failure true
+       #   action :nothing
+       # end
+       
+       apt_update 'apt-get-update' do
+         ignore_failure true
+         action :nothing
+       end
+       
+       ## due to problems and issues with Ubuntu 22.04 (Kinetic), we need to make sure that
+       ## ClusterControl will set the 
+       bash "enable-php7-repo" do
+         action :run
+       	 user "root"
+           code <<-EOH
+             cat <<EOF > /etc/apt/sources.list.d/ondrej-ubuntu-php-kinetic.list
+deb https://ppa.launchpadcontent.net/ondrej/php/ubuntu/ jammy main
+# deb-src https://ppa.launchpadcontent.net/ondrej/php/ubuntu/ jammy main
+EOF
+            apt update
+           EOH
+       end
+
+  		 Chef::Log.info "Using PHP 7 repository ..."
     else
-      packages = %w{apache2 libapache2-mod-php5 php5-common php5-mysql php5-gd php5-ldap php5-json php5-curl net-tools dnsutils curl mailutils wget mysql-client mysql-server clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
+       ## Just refresh the package manager
+       apt_update
     end
+    
+		if (node['platform'] == 'debian')
+			## all debian we supported >=9 are now using MariaDB package
+      db_packages = %w{mariadb-client mariadb-server}
+    else 
+      db_packages = %w{mysql-client mysql-server}
+    end
+  
+    if (node['only_cc_v2'] == false)
+      ## with ccv1 and ccv2, only PHP will be installed.
+      if (node['platform'] == 'ubuntu' && node['platform_version'].to_f >= 22)
+      	## starting jammy, it uses 8.x of PHP so we need to downgrade especially if CCv1 is installed
+      	php_packages = %w{php7.4-mysql php7.4-gd libapache2-mod-php7.4 php7.4-curl php7.4-ldap php7.4-xml php7.4-json php7.4-fpm}
+      else
+        php_packages = %w{php-mysql php-gd libapache2-mod-php php-curl php-ldap php-xml php-json php-fpm}
+      end
+    end
+    
+    packages = %w{apache2 net-tools dnsutils curl mailutils}
+    
+    cc_packages = %w{clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud clustercontrol-clud s9s-tools}
+   
+    if (node['only_cc_v2'] == false)
+      packages += php_packages
+    end
+    
+    packages += db_packages
+    packages += cc_packages
   
     if (node['only_cc_v2'])
       packages.push("clustercontrol2")
@@ -408,6 +532,7 @@ case node['platform_family']
   
     pkg_options = "--force-yes"
   
+
 end
 
 if (node['platform_family'] == "suse")
@@ -427,9 +552,11 @@ packages.each do |name|
       else
   	    action :install
       end
-  	options "#{pkg_options}"
+      
+  	  options "#{pkg_options}"
   end
 end
+
 
 execute "sleep-10" do
   command "sleep 10"
@@ -488,23 +615,6 @@ template "#{mysql_cnf_path}" do
   )
 end
 
-# execute "purge-innodb-logfiles" do
-#   command "rm #{node['cmon']['mysql_datadir']}/ib_logfile*"
-#   action :run
-#   not_if { FileTest.exists?("#{mysql_flag}") }
-# end
-
-# file "#{node['cmon']['mysql_datadir']}/ib_logfile*" do
-#   action :delete
-#   only_if { File.exist? "#{node['cmon']['mysql_datadir']}/ib_logfile*" }
-# end
-
-# service "reload-mysql-cnf" do
-#   service_name "#{mysql_service_name}"
-#   supports :stop => true, :start => true, :restart => true, :reload => true
-#   action :restart
-#   not_if { FileTest.exists?("#{mysql_flag}") }
-# end
 
 service "#{mysql_service_name}" do
 	service_name "#{mysql_service_name}"
@@ -531,15 +641,11 @@ execute "cmon-import-structure" do
 	command "#{mysql_bin_path} -uroot -p#{mysql_root_password} < #{cmon_sql_cmon_schema}"
   action :run
 	not_if { FileTest.exists?("#{mysql_flag}") }
-  # action :nothing
-#   subscribes :run, 'bash[secure-mysql]', :immediately
 end
 
 execute "cmon-import-data" do
 	command "#{mysql_bin_path} -uroot -p#{mysql_root_password} < #{cmon_sql_cmon_data}"
 	not_if { FileTest.exists?("#{mysql_flag}") }
-  #   action :nothing
-  # subscribes :run, 'bash[secure-mysql]', :immediately
 end
 
 if (node['only_cc_v2'] == false)
@@ -578,8 +684,6 @@ ruby_block "check_mysql_version" do
     end
     if (node['only_cc_v2'])
       subscribes :run,  resources(:execute => "cmon-import-data")
-    # else
-    #   # subscribes :run,  resources(:execute => "cc-import-structure-data")
     end
 end
 
