@@ -1,4 +1,4 @@
 # db_galera_install
 
-TODO: Enter the cookbook description here.
+NOTE: Consider this cookbook as discontinued and no further plans to improve this.
 

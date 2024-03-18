@@ -66,6 +66,7 @@ cmon_sql_cmon_data = "/usr/share/cmon/cmon_data.sql"
 cmon_www_ccv1_sql_directory = "#{wwwroot}/clustercontrol/sql"
 cmon_sql_dc_schema = "#{cmon_www_ccv1_sql_directory}/dc-schema.sql"
 cmon_www_bootstrap_file = "#{wwwroot}/clustercontrol/bootstrap.php"
+repo_host = "repo.severalnines.com"
 
 output="#{Chef::JSONCompat.to_json_pretty(node.to_hash)}"
 file '/tmp/node.json' do
@@ -75,15 +76,22 @@ end
 case node['platform_family']
   when 'rhel'
 
-    if node['platform_version'].to_f < 7
+    Chef::Log.info "platform_family: #{node['platform_family']}"
+    Chef::Log.info "platform_version: #{node['platform_version']}"
+    
+    if node['platform_family'] == 'rhel' and node['platform_version'].to_f < 7
       raise "S9S Chef Cookbooks does not support RHEL/CentOS/Rocky/Alma Linux versions anymore"
+    ## elsif ['opensuseleap', 'suse'].include?(node['platform_family']) and node['platform_version'].to_f < 15
+    ## raise "S9S Chef Cookbooks does not support OpenSUSE or SUSE Linux versions < 15"
     end
+    
+    ##raise ("exit...")
 
   	if node['platform_version'].to_f < 7
   		mysql_service_name = "mysqld"
   	else
   		mysql_service_name = "mariadb"
-  	end
+  	end    
   
     ## setup variables for web specifics
   	apache_log_dir = "/var/log/httpd"
@@ -94,6 +102,13 @@ case node['platform_family']
   	apache_s9s_ccv1_ssl_conf_src_file = "#{apache_config_directory}/conf.d/s9s-ssl.conf"
   	apache_s9s_ccv2_frontend_conf_src_file = "#{apache_config_directory}/conf.d/cc-frontend.conf"
   	apache_s9s_ccv2_proxy_conf_src_file = "#{apache_config_directory}/conf.d/cc-proxy.conf"
+    
+    ## for references of variables in case needed
+  	apache_s9s_ccv1_conf_target_file = "#{apache_s9s_ccv1_conf_src_file}"
+  	apache_s9s_ccv1_ssl_conf_target_file = "#{apache_s9s_ccv1_ssl_conf_src_file}"
+  	apache_s9s_ccv2_frontend_conf_target_file = "#{apache_s9s_ccv2_frontend_conf_src_file}"
+  	apache_s9s_ccv2_proxy_conf_target_file = "#{apache_s9s_ccv2_proxy_conf_src_file}"
+    
   
   	cert_file        = '/etc/pki/tls/certs/s9server.crt'
   	key_file         = '/etc/pki/tls/private/s9server.key'
@@ -121,15 +136,15 @@ case node['platform_family']
   		action :run
   	end
   	yum_repository 's9s-repo' do
-  		baseurl "http://repo.severalnines.com/rpm/os/x86_64"
+  		baseurl "http://#{repo_host}/rpm/os/x86_64"
   		description "Severalnines Release Repository"
-  		gpgkey "http://repo.severalnines.com/severalnines-repos.asc"
+  		gpgkey "http://#{repo_host}/severalnines-repos.asc"
   		action :create
   	end
   	yum_repository 's9s-tools' do
-  		baseurl "http://repo.severalnines.com/s9s-tools/#{node['platform_family'].upcase}_#{node['platform_version'].to_i}/"
+  		baseurl "http://#{repo_host}/s9s-tools/#{node['platform_family'].upcase}_#{node['platform_version'].to_i}/"
   		description "s9s-tools (#{node['platform_family'].upcase}_#{node['platform_version'].to_i})"
-  		gpgkey "http://repo.severalnines.com/s9s-tools/#{node['platform_family'].upcase}_#{node['platform_version'].to_i}/repodata/repomd.xml.key"
+  		gpgkey "http://#{repo_host}/s9s-tools/#{node['platform_family'].upcase}_#{node['platform_version'].to_i}/repodata/repomd.xml.key"
   		action :create
   	end
 
@@ -145,9 +160,137 @@ case node['platform_family']
       packages.push("clustercontrol")
       packages.push("clustercontrol2")
     end
+
+  when 'opensuseleap', 'suse'
+
+    Chef::Log.info "platform_family: #{node['platform_family']}"
+    Chef::Log.info "os: #{node['os']}"
+    Chef::Log.info "os-arch: #{node['platform_build']}"
+    Chef::Log.info "platform_version: #{node['platform_version']}"
     
-  when 'debian', 'ubuntu'
+    if ['opensuseleap', 'suse'].include?(node['platform_family']) and node['platform_version'].to_f < 15
+      raise "S9S Chef Cookbooks does not support OpenSUSE or SUSE Linux versions < 15"
+    end
+    
+		if ( node['platform_version'] == '15' )
+			s9s_tools_repo_osname = "#{node['platform_version']}"
+		else
+			s9s_tools_repo_osname = "#{node['platform_version']}"
+    end
+    
+    # raise ("exit...")
+
+		mysql_service_name    = 'mariadb'
+    mysql_socket_path = "/var/lib/mysql/mysql.sock"
+    # mysql_packages   = ['mariadb','mariadb-server']
+    
   
+    ## setup variables for web specifics
+  	apache_log_dir = "/var/log/apache2"
+    apache_config_source_directory = "/etc/httpd/conf.d"
+    
+    apache_config_target_directory = "/etc/apache2/vhosts.d"
+
+  	apache_s9s_ccv2_frontend_conf_src_file = "#{apache_config_source_directory}/cc-frontend.conf"
+  	apache_s9s_ccv2_proxy_conf_src_file = "#{apache_config_source_directory}/cc-proxy.conf"
+    
+  	apache_s9s_ccv1_conf_target_file = "#{apache_config_target_directory}/s9s.conf"
+  	apache_s9s_ccv1_ssl_conf_target_file = "#{apache_config_target_directory}/s9s-ssl.conf"
+  	apache_s9s_ccv2_frontend_conf_target_file = "#{apache_config_target_directory}/cc-frontend.conf"
+  	apache_s9s_ccv2_proxy_conf_target_file = "#{apache_config_target_directory}/cc-proxy.conf"
+    
+  	cert_file           = '/etc/ssl/certs/s9server.crt'
+  	key_file            = '/etc/ssl/private/s9server.key'
+  	apache_user         = 'wwwrun'
+  	apache_service_name = 'apache2'
+  	mysql_cnf_path      = '/etc/my.cnf'    
+    
+
+
+  	execute "disable-selinux" do
+  		command "setenforce 0"
+  		only_if "sestatus | grep 'Current mode' | awk {'print $3'} | grep enforcing"
+  		action :run
+  	end
+    
+  	execute "disable-firewalld" do
+  		command "systemctl stop firewalld"
+  		only_if "ps axufww|grep firewall[d]"
+  		action :run
+  	end
+    
+  	execute "set-selinux-permissive" do
+  		command "sed -i 's|^SELINUX.*|SELINUX=permissive|g' /etc/selinux/config"
+  		only_if "grep '^SELINUX=enforcing' /etc/selinux/config"
+  		action :run
+  	end
+    
+  	execute "import-gpg-keys-for-cc-repo" do
+  		command "rpm --import \"http://#{repo_host}/severalnines-repos.asc\""
+  		action :run
+  	end
+    
+  	execute "import-gpg-keys-for-s9s_tools-repo" do
+  		command "rpm --import \"http://#{repo_host}/s9s-tools/#{s9s_tools_repo_osname}/repodata/repomd.xml.key\""
+  		action :run
+  	end
+    
+    execute "refresh-zypper-auto-import-refresh" do
+      command "zypper -n --gpg-auto-import-keys refresh 2>/dev/null"
+      action :run
+    end
+      
+		## Execute repo fetch and updates for s9s only when has internet connection or access to s9s site.
+		zypper_repository 's9s-repo' do
+			description  "Severalnines Release Repository"
+  		baseurl "http://#{repo_host}/rpm/os/x86_64/"
+			enabled true
+			gpgkey "http://#{repo_host}/severalnines-repos.asc"
+			gpgcheck true
+  		action :create
+      refresh_cache true
+    end
+    
+		zypper_repository 's9s-tools-repoo' do
+			description  "s9s-tools - #{s9s_tools_repo_osname}"
+  		baseurl "http://#{repo_host}/s9s-tools//#{s9s_tools_repo_osname}"
+			enabled true
+			gpgkey "http://#{repo_host}/s9s-tools/#{s9s_tools_repo_osname}/repodata/repomd.xml.key"
+			gpgcheck true
+  		action :create
+      refresh_cache true
+    end
+    
+    packages = %w{apache2 wget mailx curl cronie bind-utils insserv-compat sysvinit-tools
+      openssl ca-certificates gnuplot expect perl-XML-XPath psmisc
+      php7 php7-mysql apache2-mod_php7 php7-gd php7-curl php7-ldap
+      php7-xmlreader php7-ctype php7-json
+      mariadb mariadb-client
+      clustercontrol-controller clustercontrol-notifications clustercontrol-ssh clustercontrol-cloud 
+      clustercontrol-clud s9s-tools}
+  
+    if (node['only_cc_v2'])
+      packages.push("clustercontrol2")
+    else 
+      packages.push("clustercontrol")
+      packages.push("clustercontrol2")
+    end
+  
+    pkg_options = "-n --no-confirm"
+        
+  when 'debian', 'ubuntu'
+
+    if node['platform_family'] == 'ubuntu' and node['platform_version'].to_f < 18.04
+      raise "S9S Chef Cookbooks does not support versions of Ubuntu < 18.04"
+    end
+    
+
+    if node['platform_family'] == 'ubuntu' and node['platform_version'].to_f == 18.04
+      lsb_code_name = "xUbuntu_18.04"
+    else
+      lsb_code_name = node['lsb']['codename']
+    end
+    
     ## setup variables for web specifics
   	apache_log_dir = "/var/log/apache2/"
     apache_config_directory = "/etc/apache2"
@@ -218,9 +361,15 @@ case node['platform_family']
   	mysql_cnf_path = "/etc/mysql/my.cnf"
     mysql_service_name = "mysql"
     
-	
+
+  	if node['platform_version'].to_f < 18.04
+  		gpg_service_name = "gnupg"
+    else
+  		gpg_service_name = "gpg"
+    end
+    
   	apt_package 'install-gpg' do
-  		package_name "gpg"
+  		package_name "#{gpg_service_name}"
   		action :install
   	end
   	apt_repository "s9s-repo" do
@@ -232,8 +381,8 @@ case node['platform_family']
   		action :add
   	end
   	apt_repository "s9s-tools" do
-  		uri "http://repo.severalnines.com/s9s-tools/#{node['lsb']['codename']}/"
-  		key "http://repo.severalnines.com/s9s-tools/#{node['lsb']['codename']}/Release.key"
+  		uri "http://repo.severalnines.com/s9s-tools/#{lsb_code_name}/"
+  		key "http://repo.severalnines.com/s9s-tools/#{lsb_code_name}/Release.key"
   		components ['./']
   		distribution ''
   		action :add
@@ -260,6 +409,13 @@ case node['platform_family']
     pkg_options = "--force-yes"
   
 end
+
+if (node['platform_family'] == "suse")
+  chown_user_grp_val = "#{apache_user}"
+else
+  chown_user_grp_val = "#{apache_user}.#{apache_user}"
+end
+
 
 # install required packages
 packages.each do |name|
@@ -343,21 +499,21 @@ end
 #   only_if { File.exist? "#{node['cmon']['mysql_datadir']}/ib_logfile*" }
 # end
 
-
-service "#{mysql_service_name}" do
-	service_name "#{mysql_service_name}"
-	supports :stop => true, :start => true, :restart => true, :reload => true
-	action :start
-	subscribes :restart, resources(:template => "#{mysql_cnf_path}")
-	not_if { FileTest.exists?("#{mysql_flag}") }
-end
-
 # service "reload-mysql-cnf" do
 #   service_name "#{mysql_service_name}"
 #   supports :stop => true, :start => true, :restart => true, :reload => true
 #   action :restart
 #   not_if { FileTest.exists?("#{mysql_flag}") }
 # end
+
+service "#{mysql_service_name}" do
+	service_name "#{mysql_service_name}"
+	supports :stop => true, :start => true, :restart => true, :reload => true
+	action :start
+	subscribes :restart, 'template["#{mysql_cnf_path}"]', :immediately
+  # subscribes :restart, 'bash[secure-mysql]', :immediately
+	not_if { FileTest.exists?("#{mysql_flag}") }
+end
 
 bash "secure-mysql" do
   user "root"
@@ -368,18 +524,22 @@ bash "secure-mysql" do
   #{mysql_bin_path} -uroot -e "FLUSH PRIVILEGES"
   EOH
   not_if { FileTest.exists?("#{mysql_flag}") }
+  action :run
 end
 
 execute "cmon-import-structure" do
 	command "#{mysql_bin_path} -uroot -p#{mysql_root_password} < #{cmon_sql_cmon_schema}"
-	action :run
+  action :run
 	not_if { FileTest.exists?("#{mysql_flag}") }
+  # action :nothing
+#   subscribes :run, 'bash[secure-mysql]', :immediately
 end
 
 execute "cmon-import-data" do
 	command "#{mysql_bin_path} -uroot -p#{mysql_root_password} < #{cmon_sql_cmon_data}"
-	action :run
 	not_if { FileTest.exists?("#{mysql_flag}") }
+  #   action :nothing
+  # subscribes :run, 'bash[secure-mysql]', :immediately
 end
 
 if (node['only_cc_v2'] == false)
@@ -390,6 +550,7 @@ if (node['only_cc_v2'] == false)
   	not_if { FileTest.exists?("#{mysql_flag}") }
   end
 end
+
 
 
 execute "cc-insert-api-key-to-dcps-schema" do
@@ -475,48 +636,77 @@ service "#{apache_service_name}" do
 end
 
 bash "pre-configure-web-app" do
-	user "root"
+  user "root"
   action :nothing
   if (node['only_cc_v2'] == false)
     ##ccv1 and ccv2 installation
     if platform_family?("debian")
     	if (node["platform"] == "ubuntu" && node['platform_version'].to_f >= 14.04) || (node["platform"] == "debian" && node['platform_version'].to_f >= 8)
         ## support only new and recent versions of ubuntu/debian
-    			code <<-EOH
-    				rm -f #{apache_config_directory}/sites-enabled/000-default.conf
-    				rm -f #{apache_config_directory}/sites-enabled/default-ssl.conf
-    				rm -f #{apache_config_directory}/sites-enabled/001-default-ssl.conf
-    				rm -f #{apache_s9s_ccv1_conf_target_file} #{apache_s9s_ccv1_ssl_conf_target_file} #{apache_s9s_ccv2_frontend_conf_target_file} #{apache_s9s_ccv2_proxy_conf_target_file}
-    				cp -f #{apache_s9s_source_config_ccv1_file} #{apache_config_sites_available_directory}/
-    				cp -f #{apache_s9s_source_config_ccv1_ssl_file} #{apache_config_sites_available_directory}/
-    				ln -sf #{apache_s9s_ccv1_conf_src_file} #{apache_s9s_ccv1_conf_target_file}
-    				ln -sf #{apache_s9s_ccv1_ssl_conf_src_file} #{apache_s9s_ccv1_ssl_conf_target_file}
-    				ln -sf #{apache_s9s_ccv2_frontend_conf_src_file} #{apache_s9s_ccv2_frontend_conf_target_file}
-    				ln -sf #{apache_s9s_ccv2_proxy_conf_src_file} #{apache_s9s_ccv2_proxy_conf_target_file}
+  			code lazy {<<-EOH
+  				rm -f #{apache_config_directory}/sites-enabled/000-default.conf
+  				rm -f #{apache_config_directory}/sites-enabled/default-ssl.conf
+  				rm -f #{apache_config_directory}/sites-enabled/001-default-ssl.conf
+  				rm -f #{apache_s9s_ccv1_conf_target_file} #{apache_s9s_ccv1_ssl_conf_target_file} #{apache_s9s_ccv2_frontend_conf_target_file} #{apache_s9s_ccv2_proxy_conf_target_file}
+  				cp -f #{apache_s9s_source_config_ccv1_file} #{apache_config_sites_available_directory}/
+  				cp -f #{apache_s9s_source_config_ccv1_ssl_file} #{apache_config_sites_available_directory}/
+  				ln -sf #{apache_s9s_ccv1_conf_src_file} #{apache_s9s_ccv1_conf_target_file}
+  				ln -sf #{apache_s9s_ccv1_ssl_conf_src_file} #{apache_s9s_ccv1_ssl_conf_target_file}
+  				ln -sf #{apache_s9s_ccv2_frontend_conf_src_file} #{apache_s9s_ccv2_frontend_conf_target_file}
+  				ln -sf #{apache_s9s_ccv2_proxy_conf_src_file} #{apache_s9s_ccv2_proxy_conf_target_file}
 
-            sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_conf_src_file}
-            sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_ssl_conf_src_file}
-
-            # Apache's default cert's lifespan is  1-10y depending on distro
-            sed -ibak "s|^[ \t]*SSLCertificateFile.*|	        SSLCertificateFile #{cert_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
-            sed -ibak "s|^[ \t]*SSLCertificateKeyFile.*|	        SSLCertificateKeyFile #{key_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
-            
-    			EOH
+          # sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_conf_src_file}
+          # sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+          #
+          # # Apache's default cert's lifespan is  1-10y depending on distro
+          # sed -ibak "s|^[ \t]*SSLCertificateFile.*|          SSLCertificateFile #{cert_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+          # sed -ibak "s|^[ \t]*SSLCertificateKeyFile.*|          SSLCertificateKeyFile #{key_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+          #
+          EOH
+          }
     	end
     elsif platform_family?("rhel")
-        code <<-EOH
-
+        code lazy {<<-EOH
           cp -f #{apache_s9s_source_config_ccv1_file} #{apache_s9s_ccv1_conf_src_file}
           cp -f #{apache_s9s_source_config_ccv1_ssl_file} #{apache_s9s_ccv1_ssl_conf_src_file}
           
-          sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_conf_src_file}
-          sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+          # sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_conf_src_file}
+   #        sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+   #
+   #        # Apache's default cert's lifespan is  1-10y depending on distro
+   #        sed -ibak "s|^[ \t]*SSLCertificateFile.*|          SSLCertificateFile #{cert_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+   #        sed -ibak "s|^[ \t]*SSLCertificateKeyFile.*|          SSLCertificateKeyFile #{key_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+   #        sed -ibak "s|^[ \t]*#SSLCertificateChainFile.*|          SSLCertificateChainFile #{cert_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
 
-          # Apache's default cert's lifespan is  1-10y depending on distro
-          sed -ibak "s|^[ \t]*SSLCertificateFile.*|	        SSLCertificateFile #{cert_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
-          sed -ibak "s|^[ \t]*SSLCertificateKeyFile.*|	        SSLCertificateKeyFile #{key_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
-          sed -ibak "s|^[ \t]*#SSLCertificateChainFile.*|	        SSLCertificateChainFile #{cert_file}|g" #{apache_s9s_ccv1_ssl_conf_src_file}
+          chkconfig --levels 235 httpd on
+
+          apache_version=$(apachectl -v | grep -i "server version" | cut -d' ' -f3)
+          [[ "${apache_version%.*}" == "Apache/2.4"  ]] && use_apache24=1
+
+          if [[ ! -z $use_apache24 ]]; then
+              # enable sameorigin header
+              if [[ ! -f #{apache_security_conf_file} ]]; then
+                  # enable for header
+                  cat > #{apache_security_conf_file} << EOF
+Header set X-Frame-Options: "sameorigin"
+EOF
+              fi
+              # restart the web server after the controller has been installed
+          fi
+          
         EOH
+        }
+    elsif ['opensuseleap', 'suse'].include?(node['platform_family'])
+        code lazy { <<-EOH
+          cp -rf #{apache_s9s_source_config_ccv1_file} #{apache_s9s_ccv1_conf_target_file}
+          cp -rf #{apache_s9s_source_config_ccv1_ssl_file} #{apache_s9s_ccv1_ssl_conf_target_file}
+
+          [[ ! -e #{apache_s9s_ccv2_frontend_conf_target_file} ]] && cp -f #{apache_s9s_ccv2_frontend_conf_src_file} #{apache_s9s_ccv2_frontend_conf_target_file}
+        	[[ ! -e #{apache_s9s_ccv2_proxy_conf_target_file} ]] && cp -f #{apache_s9s_ccv2_proxy_conf_src_file} #{apache_s9s_ccv2_proxy_conf_target_file}
+
+          echo "APACHE_SERVER_FLAGS=\"SSL\"" >> /etc/sysconfig/apache2
+        EOH
+        }
     end
   else
     ## only ccv2
@@ -532,8 +722,7 @@ bash "pre-configure-web-app" do
     			EOH
     	end
     elsif platform_family?("rhel")
-        code <<-EOH
-
+        code lazy { <<-EOH
             chkconfig --levels 235 httpd on
 
             apache_version=$(apachectl -v | grep -i "server version" | cut -d' ' -f3)
@@ -551,7 +740,17 @@ EOF
             fi
             
         EOH
-    end    
+      }
+    elsif ['opensuseleap', 'suse'].include?(node['platform_family'])
+        code lazy { <<-EOH
+          [[ ! -e #{apache_s9s_ccv2_frontend_conf_target_file} ]] && cp -f #{apache_s9s_ccv2_frontend_conf_src_file} #{apache_s9s_ccv2_frontend_conf_target_file}
+        	[[ ! -e #{apache_s9s_ccv2_proxy_conf_target_file} ]] && cp -f #{apache_s9s_ccv2_proxy_conf_src_file} #{apache_s9s_ccv2_proxy_conf_target_file}
+
+          echo "APACHE_SERVER_FLAGS=\"SSL\"" >> /etc/sysconfig/apache2
+          ln -sfn #{wwwroot} /srv/www/vhosts
+        EOH
+        }
+    end
   end
 	not_if { FileTest.exists?("#{cc_flag}") }
 end
@@ -616,8 +815,8 @@ if (node['only_cc_v2'] == false)
     content lazy { ::File.open("#{cmon_www_bootstrap_file}.default").read }
     action :nothing
     # not_if { FileTest.exists?("#{cc_flag}") }
-  end
-
+  end    
+    
   bash "configure-web-app-bootstrap-file" do
     action :nothing
   	user "root"
@@ -627,8 +826,8 @@ if (node['only_cc_v2'] == false)
         sed -i "s|^define('RPC_TOKEN'.*|define('RPC_TOKEN', '#{cmon_rpc_key}');|g" #{cmon_www_bootstrap_file}
         sed -i "s|^define('CONTAINER'.*|define('CONTAINER', '#{cmon_container}');|g" #{cmon_www_bootstrap_file}
 
-        grep -q "define('CONTAINER'.*" /var/www/html/clustercontrol/bootstrap.php
-        [[ $? -eq 1 ]] && echo "define('CONTAINER', 'NA');" >> /var/www/html/clustercontrol/bootstrap.php
+        grep -q "define('CONTAINER'.*" #{ccv1_webroot_directory}/bootstrap.php
+        [[ $? -eq 1 ]] && echo "define('CONTAINER', 'NA');" >> #{ccv1_webroot_directory}/bootstrap.php
         
         chmod o-r #{cmon_www_bootstrap_file}
       EOH
@@ -660,34 +859,69 @@ end
 
 
 if platform_family?("debian")  
-  mycmd = "a2enmod rewrite ssl proxy proxy_http proxy_wstunnel headers;"
-  
-	execute "enable-modules-site" do
-		command mycmd
+  #   mycmd = "systemctl enable apache2.service; a2enmod rewrite ssl proxy proxy_http proxy_wstunnel headers;"
+  #
+  # execute "enable-modules-site" do
+  #   command mycmd
+  #   action :nothing
+  #     # notifies :restart, resources(:service => "#{node['apache']['service_name']}"), :immediately
+  #   not_if { FileTest.exists?("#{cc_flag}") }
+  # end
+
+  bash  "enable-modules-site" do
 		action :nothing
-    # notifies :restart, resources(:service => "#{node['apache']['service_name']}"), :immediately
-		not_if { FileTest.exists?("#{cc_flag}") }
-	end
+  	user "root"
+    code lazy { <<-EOH
+      systemctl enable apache2.service;
+      a2enmod rewrite ssl proxy proxy_http proxy_wstunnel headers;
+    EOH
+    }
+    not_if { FileTest.exists?("#{cc_flag}") }
+  end
 elsif platform_family?("rhel")
   bash  "enable-modules-site" do
 		action :nothing
   	user "root"
-      code lazy { <<-EOH
-        if [[ -d /var/lib/php ]]; then
-            [[ ! -d /var/lib/php/session ]] && mkdir -p /var/lib/php/session && chmod og=+wxt /var/lib/php/session
-        fi
-        grep -q "Listen 443" #{apache_conf_file}
-        [[ $? -eq 1 ]] && sed -i '1s/^/Listen 443\n/'  #{apache_conf_file} &>/dev/null
-        grep -q "ServerName 127.0.0.1"  #{apache_conf_file}
-        [[ $? -eq 1 ]] && sed -i '1s/^/ServerName 127.0.0.1\n/'  #{apache_conf_file} &>/dev/null
+    code lazy { <<-EOH
+      systemctl enable apache2.service
+      if [[ -d /var/lib/php ]]; then
+          [[ ! -d /var/lib/php/session ]] && mkdir -p /var/lib/php/session && chmod og=+wxt /var/lib/php/session
+      fi
+      grep -q "Listen 443" #{apache_conf_file}
+      [[ $? -eq 1 ]] && sed -i '1s/^/Listen 443\n/'  #{apache_conf_file} &>/dev/null
+      grep -q "ServerName 127.0.0.1"  #{apache_conf_file}
+      [[ $? -eq 1 ]] && sed -i '1s/^/ServerName 127.0.0.1\n/'  #{apache_conf_file} &>/dev/null
 
-        if [[ ! -f #{apache_security_conf_file} ]]; then
-            cat > #{apache_security_conf_file}  << EOF
+      if [[ ! -f #{apache_security_conf_file} ]]; then
+          cat > #{apache_security_conf_file}  << EOF
 Header set X-Frame-Options: "sameorigin"
 EOF
-        fi
-      EOH
-      }
+      fi
+    EOH
+    }
+  end
+elsif ['opensuseleap', 'suse'].include?(node['platform_family'])
+  bash  "enable-modules-site" do
+		action :nothing
+  	user "root"
+    code lazy { <<-EOH
+      systemctl enable apache2.service
+      # enable mods
+      a2enmod rewrite
+      a2enmod headers
+      a2enmod proxy
+      a2enmod proxy_http
+      a2enmod proxy_wstunnel
+      a2enmod ssl
+      echo "AddType application/x-httpd-php .php" >> /etc/apache2/mod_mime-defaults.conf
+      cat >> /etc/apache2/loadmodule.conf << EOF
+LoadModule proxy_module modules/mod_proxy.so
+LoadModule proxy_http_module modules/mod_proxy_http.so
+LoadModule proxy_wstunnel_module modules/mod_proxy_wstunnel.so
+EOF
+      
+    EOH
+    }
   end
 end
 
@@ -705,42 +939,81 @@ end
 bash "configure-web-app" do
 	user "root"
   if (node['only_cc_v2'])
+    ## ccv1 only
     code lazy { <<-EOH
     	mkdir -p #{wwwroot}/cmon/upload
-    	chown -Rf #{apache_user}:#{apache_user} #{wwwroot}/cmon
+    	chown -Rf #{chown_user_grp_val} #{wwwroot}/cmon
     	cat #{cmon_os_user_home_dir}/.ssh/id_rsa.pub >> #{cmon_os_user_home_dir}/.ssh/authorized_keys
     	chmod 600 #{node['ssh_user_home']}/.ssh/authorized_keys
+      
       sed -i "s|^[ \t]*USER_REGISTRATION:.*|  USER_REGISTRATION: 1,|g" #{ccv2_webroot_directory}/config.js
-      sed -i "s|^[ \t]*ServerName.*|        ServerName #{apache_server_hostname}|g" #{apache_s9s_ccv2_frontend_conf_src_file}
-      sed -i "s|https://cc2.severalnines.local:9443.*|https://#{apache_server_hostname}\/|g" #{apache_s9s_ccv2_frontend_conf_src_file}
-      sed -i "s|Listen 9443|#Listen 443|g" #{apache_s9s_ccv2_frontend_conf_src_file}
-      sed -i "s|9443|443|g" #{apache_s9s_ccv2_frontend_conf_src_file}
+      # sed -ibak "s|^[ \t]*CMON_API_URL.*|  CMON_API_URL: 'https://#{apache_server_hostname}:19501/v2',|g" #{ccv2_webroot_directory}/config.js
+      
+      sed -ibak "s|^[ \t]*ServerName.*|        ServerName #{apache_server_hostname}|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "s|https://cc2.severalnines.local:9443.*|https://#{apache_server_hostname}\/|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      
+      sed -ibak "s|Listen 9443|#Listen 443|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "s|9443|443|g" #{apache_s9s_ccv2_frontend_conf_target_file}     
+
+      sed -ibak "s|https://cc2.severalnines.local:9443.*|https://#{apache_server_hostname}\/|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      
+      
+      sed -ibak "s|AllowOverride None|AllowOverride All|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+
+      # Apache's default cert's lifespan is  1-10y depending on distro
+      sed -ibak "s|^[ \t]*SSLCertificateFile.*|	        SSLCertificateFile #{cert_file}|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "s|^[ \t]*SSLCertificateKeyFile.*|	        SSLCertificateKeyFile #{key_file}|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+
+
+      
     EOH
     }
   else
     ## ccv1 and ccv2
     code lazy { <<-EOH
     	mkdir -p #{wwwroot}/cmon/upload
-    	chown -Rf #{apache_user}:#{apache_user} #{wwwroot}/cmon
     	cat #{cmon_os_user_home_dir}/.ssh/id_rsa.pub >> #{cmon_os_user_home_dir}/.ssh/authorized_keys
     	chmod 600 #{node['ssh_user_home']}/.ssh/authorized_keys
       sed -i "s|^[ \t]*USER_REGISTRATION:.*|  USER_REGISTRATION: 1,|g" #{ccv2_webroot_directory}/config.js
-      sed -i "s|^[ \t]*ServerName.*|        ServerName #{apache_server_hostname}|g" #{apache_s9s_ccv2_frontend_conf_src_file}
-      sed -i "s|https://cc2.severalnines.local:9443.*|https://#{apache_server_hostname}\/|g" #{apache_s9s_ccv2_frontend_conf_src_file}
+      # sed -ibak "s|^[ \t]*CMON_API_URL.*|  CMON_API_URL: 'https://#{apache_server_hostname}:19501/v2',|g" #{ccv2_webroot_directory}/config.js
+
+      sed -ibak "s|^[ \t]*ServerName.*|        ServerName #{apache_server_hostname}|g" #{apache_s9s_ccv1_conf_target_file}
+      sed -ibak "s|^[ \t]*ServerName.*|        ServerName #{apache_server_hostname}|g" #{apache_s9s_ccv1_ssl_conf_target_file}
+      sed -ibak "s|^[ \t]*ServerName.*|        ServerName #{apache_server_hostname}|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "s|https://cc2.severalnines.local:9443.*|https://#{apache_server_hostname}:9443\/|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      
+      #### CCv1
+      # Apache's default cert's lifespan is  1-10y depending on distro
+      sed -ibak "s|^[ \t]*SSLCertificateFile.*|	        SSLCertificateFile #{cert_file}|g" #{apache_s9s_ccv1_ssl_conf_target_file}
+      sed -ibak "s|^[ \t]*SSLCertificateKeyFile.*|	        SSLCertificateKeyFile #{key_file}|g" #{apache_s9s_ccv1_ssl_conf_target_file}
+
+      #### CCv2 
+      # disable forwarding to 443 just let the user do it.
+      sed -ibak "3s|^|#|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "4s|^|#|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "5s|^|#|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "6s|^|#|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      
+      # Apache's default cert's lifespan is  1-10y depending on distro
+      sed -ibak "s|^[ \t]*SSLCertificateFile.*|	        SSLCertificateFile #{cert_file}|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      sed -ibak "s|^[ \t]*SSLCertificateKeyFile.*|	        SSLCertificateKeyFile #{key_file}|g" #{apache_s9s_ccv2_frontend_conf_target_file}
+      
       chmod -R ugo-w #{ccv1_webroot_directory}/ &>/dev/null
       chmod -R ug+w #{ccv1_webroot_directory}/app/tmp &>/dev/null
-      chown -R ${apache_user}.${apache_user} #{ccv1_webroot_directory}/
+      chown -R #{chown_user_grp_val} #{ccv1_webroot_directory}/
+      chmod -R 770 #{wwwroot}/clustercontrol/app/tmp #{wwwroot}/clustercontrol/app/upload #{wwwroot}/cmon
+      chown -R #{chown_user_grp_val} #{wwwroot}/clustercontrol/app/tmp #{wwwroot}/clustercontrol/app/upload #{wwwroot}/cmon
     EOH
     }
   end
 
   notifies :create, resources(:template => "configure_cmon_db_mysql8.sql.erb"), :immediately
   notifies :run, resources(:execute => "configure-cmon-db"), :immediately
-  if platform_family?("debian")
-	  notifies :run, resources(:execute => "enable-modules-site"), :immediately
-  elsif platform_family?("rhel")
+  # if platform_family?("debian")
+  #     notifies :run, resources(:execute => "enable-modules-site"), :immediately
+  # elsif platform_family?("rhel")
 	  notifies :run, resources(:bash => "enable-modules-site"), :immediately
-  end
+  # end
   
 	notifies :restart, resources(:service => mysql_service_name), :immediately
 	notifies :run, resources(:execute => "sleep-10"), :immediately
@@ -790,22 +1063,6 @@ ruby_block "create_ccsetup_user" do
     action :nothing
     notifies :run, 'execute[sleep-10]', :immediately
 end
-
-
-# execute "create_ccrpc_user" do
-#   command "sudo S9S_USER_CONFIG=#{user_path} s9s user --create --new-password=#{cmon_rpc_key} --generate-key --private-key-file=~/.s9s/ccrpc.key --group=admins --controller=https://127.0.0.1:9501 ccrpc"
-#   action :nothing
-#   returns 0
-# end
-
-
-# execute "create_ccrpc_set_firstname" do
-#   command "sudo S9S_USER_CONFIG=#{user_path} s9s user --set --first-name=RPC --last-name=API"
-#   action :run
-#   returns 0
-#   not_if { FileTest.exists?("#{cc_flag}") }
-#   notifies :run, 'execute[create_ccrpc_user]', :immediately
-# end
 
 # restart services after installed
 service "#{apache_service_name}" do

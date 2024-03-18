@@ -36,31 +36,33 @@ Requirements
 ### Platform
 
 - CentOS, Redhat, Fedora, Oracle Linux
+- SLES/OpenSUSE
 - Debian, Ubuntu
 - x86\_64 architecture only
 
 This has been tested on Chef with the most recently versions:
 
 ```
-root@pupnode1	51:~# chef --version
-Chef Workstation version: 23.7.1042
-Chef Infra Client version: 18.2.7
-Chef InSpec version: 5.22.3
-Chef CLI version: 5.6.12
+root@chefwork:~/chef-repo/cookbooks# chef --version
+Chef Workstation version: 24.2.1058
+Chef Infra Client version: 18.3.0
+Chef InSpec version: 5.22.40
+Chef CLI version: 5.6.14
 Chef Habitat version: 1.6.652
-Test Kitchen version: 3.5.0
-Cookstyle version: 7.32.2
+Test Kitchen version: 3.6.0
+Cookstyle version: 7.32.7
 ```
 
 and tested on Chef Server 
 ```
-root@pupnode150:~# chef-server-ctl version
-15.8.0
+root@chefmas:~# chef-server-ctl version
+15.9.20
 ```
 
 Targetted supported platforms are the following:
 
 - RHEL/CentOS/Rocky Linux /AlmaLinux versions 7, 8, and 9
+- Suse Enterprise Linux (SLES)/OpenSUSE version 15.x
 - Ubuntu 18.04, 20.04, 22.04
 - Debian 8, 9, 10, 11, 12
 
@@ -87,7 +89,7 @@ Below is an example of a successful run using he `s9s_helper.sh` script.
 ```bash
 $ cd ~/chef-repo/cookbooks/clustercontrol/files/default
 
-root@pupnode151:~/chef-repo/cookbooks/clustercontrol/files/default# ./s9s_helper.sh
+root@chefwork:~/chef-repo/cookbooks/clustercontrol/files/default# ./s9s_helper.sh
 ==============================================
 Helper script for ClusterControl Chef cookbook
 ==============================================
@@ -177,9 +179,10 @@ $ knife ssh 'name:clustercontrol.domain.com' 'sudo chef-client' -x vagrant
 ```
 where in this example, `vagrant` is my OS user that both exist in my workstation and on the target client node (node to be setup for ClusterControl deployment).
 
-### ClusterControl general options
+S9s_cookbooks general options
+-----
 
-Following options are used for the general ClusterControl set up:
+Following options are used for the general ClusterControl data bag set up: (see _files/default/config.json_)
 
 `id`
 
@@ -219,7 +222,11 @@ Following options are used for the general ClusterControl set up:
 
 - 40-character ClusterControl token generated from s9s\_helper script. Basically, this is your controller id.
 - Example: 'bb47df956c69a4c24d8e24ce983b30f1be923a30'
-	
+
+`only_cc_v2`
+
+- Accepts only boolean parameter. Set either *true* or *false*. When set to *true*, this means that only ClusterControl version 2 (CCv2) will be installed and setup. Setting it to *false* will allow both ClusterControl version 1 and CCv2 will be installed. To set this parameter, check the file _attributes/default.rb_ and find the parameter `default['only_cc_v2']`.
+- Default: true (only CCv2)
 	
 	
 Usage

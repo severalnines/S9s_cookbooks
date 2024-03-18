@@ -3,7 +3,7 @@ default['api_token'] = ""
 default['ssh_user'] = "root"
 default['user_home'] = "/root"
 ## only_cc_v2 {true = if only ccv2, false = if ccv1 and ccv2 combination (the installation setup in 1.9.6 below when ccv2 had been suppported)}
-default['only_cc_v2'] = false
+default['only_cc_v2'] = true
 ## your desired admin email for your clustercontrol setup. Email field will use this as auto-fill value during registration form
 default['ccsetup_email'] = "admin@clustercontrol.com"
 default['ssh_key'] = "#{node['user_home']}/.ssh/id_rsa"
